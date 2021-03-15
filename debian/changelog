@@ -1,0 +1,37 @@
+ros-rolling-rmw-connextddsmicro (0.3.1-1focal) focal; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 15 Mar 2021 07:00:00 -0000
+
+ros-rolling-rmw-connextddsmicro (0.3.0-1focal) focal; urgency=high
+
+  * Add <buildtool_export_depend> for ament_cmake.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 12 Mar 2021 08:00:00 -0000
+
+ros-rolling-rmw-connextddsmicro (0.2.1-1focal) focal; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 11 Mar 2021 08:00:00 -0000
+
+ros-rolling-rmw-connextddsmicro (0.2.0-1focal) focal; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 08:00:00 -0000
+
+ros-rolling-rmw-connextddsmicro (0.1.1-1focal) focal; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 08:00:00 -0000
+
+ros-rolling-rmw-connextddsmicro (0.1.0-1focal) focal; urgency=high
+
+  * Initial release.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 08:00:00 -0000
+
+
