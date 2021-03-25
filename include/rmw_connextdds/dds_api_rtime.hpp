@@ -35,6 +35,16 @@ typedef DDS_UntypedSampleSeq RMW_Connext_UntypedSampleSeq;
   (DDS_PropertySeq_assert_property(&(p_)->value, (n_), (v_), (pr_)) ? \
   DDS_RETCODE_OK : DDS_RETCODE_ERROR)
 
+#define DDS_DomainParticipantFactory_get_qos_profiles(dpf, profiles, library_name) DDS_RETCODE_OK
+
+#define DDS_DomainParticipantFactory_get_qos_profile_libraries(dpf, libraries) DDS_RETCODE_OK
+
+#define DDS_Publisher_get_default_datawriter_qos_w_topic_name(pub_, dw_qos_, topic_) \
+  DDS_Publisher_get_default_datawriter_qos(pub_, dw_qos_)
+
+#define DDS_Subscriber_get_default_datareader_qos_w_topic_name(sub_, dr_qos_, topic_) \
+  DDS_Subscriber_get_default_datareader_qos(sub_, dr_qos_)
+
 // Forward declaration for DDS_LifespanQosPolicy, since it is not supported by Micro.
 struct DDS_LifespanQosPolicy;
 
