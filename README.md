@@ -139,12 +139,14 @@ configuration of some aspects of their runtime behavior via custom environment
 variables.
 
 - [RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE](#RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE)
+- [RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS](#RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS)
 - [RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY](#RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY)
-- [RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE](#RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE)
+- [RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY](#RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY)
 - [RMW_CONNEXT_INITIAL_PEERS](#RMW_CONNEXT_INITIAL_PEERS)
 - [RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE](#RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE)
 - [RMW_CONNEXT_REQUEST_REPLY_MAPPING](#RMW_CONNEXT_REQUEST_REPLY_MAPPING)
 - [RMW_CONNEXT_UDP_INTERFACE](#RMW_CONNEXT_UDP_INTERFACE)
+- [RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE](#RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE)
 
 ### RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE
 
@@ -162,6 +164,24 @@ will use this non-standard profile in order to interoperate with `rmw_cyclonedds
 instead of using one the two standard profiles defined by the DDS-RPC specification
 (see [RMW_CONNEXT_REQUEST_REPLY_MAPPING](#rmw_connext_request_reply_mapping)).
 
+### RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS
+
+By default, `rmw_connextdds` will try to detect the use of "large data" types,
+and automatically optimize the QoS of DDS DataWriters and DataReaders
+using these types, to improve out of the box performance on reliable streams.
+
+These optimizations will be applied to any endpoint whose type has a serialized
+size of at least 1MB (configured by a compile-time limit).
+
+`rmw_connextdds` will modify a "large data" endpoint's RTPS reliability
+protocol parameters to more quickly recover samples, which typically improves
+performance in the presence of very fragmented data, but it might also
+end up increasing network traffic unnecessarily, particularly if data is not
+exchanged at a fast periodic pace.
+
+Variable `RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS` may be used to disable
+these automatic optimizations, and revert to Connext's default behavior.
+
 ### RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY
 
 By default, `rmw_connextdds` modifies the QoS of its DomainParticipant to enable
@@ -176,17 +196,32 @@ Variable `RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY` may be used to disable
 these automatic optimizations, and to leave the DomainParticipant's QoS to
 its defaults.
 
-### RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE
+### RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY
 
-`rmw_connextdds` will always set `DDS_DataWriterQos::publish_mode::kind` of
-any DataWriter it creates to `DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS`, in order to
-enable out of the box support for "large data".
+When this variable is not set or set to `always`, the QoS settings specified in
+the default profile will be used and the ros QoS profile will be applied on top
+of it. You can use topic filters in XML profile files to have different defaults
+for different topics, but you have to use the mangled topic names
+(see [ROS topic mangling conventions](#ros-topic-mangling-conventions)).
 
-This behavior might not be always desirable, and it can be disabled by setting
-`RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE` to a non-empty value.
+In case this variable is set to `never`, the QoS settings will be loaded from
+the default profile as before but the ros QoS profile will be ignored.
+Be aware of configuring the QoS of rcl topics (`rt/rosout`, `rt/parameter_events`,
+etc.) and the rmw internal topic `ros_discovery_info` correctly.
 
-This variable is not used by `rmw_connextddsmicro`, since it doesn't
-automatically override `DDS_DataWriterQos::publish_mode::kind`.
+This variable can also be set to `dds_topics: <regex>`, e.g.:
+ `dds_topics: rt/my_topic|rt/my_ns/another_topic`.
+In that case, QoS settings for topics matching the provided regex will be
+loaded in the same way as the `never` policy, and the ones that don't match
+will be loaded in the same way as the `always` policy.
+
+#### ROS topic mangling conventions
+
+ROS mangles topic names in the following way:
+
+- Topics are prefixed with `rt`. e.g.: `/my/fully/qualified/ros/topic` is converted to `rt/my/fully/qualified/ros/topic`.
+- The service request topics are prefixed with `rq` and suffixed with `Request`. e.g.: `/my/fully/qualified/ros/service` request topic is `rq/my/fully/qualified/ros/serviceRequest`.
+- The service response topics are prefixed with `rr` and suffixed with `Response`. e.g.: `/my/fully/qualified/ros/service` response topic is `rr/my/fully/qualified/ros/serviceResponse`.
 
 ### RMW_CONNEXT_INITIAL_PEERS
 
@@ -309,3 +344,15 @@ RMW_CONNEXT_UDP_INTERFACE=eth0 \
 ```
 
 This variable is not used by `rmw_connextdds`.
+
+### RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE
+
+`rmw_connextdds` will always set `DDS_DataWriterQos::publish_mode::kind` of
+any DataWriter it creates to `DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS`, in order to
+enable out of the box support for "large data".
+
+This behavior might not be always desirable, and it can be disabled by setting
+`RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE` to a non-empty value.
+
+This variable is not used by `rmw_connextddsmicro`, since it doesn't
+automatically override `DDS_DataWriterQos::publish_mode::kind`.
