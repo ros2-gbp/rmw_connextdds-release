@@ -1,6 +1,6 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
-This repository contains two novel implementations of the [ROS 2](https://index.ros.org/doc/ros2/)
+This repository contains two novel implementations of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
 [RTI Connext DDS Professional](https://www.rti.com/products/connext-dds-professional)
 and [RTI Connext DDS Micro](https://www.rti.com/products/connext-dds-micro).
@@ -24,10 +24,11 @@ For any questions or feedback, feel free to reach out to robotics@rti.com.
 
 ## Quick Start
 
-1. Load ROS into the shell environment, e.g. if you are using Foxy:
+1. Load ROS into the shell environment (Rolling if using the `master` branch,
+   see [Support for different ROS 2 Releases](#support-for-different-ros-2-releases))
 
     ```sh
-    source /opt/ros/foxy/setup.bash
+    source /opt/ros/rolling/setup.bash
     ```
 
 2. Configure RTI Connext DDS Professional and/or RTI Connext DDS Micro on your
@@ -81,12 +82,20 @@ The following table summarizes which branch of the repository should be
 checked out in order to compile the RMW implementations for a specific ROS 2
 release:
 
-|ROS 2 Release|Branch|
-|-------------|------|
-|Rolling      |`master`|
-|Foxy         |`master`|
-|Eloquent     |`dashing`|
-|Dashing      |`dashing`|
+|ROS 2 Release|Branch|Status|
+|-------------|------|------|
+|Rolling      |`master`|Developed|
+|Foxy         |`foxy`|LTS (May 2023)|
+|Eloquent     |`eloquent`|EOL (Nov 2020)|
+|Dashing      |`dashing`|LTS (May 2021)|
+
+Branch `master` is actively developed and maintained. It is used to create
+other branches for specific ROS 2 releases (starting from Galactic).
+
+Branches marked as `LTS` will receive updates for critical bug fixes and
+important patches only (until they reach `EOL`).
+
+Branches marked as `EOL` will not receive any future updates.
 
 ## RTI Connext DDS Requirements
 
