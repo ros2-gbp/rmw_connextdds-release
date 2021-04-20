@@ -1,0 +1,12 @@
+Source: ros-galactic-rmw-connextdds
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-galactic-ament-cmake-ros, ros-galactic-ament-lint-auto, ros-galactic-ament-lint-common, ros-galactic-rmw-connextdds-common, ros-galactic-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-galactic-rmw-connextdds
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-galactic-ament-cmake, ros-galactic-rmw-connextdds-common, ros-galactic-ros-workspace
+Description: A ROS2 RMW implementation built with RTI Connext DDS Professional.
