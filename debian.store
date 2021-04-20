@@ -1,1 +1,1 @@
-{"base": "5ce8c30", "parent": "debian/rolling/rti_connext_dds_cmake_module", "previous": "bf6e7dc", "trim": "", "trimbase": ""}
+{"base": "5eae0ce", "parent": "debian/galactic/rti_connext_dds_cmake_module", "previous": "a04198b", "trim": "", "trimbase": ""}
