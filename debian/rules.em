@@ -13,61 +13,52 @@ export DH_VERBOSE=1
 #  https://code.ros.org/trac/ros/ticket/2977
 #  https://code.ros.org/trac/ros/ticket/3842
 export LDFLAGS=
-export PKG_CONFIG_PATH=/opt/ros/rolling/lib/pkgconfig
+export PKG_CONFIG_PATH=@(InstallationPrefix)/lib/pkgconfig
 # Explicitly enable -DNDEBUG, see:
 # 	https://github.com/ros-infrastructure/bloom/issues/327
 export DEB_CXXFLAGS_MAINT_APPEND=-DNDEBUG
 
+# Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
+export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-6.0.1
+
 %:
-	dh $@ -v --buildsystem=cmake
+	dh $@@ -v --buildsystem=cmake
 
-override_dh_auto_configure: /tmp/rtienv.sh
+override_dh_auto_configure:
 	# In case we're installing to a non-standard location, look for a setup.sh
 	# in the install tree and source it.  It will set things like
 	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
-	. /tmp/rtienv.sh && \
-	if [ -f "/opt/ros/rolling/setup.sh" ]; then . "/opt/ros/rolling/setup.sh"; fi && \
+	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
 	dh_auto_configure -- \
-		-DCMAKE_INSTALL_PREFIX="/opt/ros/rolling" \
-		-DAMENT_PREFIX_PATH="/opt/ros/rolling" \
-		-DCMAKE_PREFIX_PATH="/opt/ros/rolling"
+		-DCMAKE_INSTALL_PREFIX="@(InstallationPrefix)" \
+		-DAMENT_PREFIX_PATH="@(InstallationPrefix)" \
+		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)"
 
-override_dh_auto_build: /tmp/rtienv.sh
+override_dh_auto_build:
 	# In case we're installing to a non-standard location, look for a setup.sh
 	# in the install tree and source it.  It will set things like
 	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
-	. /tmp/rtienv.sh && \
-	if [ -f "/opt/ros/rolling/setup.sh" ]; then . "/opt/ros/rolling/setup.sh"; fi && \
+	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
 	dh_auto_build
 
-override_dh_auto_test: /tmp/rtienv.sh
+override_dh_auto_test:
 	# In case we're installing to a non-standard location, look for a setup.sh
 	# in the install tree and source it.  It will set things like
 	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
-	. /tmp/rtienv.sh && \
 	echo -- Running tests. Even if one of them fails the build is not canceled.
-	if [ -f "/opt/ros/rolling/setup.sh" ]; then . "/opt/ros/rolling/setup.sh"; fi && \
+	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
 	dh_auto_test || true
 
-override_dh_shlibdeps: /tmp/rtienv.sh
+override_dh_shlibdeps:
 	# In case we're installing to a non-standard location, look for a setup.sh
 	# in the install tree and source it.  It will set things like
 	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
-	. /tmp/rtienv.sh && \
-	if [ -f "/opt/ros/rolling/setup.sh" ]; then . "/opt/ros/rolling/setup.sh"; fi && \
-	dh_shlibdeps -l$(CURDIR)/debian/ros-rolling-rti-connext-dds-cmake-module//opt/ros/rolling/lib/
+	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
+	dh_shlibdeps -l$(CURDIR)/debian/@(Package)/@(InstallationPrefix)/lib/
 
-override_dh_auto_install: /tmp/rtienv.sh
+override_dh_auto_install:
 	# In case we're installing to a non-standard location, look for a setup.sh
 	# in the install tree and source it.  It will set things like
 	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
-	. /tmp/rtienv.sh && \
-	if [ -f "/opt/ros/rolling/setup.sh" ]; then . "/opt/ros/rolling/setup.sh"; fi && \
+	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
 	dh_auto_install
-
-/tmp/rtienv.sh:
-	if [ -f /opt/rti.com/rti_connext_dds-5.3.1/resource/scripts/rtisetenv_x64Linux3gcc5.4.0.bash ]; then \
-	sed -e 's:\$${BASH_SOURCE\[0\]}:/opt/rti.com/rti_connext_dds-5.3.1/resource/scripts/rtisetenv_x64Linux3gcc5.4.0.bash:' \
-	/opt/rti.com/rti_connext_dds-5.3.1/resource/scripts/rtisetenv_x64Linux3gcc5.4.0.bash \
-	> /tmp/rtienv.sh; \
-	else touch /tmp/rtienv.sh; fi
