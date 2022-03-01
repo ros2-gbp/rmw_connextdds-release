@@ -1,4 +1,4 @@
-From 3cbe9096805404f56a31a84644c8951ef3420d8a Mon Sep 17 00:00:00 2001
+From 5c3c9f77642236a3ac2d3f40f5172c6c2670f31b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?= <steven@nuclearsandwich.com>
 Date: Thu, 11 Mar 2021 15:42:22 -0800
 Subject: [PATCH 1/2] Source sh-compatible rtisetenv script before building.
@@ -75,5 +75,5 @@ index 5a04067..9eca9b6 100755
 +	> /tmp/rtienv.sh; \
 +	else touch /tmp/rtienv.sh; fi
 -- 
-2.35.1
+2.25.1
 
