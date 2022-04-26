@@ -1,4 +1,4 @@
-From 80e9c357ecd4f3c282782607912a5e6874d0e407 Mon Sep 17 00:00:00 2001
+From c31c495b467118f6b956d8a28d14002919fa6606 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
  <nuclearsandwich@users.noreply.github.com>
 Date: Sat, 12 Feb 2022 11:07:44 -0500
@@ -85,5 +85,5 @@ index 9eca9b6..1257f8d 100755
 -	> /tmp/rtienv.sh; \
 -	else touch /tmp/rtienv.sh; fi
 -- 
-2.25.1
+2.34.1
 
