@@ -2,44 +2,11 @@
 Changelog for package rmw_connextddsmicro
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.11.1 (2022-04-26)
--------------------
-
-0.11.0 (2022-04-08)
--------------------
-* Exclude missing sample info fields when building rmw_connextddsmicro (`#79 <https://github.com/ros2/rmw_connextdds/issues/79>`_)
-* Contributors: Andrea Sorbini
-
-0.10.0 (2022-03-28)
--------------------
-* Add support for user-specified content filters (`#68 <https://github.com/ros2/rmw_connextdds/issues/68>`_)
-* add stub for content filtered topic (`#77 <https://github.com/ros2/rmw_connextdds/issues/77>`_)
-* Add sequence numbers to message info structure (`#74 <https://github.com/ros2/rmw_connextdds/issues/74>`_)
-* Contributors: Andrea Sorbini, Chen Lihui, Ivan Santiago Paunovic
-
-0.9.0 (2022-03-01)
-------------------
-* Add rmw listener apis (`#44 <https://github.com/rticommunity/rmw_connextdds/issues/44>`_)
-* Contributors: iRobot ROS
-
-0.8.3 (2022-02-10)
+0.6.3 (2022-04-28)
 ------------------
 
-0.8.2 (2022-01-14)
+0.6.2 (2021-05-20)
 ------------------
-
-0.8.1 (2021-11-19)
-------------------
-* Add client/service QoS getters. (`#67 <https://github.com/rticommunity/rmw_connextdds/issues/67>`_)
-* Contributors: mauropasse
-
-0.8.0 (2021-09-15)
-------------------
-
-0.7.0 (2021-06-04)
-------------------
-* Add rmw_publisher_wait_for_all_acked support. (`#20 <https://github.com/rticommunity/rmw_connextdds/issues/20>`_)
-* Contributors: Barry Xu
 
 0.6.1 (2021-04-26)
 ------------------

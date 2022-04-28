@@ -88,15 +88,15 @@ struct RMW_Connext_NddsTypePluginI
     REDAFastBufferPool_delete(this->pool_samples);
   }
 
-  RMW_Connext_Message *
+  rcutils_uint8_array_t *
   allocate_sample()
   {
-    return reinterpret_cast<RMW_Connext_Message *>(
+    return reinterpret_cast<rcutils_uint8_array_t *>(
       REDAFastBufferPool_getBuffer(this->pool_samples));
   }
 
   void
-  return_sample(RMW_Connext_Message * const sample)
+  return_sample(rcutils_uint8_array_t * const sample)
   {
     REDAFastBufferPool_returnBuffer(this->pool_samples, sample);
   }
@@ -126,8 +126,8 @@ struct RMW_Connext_NddsParticipantData
 
 
 static RTIBool
-RMW_Connext_MessagePtr_initialize_w_params(
-  RMW_Connext_Message ** self,
+RMW_Connext_Uint8ArrayPtr_initialize_w_params(
+  rcutils_uint8_array_t ** self,
   const struct DDS_TypeAllocationParams_t * allocParams)
 {
   UNUSED_ARG(allocParams);
@@ -136,8 +136,8 @@ RMW_Connext_MessagePtr_initialize_w_params(
 }
 
 static RTIBool
-RMW_Connext_MessagePtr_finalize_w_params(
-  RMW_Connext_Message ** self,
+RMW_Connext_Uint8ArrayPtr_finalize_w_params(
+  rcutils_uint8_array_t ** self,
   const struct DDS_TypeDeallocationParams_t * deallocParams)
 {
   UNUSED_ARG(deallocParams);
@@ -146,19 +146,19 @@ RMW_Connext_MessagePtr_finalize_w_params(
 }
 
 static RTIBool
-RMW_Connext_MessagePtr_copy(
-  RMW_Connext_Message ** dst,
-  const RMW_Connext_Message ** src)
+RMW_Connext_Uint8ArrayPtr_copy(
+  rcutils_uint8_array_t ** dst,
+  const rcutils_uint8_array_t ** src)
 {
-  *dst = const_cast<RMW_Connext_Message *>(*src);
+  *dst = const_cast<rcutils_uint8_array_t *>(*src);
   return RTI_TRUE;
 }
 
-#define T                       RMW_Connext_Message *
-#define TSeq                    RMW_Connext_MessagePtrSeq
-#define T_initialize_w_params   RMW_Connext_MessagePtr_initialize_w_params
-#define T_finalize_w_params     RMW_Connext_MessagePtr_finalize_w_params
-#define T_copy                  RMW_Connext_MessagePtr_copy
+#define T                       rcutils_uint8_array_t *
+#define TSeq                    RMW_Connext_Uint8ArrayPtrSeq
+#define T_initialize_w_params   RMW_Connext_Uint8ArrayPtr_initialize_w_params
+#define T_finalize_w_params     RMW_Connext_Uint8ArrayPtr_finalize_w_params
+#define T_copy                  RMW_Connext_Uint8ArrayPtr_copy
 #include "dds_c/generic/dds_c_sequence_TSeq.gen"
 
 static
@@ -232,22 +232,29 @@ RMW_Connext_TypePlugin_create_data(void ** sample, void * user_data)
   RMW_Connext_MessageTypeSupport * const type_support =
     reinterpret_cast<RMW_Connext_MessageTypeSupport *>(user_data);
 
+  rcutils_uint8_array_t * data_buffer =
+    new (std::nothrow) rcutils_uint8_array_t();
+  if (nullptr == data_buffer) {
+    return RTI_FALSE;
+  }
+
+  const rcutils_allocator_t allocator = rcutils_get_default_allocator();
   size_t buffer_size = 0;
+
   if (type_support->unbounded()) {
     buffer_size = 0;
   } else {
     buffer_size = type_support->type_serialized_size_max();
   }
 
-  RMW_Connext_Message * msg = new (std::nothrow) RMW_Connext_Message();
-  if (nullptr == msg) {
+  if (RCUTILS_RET_OK !=
+    rcutils_uint8_array_init(data_buffer, buffer_size, &allocator))
+  {
+    delete data_buffer;
     return RTI_FALSE;
   }
-  if (RMW_RET_OK != RMW_Connext_Message_initialize(msg, type_support, buffer_size)) {
-    delete msg;
-    return RTI_FALSE;
-  }
-  *sample = msg;
+
+  *sample = data_buffer;
 
   return RTI_TRUE;
 }
@@ -261,9 +268,14 @@ RMW_Connext_TypePlugin_destroy_data(void ** sample, void * user_data)
 
   UNUSED_ARG(type_support);
 
-  RMW_Connext_Message * msg = reinterpret_cast<RMW_Connext_Message *>(*sample);
-  RMW_Connext_Message_finalize(msg);
-  delete msg;
+  rcutils_uint8_array_t * data_buffer =
+    reinterpret_cast<rcutils_uint8_array_t *>(*sample);
+
+  if (RCUTILS_RET_OK != rcutils_uint8_array_fini(data_buffer)) {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to finalize array")
+  }
+
+  delete data_buffer;
 }
 
 /* ----------------------------------------------------------------------------
@@ -406,14 +418,11 @@ RMW_Connext_TypePlugin_copy_sample(
 {
   UNUSED_ARG(endpoint_data);
 
-  const RMW_Connext_Message * src_msg =
-    reinterpret_cast<const RMW_Connext_Message *>(src);
-  RMW_Connext_Message * dst_msg =
-    reinterpret_cast<RMW_Connext_Message *>(dst);
+  const rcutils_uint8_array_t * src_buffer =
+    reinterpret_cast<const rcutils_uint8_array_t *>(src);
+  rcutils_uint8_array_t * dst_buffer = reinterpret_cast<rcutils_uint8_array_t *>(dst);
 
-  if (RCUTILS_RET_OK !=
-    rcutils_uint8_array_copy(&dst_msg->data_buffer, &src_msg->data_buffer))
-  {
+  if (RCUTILS_RET_OK != rcutils_uint8_array_copy(dst_buffer, src_buffer)) {
     return RTI_FALSE;
   }
 
@@ -451,14 +460,6 @@ RMW_Connext_TypePlugin_serialize(
 
   const RMW_Connext_Message * const msg =
     reinterpret_cast<const RMW_Connext_Message *>(sample);
-
-  if (nullptr == msg->user_data) {
-    // Samples written by the application layer should always have a non-null
-    // user_data pointer. The only samples which do not use that pointers are
-    // the ones created internally in the DataReader queue, and it would be
-    // unexpected for them to be passed to this function.
-    return RTI_FALSE;
-  }
 
   rcutils_uint8_array_t data_buffer;
   data_buffer.allocator = rcutils_get_default_allocator();
@@ -516,22 +517,22 @@ RMW_Connext_TypePlugin_deserialize(
     return RTI_FALSE;
   }
 
-  RMW_Connext_Message * const msg =
-    reinterpret_cast<RMW_Connext_Message *>(*sample);
-
+  rcutils_uint8_array_t * const data_buffer =
+    reinterpret_cast<rcutils_uint8_array_t *>(*sample);
   const size_t deserialize_size = RTICdrStream_getRemainder(stream);
   void * const src_ptr = RTICdrStream_getCurrentPosition(stream);
 
-  if (msg->data_buffer.buffer_capacity < deserialize_size) {
+  if (data_buffer->buffer_capacity < deserialize_size) {
     if (RCUTILS_RET_OK !=
-      rcutils_uint8_array_resize(&msg->data_buffer, deserialize_size))
+      rcutils_uint8_array_resize(data_buffer, deserialize_size))
     {
       return RTI_FALSE;
     }
   }
 
-  memcpy(msg->data_buffer.buffer, src_ptr, deserialize_size);
-  msg->data_buffer.buffer_length = deserialize_size;
+  memcpy(data_buffer->buffer, src_ptr, deserialize_size);
+
+  data_buffer->buffer_length = deserialize_size;
 
   RTICdrStream_setCurrentPosition(stream, reinterpret_cast<char *>(src_ptr) + deserialize_size);
 
@@ -604,12 +605,6 @@ RMW_Connext_TypePlugin_get_serialized_sample_size(
 
   const RMW_Connext_Message * const msg =
     reinterpret_cast<const RMW_Connext_Message *>(sample);
-
-  // Samples written by the application layer should always have a non-null
-  // user_data pointer. The only samples which do not use that pointers are
-  // the ones created internally in the DataReader queue, and it would be
-  // unexpected for them to be passed to this function.
-  RMW_CONNEXT_ASSERT(nullptr != msg->user_data)
 
   if (msg->serialized) {
     const rcutils_uint8_array_t * const serialized_msg =
@@ -801,7 +796,7 @@ rmw_connextdds_register_type_support(
 
     struct REDAFastBufferPool * const pool_samples =
       REDAFastBufferPool_new(
-      sizeof(RMW_Connext_Message),
+      sizeof(rcutils_uint8_array_t),
       RTIOsapiAlignment_getDefaultAlignment(),
       &pool_prop);
 

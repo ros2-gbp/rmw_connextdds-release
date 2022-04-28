@@ -62,11 +62,6 @@ function(rtirmw_add_library)
     ament_target_dependencies(${_rti_build_NAME}
         ${_rti_build_DEPS})
 
-    set(_extra_defines)
-    if("${CMAKE_BUILD_TYPE}" MATCHES "[dD]ebug")
-      list(APPEND _extra_defines "RMW_CONNEXT_DEBUG=1")
-    endif()
-
     target_compile_definitions(${_rti_build_NAME}
         PUBLIC
             RMW_VERSION_MAJOR=${rmw_VERSION_MAJOR}
@@ -74,7 +69,6 @@ function(rtirmw_add_library)
             RMW_VERSION_PATCH=${rmw_VERSION_PATCH}
             RMW_CONNEXT_DDS_API=RMW_CONNEXT_DDS_API_${_rti_build_API}
             ${_rti_build_DEFINES}
-            ${_extra_defines}
     )
 
     set(private_defines)
@@ -138,7 +132,6 @@ set(RMW_CONNEXT_COMMON_SOURCE_CPP
     src/common/rmw_impl.cpp
     src/common/rmw_impl_waitset_std.cpp
     src/common/rmw_info.cpp
-    src/common/rmw_listener.cpp
     src/common/rmw_node.cpp
     src/common/rmw_publication.cpp
     src/common/rmw_qos.cpp
@@ -194,9 +187,6 @@ else()
     if("${CONNEXTDDS_VERSION}" VERSION_LESS "6.0.0")
       list(APPEND extra_defines "RMW_CONNEXT_DDS_API_PRO_LEGACY=1")
     endif()
-    if(CONNEXTDDS_ARCH MATCHES ".*Win.*")
-      list(APPEND extra_defines "RMW_CONNEXT_BUILTIN_CFT_COMPATIBILITY_MODE=1")
-    endif()
     rtirmw_add_library(
         NAME      ${PROJECT_NAME}_pro
         API       PRO
@@ -205,10 +195,8 @@ else()
                   src/ndds/rmw_type_support_ndds.cpp
                   src/ndds/rmw_typecode.cpp
                   src/ndds/dds_api_ndds.cpp
-                  src/ndds/custom_sql_filter.cpp
                   include/rmw_connextdds/typecode.hpp
                   include/rmw_connextdds/dds_api_ndds.hpp
-                  include/rmw_connextdds/custom_sql_filter.hpp
         DEPS      ${RMW_CONNEXT_DEPS}
         LIBRARIES RTIConnextDDS::c_api
         DEFINES   ${extra_defines})

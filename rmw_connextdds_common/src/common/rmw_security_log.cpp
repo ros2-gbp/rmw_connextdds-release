@@ -14,7 +14,7 @@
 
 #include "rmw_connextdds/rmw_impl.hpp"
 
-#include "rcutils/env.h"
+#include "rcutils/get_env.h"
 
 // Connext 5.3.1 uses numeric levels (although note that v6 moved to using
 // strings). These levels are:

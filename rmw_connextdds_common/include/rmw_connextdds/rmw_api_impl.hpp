@@ -17,8 +17,6 @@
 
 #include "rmw_connextdds/context.hpp"
 
-#include "rmw/features.h"
-
 /*****************************************************************************
  * Context API
  *****************************************************************************/
@@ -87,13 +85,6 @@ rmw_api_connextdds_take_event(
   const rmw_event_t * event_handle,
   void * event_info,
   bool * taken);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_event_set_callback(
-  rmw_event_t * event,
-  rmw_event_callback_t callback,
-  const void * user_data);
 
 /*****************************************************************************
  * Info API
@@ -295,12 +286,6 @@ rmw_api_connextdds_publisher_assert_liveliness(
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
-rmw_api_connextdds_publisher_wait_for_all_acked(
-  const rmw_publisher_t * publisher,
-  rmw_time_t wait_timeout);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
 rmw_api_connextdds_publisher_get_actual_qos(
   const rmw_publisher_t * publisher,
   rmw_qos_profile_t * qos);
@@ -391,18 +376,6 @@ rmw_api_connextdds_create_client(
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
-rmw_api_connextdds_client_request_publisher_get_actual_qos(
-  const rmw_client_t * client,
-  rmw_qos_profile_t * qos);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_client_response_subscription_get_actual_qos(
-  const rmw_client_t * client,
-  rmw_qos_profile_t * qos);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
 rmw_api_connextdds_destroy_client(
   rmw_node_t * node,
   rmw_client_t * client);
@@ -417,36 +390,9 @@ rmw_api_connextdds_create_service(
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
-rmw_api_connextdds_service_response_publisher_get_actual_qos(
-  const rmw_service_t * service,
-  rmw_qos_profile_t * qos);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_service_request_subscription_get_actual_qos(
-  const rmw_service_t * service,
-  rmw_qos_profile_t * qos);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
 rmw_api_connextdds_destroy_service(
   rmw_node_t * node,
   rmw_service_t * service);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_service_set_on_new_request_callback(
-  rmw_service_t * rmw_service,
-  rmw_event_callback_t callback,
-  const void * user_data);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_client_set_on_new_response_callback(
-  rmw_client_t * rmw_client,
-  rmw_event_callback_t callback,
-  const void * user_data);
-
 /*****************************************************************************
  * Subscription API
  *****************************************************************************/
@@ -483,18 +429,6 @@ rmw_api_connextdds_subscription_get_actual_qos(
   const rmw_subscription_t * subscription,
   rmw_qos_profile_t * qos);
 
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_subscription_set_content_filter(
-  rmw_subscription_t * subscription,
-  const rmw_subscription_content_filter_options_t * options);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_subscription_get_content_filter(
-  const rmw_subscription_t * subscription,
-  rcutils_allocator_t * const allocator,
-  rmw_subscription_content_filter_options_t * options);
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
@@ -571,13 +505,6 @@ rmw_api_connextdds_return_loaned_message_from_subscription(
   const rmw_subscription_t * subscription,
   void * loaned_message);
 
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_subscription_set_on_new_message_callback(
-  rmw_subscription_t * rmw_subscription,
-  rmw_event_callback_t callback,
-  const void * user_data);
-
 /*****************************************************************************
  * WaitSet API
  *****************************************************************************/
@@ -650,12 +577,5 @@ rmw_api_connextdds_subscription_get_network_flow_endpoints(
   const rmw_subscription_t * subscription,
   rcutils_allocator_t * allocator,
   rmw_network_flow_endpoint_array_t * network_flow_endpoint_array);
-
-/******************************************************************************
- * Feature support functions
- ******************************************************************************/
-RMW_CONNEXTDDS_PUBLIC
-bool
-rmw_api_connextdds_feature_supported(rmw_feature_t feature);
 
 #endif  // RMW_CONNEXTDDS__RMW_API_IMPL_HPP_

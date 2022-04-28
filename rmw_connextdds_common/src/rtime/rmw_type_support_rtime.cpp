@@ -62,23 +62,29 @@ RMW_Connext_MemoryPlugin_create_sample(
 {
   auto type_support = RMW_Connext_RtimeTypePluginI::type_support(tp);
 
+  rcutils_uint8_array_t * data_buffer =
+    new (std::nothrow) rcutils_uint8_array_t();
+  if (nullptr == data_buffer) {
+    return RTI_FALSE;
+  }
+
+  const rcutils_allocator_t allocator = rcutils_get_default_allocator();
   size_t buffer_size = 0;
+
   if (type_support->unbounded()) {
     buffer_size = 0;
   } else {
     buffer_size = type_support->type_serialized_size_max();
   }
 
-  RMW_Connext_Message * const msg = new (std::nothrow) RMW_Connext_Message();
-  if (nullptr == msg) {
-    return RTI_FALSE;
-  }
-  if (RMW_RET_OK != RMW_Connext_Message_initialize(msg, type_support, buffer_size)) {
-    delete msg;
+  if (RCUTILS_RET_OK !=
+    rcutils_uint8_array_init(data_buffer, buffer_size, &allocator))
+  {
+    delete data_buffer;
     return RTI_FALSE;
   }
 
-  *sample = msg;
+  *sample = data_buffer;
 
   return RTI_TRUE;
 }
@@ -91,10 +97,15 @@ RMW_Connext_MemoryPlugin_delete_sample(
 {
   UNUSED_ARG(plugin);
 
-  RMW_Connext_Message * const msg =
-    reinterpret_cast<RMW_Connext_Message *>(sample);
-  RMW_Connext_Message_finalize(msg);
-  delete msg;
+  rcutils_uint8_array_t * data_buffer =
+    reinterpret_cast<rcutils_uint8_array_t *>(sample);
+
+  if (RCUTILS_RET_OK != rcutils_uint8_array_fini(data_buffer)) {
+    delete data_buffer;
+    return RTI_FALSE;
+  }
+
+  delete data_buffer;
 
   return RTI_TRUE;
 }
@@ -106,16 +117,14 @@ RMW_Connext_MemoryPlugin_copy_sample(
   void * dst,
   const void * src)
 {
-  const RMW_Connext_Message * src_msg =
-    reinterpret_cast<const RMW_Connext_Message *>(src);
-  RMW_Connext_Message * dst_msg =
-    reinterpret_cast<RMW_Connext_Message *>(dst);
+  const rcutils_uint8_array_t * src_buffer =
+    reinterpret_cast<const rcutils_uint8_array_t *>(src);
+  rcutils_uint8_array_t * dst_buffer =
+    reinterpret_cast<rcutils_uint8_array_t *>(dst);
 
   UNUSED_ARG(plugin);
 
-  if (RCUTILS_RET_OK !=
-    rcutils_uint8_array_copy(&dst_msg->data_buffer, &src_msg->data_buffer))
-  {
+  if (RCUTILS_RET_OK != rcutils_uint8_array_copy(dst_buffer, src_buffer)) {
     return RTI_FALSE;
   }
 
@@ -135,14 +144,6 @@ RMW_Connext_EncapsulationPlugin_serialize(
   auto type_support = msg->type_support;
   UNUSED_ARG(plugin);
   UNUSED_ARG(destination);
-
-  if (nullptr == msg->user_data) {
-    // Samples written by the application layer should always have a non-null
-    // user_data pointer. The only samples which do not use that pointers are
-    // the ones created internally in the DataReader queue, and it would be
-    // unexpected for them to be passed to this function.
-    return RTI_FALSE;
-  }
 
   DDS_TypePluginBuffer * const tbuf =
     reinterpret_cast<DDS_TypePluginBuffer *>(stream->real_buff);
@@ -181,7 +182,8 @@ RMW_Connext_EncapsulationPlugin_serialize(
   if (type_support->unbounded()) {
     if (msg_buffer_unbound->buffer_capacity < serialized_size) {
       if (RCUTILS_RET_OK !=
-        rcutils_uint8_array_resize(msg_buffer_unbound, serialized_size))
+        rcutils_uint8_array_resize(
+          msg_buffer_unbound, serialized_size))
       {
         return RTI_FALSE;
       }
@@ -241,15 +243,15 @@ RMW_Connext_EncapsulationPlugin_deserialize(
   UNUSED_ARG(source);
   UNUSED_ARG(plugin);
 
-  RMW_Connext_Message * const msg =
-    reinterpret_cast<RMW_Connext_Message *>(void_sample);
+  rcutils_uint8_array_t * const data_buffer =
+    reinterpret_cast<rcutils_uint8_array_t *>(void_sample);
   const size_t deserialize_size =
     stream->length - CDR_Stream_get_current_position_offset(stream) +
     RMW_Connext_MessageTypeSupport::ENCAPSULATION_HEADER_SIZE;
 
-  if (msg->data_buffer.buffer_capacity < deserialize_size) {
+  if (data_buffer->buffer_capacity < deserialize_size) {
     if (RCUTILS_RET_OK !=
-      rcutils_uint8_array_resize(&msg->data_buffer, deserialize_size))
+      rcutils_uint8_array_resize(data_buffer, deserialize_size))
     {
       return RTI_FALSE;
     }
@@ -260,11 +262,11 @@ RMW_Connext_EncapsulationPlugin_deserialize(
     RMW_Connext_MessageTypeSupport::ENCAPSULATION_HEADER_SIZE;
 
   memcpy(
-    msg->data_buffer.buffer,
+    data_buffer->buffer,
     src_ptr,
     deserialize_size);
 
-  msg->data_buffer.buffer_length = deserialize_size;
+  data_buffer->buffer_length = deserialize_size;
 
   return RTI_TRUE;
 }
