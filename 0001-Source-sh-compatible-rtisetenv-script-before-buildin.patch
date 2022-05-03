@@ -1,4 +1,4 @@
-From f9a92a2ac294d0300f55b1b700fec34180aac950 Mon Sep 17 00:00:00 2001
+From 8508cc758e1a095c126ede79c73fe616229f29bc Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?= <steven@nuclearsandwich.com>
 Date: Thu, 11 Mar 2021 15:42:22 -0800
 Subject: [PATCH 1/2] Source sh-compatible rtisetenv script before building.
@@ -12,12 +12,12 @@ functionality of the script must be patched out.
  1 file changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index 5a04067..9eca9b6 100755
+index 2ab7b14..b7ad604 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
-@@ -21,41 +21,53 @@ export DEB_CXXFLAGS_MAINT_APPEND=-DNDEBUG
+@@ -26,10 +26,11 @@ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
  %:
- 	dh $@@ -v --buildsystem=cmake
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
  
 -override_dh_auto_configure:
 +override_dh_auto_configure: /tmp/rtienv.sh
@@ -28,8 +28,9 @@ index 5a04067..9eca9b6 100755
  	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
  	dh_auto_configure -- \
  		-DCMAKE_INSTALL_PREFIX="@(InstallationPrefix)" \
- 		-DAMENT_PREFIX_PATH="@(InstallationPrefix)" \
- 		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)"
+@@ -37,31 +38,42 @@ override_dh_auto_configure:
+ 		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)" \
+ 		$(BUILD_TESTING_ARG)
  
 -override_dh_auto_build:
 +override_dh_auto_build: /tmp/rtienv.sh
@@ -75,5 +76,5 @@ index 5a04067..9eca9b6 100755
 +	> /tmp/rtienv.sh; \
 +	else touch /tmp/rtienv.sh; fi
 -- 
-2.34.1
+2.25.1
 

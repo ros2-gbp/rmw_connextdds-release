@@ -1,4 +1,4 @@
-From c31c495b467118f6b956d8a28d14002919fa6606 Mon Sep 17 00:00:00 2001
+From 2fc74c75bd3bb4d77f05d6bfc02dcd5e46580907 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
  <nuclearsandwich@users.noreply.github.com>
 Date: Sat, 12 Feb 2022 11:07:44 -0500
@@ -16,18 +16,18 @@ robust going forward.
  1 file changed, 8 insertions(+), 17 deletions(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index 9eca9b6..1257f8d 100755
+index b7ad604..adf2cbd 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
-@@ -18,56 +18,47 @@ export PKG_CONFIG_PATH=@(InstallationPrefix)/lib/pkgconfig
- # 	https://github.com/ros-infrastructure/bloom/issues/327
- export DEB_CXXFLAGS_MAINT_APPEND=-DNDEBUG
+@@ -23,14 +23,16 @@ endif
+ 
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
  
 +# Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
 +export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-6.0.1
 +
  %:
- 	dh $@@ -v --buildsystem=cmake
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
  
 -override_dh_auto_configure: /tmp/rtienv.sh
 +override_dh_auto_configure:
@@ -38,8 +38,9 @@ index 9eca9b6..1257f8d 100755
  	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
  	dh_auto_configure -- \
  		-DCMAKE_INSTALL_PREFIX="@(InstallationPrefix)" \
- 		-DAMENT_PREFIX_PATH="@(InstallationPrefix)" \
- 		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)"
+@@ -38,42 +40,31 @@ override_dh_auto_configure: /tmp/rtienv.sh
+ 		-DCMAKE_PREFIX_PATH="@(InstallationPrefix)" \
+ 		$(BUILD_TESTING_ARG)
  
 -override_dh_auto_build: /tmp/rtienv.sh
 +override_dh_auto_build:
@@ -85,5 +86,5 @@ index 9eca9b6..1257f8d 100755
 -	> /tmp/rtienv.sh; \
 -	else touch /tmp/rtienv.sh; fi
 -- 
-2.34.1
+2.25.1
 
