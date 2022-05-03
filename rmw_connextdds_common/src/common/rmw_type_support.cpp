@@ -678,8 +678,15 @@ void RMW_Connext_MessageTypeSupport::type_info(
      but assumes full_bounded == true by default */
   bool full_bounded = true;
 
+#ifdef ROSIDL_TYPESUPPORT_FASTRTPS_HAS_PLAIN_TYPES
+  char bounds_info;
+  serialized_size_max =
+    static_cast<uint32_t>(callbacks->max_serialized_size(bounds_info));
+  full_bounded = 0 != (bounds_info & ROSIDL_TYPESUPPORT_FASTRTPS_BOUNDED_TYPE);
+#else
   serialized_size_max =
     static_cast<uint32_t>(callbacks->max_serialized_size(full_bounded));
+#endif
 
   unbounded = !full_bounded;
 
@@ -805,4 +812,37 @@ RMW_Connext_ServiceTypeSupportWrapper::get_response_type_name(
     svc_type_support_fastrtps->data);
 
   return rmw_connextdds_create_type_name_response(svc_callbacks);
+}
+
+
+rmw_ret_t
+RMW_Connext_Message_initialize(
+  RMW_Connext_Message * const self,
+  RMW_Connext_MessageTypeSupport * const type_support,
+  const size_t data_buffer_size)
+{
+  const rcutils_allocator_t allocator = rcutils_get_default_allocator();
+
+  self->user_data = nullptr;
+  self->serialized = false;
+  self->type_support = type_support;
+
+  if (RCUTILS_RET_OK !=
+    rcutils_uint8_array_init(&self->data_buffer, data_buffer_size, &allocator))
+  {
+    RMW_CONNEXT_LOG_ERROR_A_SET(
+      "failed to initialize message buffer: size=%lu",
+      data_buffer_size)
+    return RMW_RET_ERROR;
+  }
+
+  return RMW_RET_OK;
+}
+
+void
+RMW_Connext_Message_finalize(RMW_Connext_Message * const self)
+{
+  if (RCUTILS_RET_OK != rcutils_uint8_array_fini(&self->data_buffer)) {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to finalize uint8 array")
+  }
 }

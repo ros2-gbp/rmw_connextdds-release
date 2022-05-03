@@ -64,6 +64,9 @@ bool rmw_connextdds_find_string_in_list(
   const DDS_StringSeq * const values,
   const char * const value);
 
+DDS_Duration_t rmw_connextdds_duration_from_ros_time(
+  const rmw_time_t * const ros_time);
+
 /******************************************************************************
  * WaitSet wrapper
  ******************************************************************************/
@@ -196,6 +199,9 @@ public:
 
   rmw_ret_t
   assert_liveliness();
+
+  rmw_ret_t
+  wait_for_all_acked(rmw_time_t wait_timeout);
 
   rmw_ret_t
   qos(rmw_qos_profile_t * const qos);
@@ -432,6 +438,15 @@ public:
     rmw_message_info_t * const message_info,
     bool * const taken);
 
+  rmw_ret_t
+  set_content_filter(
+    const rmw_subscription_content_filter_options_t * const options);
+
+  rmw_ret_t
+  get_content_filter(
+    rcutils_allocator_t * allocator,
+    rmw_subscription_content_filter_options_t * const options);
+
   bool
   has_data()
   {
@@ -464,6 +479,17 @@ public:
     return this->dds_topic;
   }
 
+  static std::string get_atomic_id()
+  {
+    static std::atomic_uint64_t id;
+    return std::to_string(id++);
+  }
+
+  bool is_cft_enabled()
+  {
+    return !this->cft_expression.empty();
+  }
+
   const bool internal;
   const bool ignore_local;
 
@@ -472,6 +498,7 @@ private:
   DDS_DataReader * dds_reader;
   DDS_Topic * dds_topic;
   DDS_TopicDescription * dds_topic_cft;
+  std::string cft_expression;
   RMW_Connext_MessageTypeSupport * type_support;
   rmw_gid_t ros_gid;
   const bool created_topic;
@@ -490,6 +517,7 @@ private:
     const bool ignore_local,
     const bool created_topic,
     DDS_TopicDescription * const dds_topic_cft,
+    const char * const cft_expression,
     const bool internal);
 
   friend class RMW_Connext_SubscriberStatusCondition;
@@ -576,6 +604,12 @@ public:
 
   rmw_ret_t
   enable();
+
+  rmw_ret_t
+  request_publisher_qos(rmw_qos_profile_t * const qos);
+
+  rmw_ret_t
+  response_subscription_qos(rmw_qos_profile_t * const qos);
 };
 
 class RMW_Connext_Service
@@ -623,6 +657,12 @@ public:
 
   rmw_ret_t
   enable();
+
+  rmw_ret_t
+  response_publisher_qos(rmw_qos_profile_t * const qos);
+
+  rmw_ret_t
+  request_subscription_qos(rmw_qos_profile_t * const qos);
 };
 
 /******************************************************************************

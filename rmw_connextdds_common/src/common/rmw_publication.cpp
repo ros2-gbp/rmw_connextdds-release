@@ -166,6 +166,14 @@ rmw_api_connextdds_create_publisher(
     }
   }
 
+  // Adapt any 'best available' QoS options
+  rmw_qos_profile_t adapted_qos_policies = *qos_policies;
+  rmw_ret_t ret = rmw_dds_common::qos_profile_get_best_available_for_topic_publisher(
+    node, topic_name, &adapted_qos_policies, rmw_api_connextdds_get_subscriptions_info_by_topic);
+  if (RMW_RET_OK != ret) {
+    return nullptr;
+  }
+
   rmw_context_impl_t * ctx = node->context->impl;
 
   rmw_publisher_t * const rmw_pub =
@@ -176,7 +184,7 @@ rmw_api_connextdds_create_publisher(
     ctx->dds_pub,
     type_supports,
     topic_name,
-    qos_policies,
+    &adapted_qos_policies,
     publisher_options);
 
   if (nullptr == rmw_pub) {
@@ -280,6 +288,26 @@ rmw_api_connextdds_publisher_assert_liveliness(
     reinterpret_cast<RMW_Connext_Publisher *>(publisher->data);
 
   return pub_impl->assert_liveliness();
+}
+
+
+rmw_ret_t
+rmw_api_connextdds_publisher_wait_for_all_acked(
+  const rmw_publisher_t * publisher,
+  rmw_time_t wait_timeout)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(publisher, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    publisher,
+    publisher->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+
+  RMW_Connext_Publisher * const pub_impl =
+    reinterpret_cast<RMW_Connext_Publisher *>(publisher->data);
+  RMW_CHECK_ARGUMENT_FOR_NULL(pub_impl, RMW_RET_INVALID_ARGUMENT);
+
+  return pub_impl->wait_for_all_acked(wait_timeout);
 }
 
 

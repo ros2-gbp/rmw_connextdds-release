@@ -2,15 +2,63 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.6.3 (2022-04-28)
-------------------
-* Allow sharing DomainParticipant with C++ applications (`#25 <https://github.com/ros2/rmw_connextdds/issues/25>`_) (`#52 <https://github.com/ros2/rmw_connextdds/issues/52>`_)
+0.12.0 (2022-05-03)
+-------------------
+* Handle 'best_available' QoS policies in common  (`#85 <https://github.com/ros2/rmw_connextdds/issues/85>`_)
+* Contributors: Jose Luis Rivero
+
+0.11.1 (2022-04-26)
+-------------------
+* Resolve build error with RTI Connext DDS 5.3.1 (`#82 <https://github.com/ros2/rmw_connextdds/issues/82>`_)
 * Contributors: Andrea Sorbini
 
-0.6.2 (2021-05-20)
-------------------
-* Improved conversion of time values between ROS and DDS formats (`#43 <https://github.com/ros2/rmw_connextdds/issues/43>`_) (`#54 <https://github.com/ros2/rmw_connextdds/issues/54>`_)
+0.11.0 (2022-04-08)
+-------------------
+* Exclude missing sample info fields when building rmw_connextddsmicro (`#79 <https://github.com/ros2/rmw_connextdds/issues/79>`_)
+* Properly initialize CDR stream before using it for filtering (`#81 <https://github.com/ros2/rmw_connextdds/issues/81>`_)
 * Contributors: Andrea Sorbini
+
+0.10.0 (2022-03-28)
+-------------------
+* Add support for user-specified content filters (`#68 <https://github.com/ros2/rmw_connextdds/issues/68>`_)
+* add stub for content filtered topic (`#77 <https://github.com/ros2/rmw_connextdds/issues/77>`_)
+* Add sequence numbers to message info structure (`#74 <https://github.com/ros2/rmw_connextdds/issues/74>`_)
+* Contributors: Andrea Sorbini, Chen Lihui, Ivan Santiago Paunovic
+
+0.9.0 (2022-03-01)
+------------------
+* Add rmw listener apis (`#44 <https://github.com/rticommunity/rmw_connextdds/issues/44>`_)
+* Contributors: iRobot ROS
+
+0.8.3 (2022-02-10)
+------------------
+
+0.8.2 (2022-01-14)
+------------------
+* Fix cpplint errors (`#69 <https://github.com/ros2/rmw_connextdds/issues/69>`_)
+* Contributors: Jacob Perron
+
+0.8.1 (2021-11-19)
+------------------
+* Add client/service QoS getters. (`#67 <https://github.com/rticommunity/rmw_connextdds/issues/67>`_)
+* Contributors: mauropasse
+
+0.8.0 (2021-09-15)
+------------------
+* Update rmw_context_impl_t definition (`#65 <https://github.com/ros2/rmw_connextdds/issues/65>`_)
+* Use the new rmw_dds_common::get_security_files API (`#61 <https://github.com/ros2/rmw_connextdds/issues/61>`_)
+* Contributors: Chris Lalancette, Michel Hidalgo
+
+0.7.0 (2021-06-04)
+------------------
+* Add rmw_publisher_wait_for_all_acked support. (`#20 <https://github.com/rticommunity/rmw_connextdds/issues/20>`_)
+* Support extended signature for `message_type_support_callbacks_t::max_serialized_size()` from `rosidl_typesupport_fastrtps_cpp`. (`#14 <https://github.com/rticommunity/rmw_connextdds/issues/14>`_)
+* Update includes after rcutils/get_env.h deprecation. (`#55 <https://github.com/rticommunity/rmw_connextdds/issues/55>`_)
+* Always modify UserObjectQosPolicy regardless of override policy. (`#53 <https://github.com/rticommunity/rmw_connextdds/issues/53>`_)
+* Improved conversion of time values between ROS and DDS formats. (`#43 <https://github.com/rticommunity/rmw_connextdds/issues/43>`_)
+* Allow sharing DomainParticipant with C++ applications. (`#25 <https://github.com/rticommunity/rmw_connextdds/issues/25>`_)
+* Add environment variable to control override of DomainParticipantQos. (`#41 <https://github.com/rticommunity/rmw_connextdds/issues/41>`_)
+* Contributors: Andrea Sorbini, Barry Xu, Christophe Bedard, Miguel Company
 
 0.6.1 (2021-04-26)
 ------------------
