@@ -1,0 +1,33 @@
+From 17fefde0014bc807d07fdfa7d1f9d654d9160b09 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
+ <nuclearsandwich@users.noreply.github.com>
+Date: Mon, 6 Jun 2022 19:49:23 -0700
+Subject: [PATCH] Set CONNEXTDDS_DIR environment variable in build.
+
+The rti_connext_dds_cmake_module is capable of finding Connext using the
+CONNEXTDDS_DIR environment variable which is the preferred method of
+finding Connext.
+
+For packages downstream of this one, the environment variable will be
+set by an environment hook.
+---
+ debian/rules.em | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/debian/rules.em b/debian/rules.em
+index 2ab7b14..adf2cbd 100755
+--- a/debian/rules.em
++++ b/debian/rules.em
+@@ -23,6 +23,9 @@ endif
+ 
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ 
++# Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
++export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-6.0.1
++
+ %:
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
+ 
+-- 
+2.36.1
+
