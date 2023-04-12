@@ -15,6 +15,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cmath>
 
 #include "rmw/impl/cpp/key_value.hpp"
 #include "rmw_connextdds/custom_sql_filter.hpp"
@@ -202,23 +203,6 @@ rmw_connextdds_initialize_participant_qos_impl(
     case rmw_context_impl_t::participant_qos_override_policy_t::All:
     case rmw_context_impl_t::participant_qos_override_policy_t::Basic:
       {
-        // Parse and apply QoS parameters derived from ROS 2 configuration options.
-
-        if (ctx->localhost_only) {
-          if (DDS_RETCODE_OK !=
-            DDS_PropertyQosPolicyHelper_assert_property(
-              &dp_qos->property,
-              "dds.transport.UDPv4.builtin.parent.allow_interfaces",
-              RMW_CONNEXT_LOCALHOST_ONLY_ADDRESS,
-              DDS_BOOLEAN_FALSE /* propagate */))
-          {
-            RMW_CONNEXT_LOG_ERROR_A_SET(
-              "failed to assert property on participant: %s",
-              "dds.transport.UDPv4.builtin.parent.allow_interfaces")
-            return RMW_RET_ERROR;
-          }
-        }
-
         const size_t user_data_len_in =
           DDS_OctetSeq_get_length(&dp_qos->user_data.value);
 
@@ -504,6 +488,7 @@ rmw_connextdds_get_datawriter_qos(
         // TODO(asorbini) this value is not actually used, remove it
         &qos->publish_mode,
         &qos->lifespan,
+        &qos->user_data,
         qos_policies,
         pub_options,
         nullptr /* sub_options */))
@@ -593,6 +578,7 @@ rmw_connextdds_get_datareader_qos(
         &qos->resource_limits,
         nullptr /* publish_mode */,
         nullptr /* Lifespan is a writer-only qos policy */,
+        &qos->user_data,
         qos_policies,
         nullptr /* pub_options */,
         sub_options))
@@ -1219,6 +1205,7 @@ rmw_connextdds_dcps_publication_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
+        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,
@@ -1302,6 +1289,7 @@ rmw_connextdds_dcps_subscription_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
+        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,
