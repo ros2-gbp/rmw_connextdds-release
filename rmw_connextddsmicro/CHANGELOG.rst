@@ -2,6 +2,9 @@
 Changelog for package rmw_connextddsmicro
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.14.1 (2023-05-11)
+-------------------
+
 0.14.0 (2023-04-12)
 -------------------
 * Dynamic Subscription (BONUS: Allocators): rmw_connextdds (`#115 <https://github.com/ros2/rmw_connextdds/issues/115>`_)
