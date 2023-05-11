@@ -1,0 +1,12 @@
+Source: ros-iron-rmw-connextdds
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-iron-ament-cmake-ros, ros-iron-ament-lint-auto <!nocheck>, ros-iron-ament-lint-common <!nocheck>, ros-iron-rmw-connextdds-common, ros-iron-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-iron-rmw-connextdds
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-iron-ament-cmake, ros-iron-rmw-connextdds-common, ros-iron-ros-workspace
+Description: A ROS 2 RMW implementation built with RTI Connext DDS Professional.
