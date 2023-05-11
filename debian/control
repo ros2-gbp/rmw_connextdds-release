@@ -1,0 +1,12 @@
+Source: ros-iron-rmw-connextdds-common
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-iron-ament-cmake-ros, ros-iron-ament-lint-auto <!nocheck>, ros-iron-ament-lint-common <!nocheck>, ros-iron-fastcdr, ros-iron-rcpputils, ros-iron-rcutils, ros-iron-rmw, ros-iron-rmw-dds-common, ros-iron-rosidl-runtime-c, ros-iron-rosidl-runtime-cpp, ros-iron-rosidl-typesupport-fastrtps-c, ros-iron-rosidl-typesupport-fastrtps-cpp, ros-iron-rosidl-typesupport-introspection-c, ros-iron-rosidl-typesupport-introspection-cpp, ros-iron-rti-connext-dds-cmake-module, ros-iron-ros-workspace, ros-iron-rosidl-typesupport-fastrtps-c, ros-iron-rosidl-typesupport-fastrtps-cpp
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-iron-rmw-connextdds-common
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-iron-ament-cmake, ros-iron-fastcdr, ros-iron-rcpputils, ros-iron-rcutils, ros-iron-rmw, ros-iron-rmw-dds-common, ros-iron-rosidl-runtime-c, ros-iron-rosidl-runtime-cpp, ros-iron-rosidl-typesupport-fastrtps-c, ros-iron-rosidl-typesupport-fastrtps-cpp, ros-iron-rosidl-typesupport-introspection-c, ros-iron-rosidl-typesupport-introspection-cpp, ros-iron-rti-connext-dds-cmake-module, ros-iron-ros-workspace
+Description: Common source for RMW implementations built with RTI Connext DDS Professional and RTI Connext DDS Micro.
