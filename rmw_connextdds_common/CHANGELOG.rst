@@ -2,6 +2,11 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.16.0 (2023-07-11)
+-------------------
+* Add support for listener callbacks (`#76 <https://github.com/ros2/rmw_connextdds/issues/76>`_)
+* Contributors: Andrea Sorbini
+
 0.15.1 (2023-05-11)
 -------------------
 
