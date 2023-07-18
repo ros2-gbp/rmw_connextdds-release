@@ -84,19 +84,18 @@ release:
 
 |ROS 2 Release|Branch|Status|
 |-------------|------|------|
-|Rolling      |`rolling`|Developed|
-|Iron         |`iron`|Supported until November 2024|
-|Humble       |`humble`|Supported until May 2027|
-|Galactic     |`galactic`|Supported until November 2022 (EOL)|
-|Foxy         |`foxy`|Supported until May 2023 (EOL)|
-|Eloquent     |`eloquent`|Supported until November 2020 (EOL)|
-|Dashing      |`dashing`|Supported until May 2021 (EOL)|
+|Rolling      |`master`|Developed|
+|Foxy         |`foxy`|LTS (May 2023)|
+|Eloquent     |`eloquent`|EOL (Nov 2020)|
+|Dashing      |`dashing`|LTS (May 2021)|
 
-Branch `rolling` is actively developed and maintained. It is used to create
+Branch `master` is actively developed and maintained. It is used to create
 other branches for specific ROS 2 releases (starting from Galactic).
 
-All other non-EOL branches will receive updates for critical bug fixes and
-important patches only.
+Branches marked as `LTS` will receive updates for critical bug fixes and
+important patches only (until they reach `EOL`).
+
+Branches marked as `EOL` will not receive any future updates.
 
 ## RTI Connext DDS Requirements
 
@@ -143,7 +142,7 @@ consider uninstalling `rmw_connext_cpp` and `connext_cmake_module`
 
 ## Runtime Configuration
 
-In addition to standard configuration facilities provided by the ROS 2 RMW
+In addition to standard configuration facilities provided by the ROS2 RMW
 interface, `rmw_connextdds`, and `rmw_connextddsmicro` support the additional
 configuration of some aspects of their runtime behavior via custom environment
 variables.
@@ -163,9 +162,9 @@ variables.
 
 Enable different policies to improve interoperability with `rmw_cyclonedds_cpp`.
 
-By default, ROS 2 applications using `rmw_connextdds` will be able to communicate
-with those using `rmw_cyclonedds_cpp` only via ROS 2 publishers and subscribers,
-while ROS 2 clients and services will not interoperate across vendors.
+By default, ROS2 applications using `rmw_connextdds` will be able to communicate
+with those using `rmw_cyclonedds_cpp` only via ROS2 publishers and subscribers,
+while ROS2 clients and services will not interoperate across vendors.
 
 The reason for this incompatibility lies in `rmw_cyclonedds_cpp`'s use of a custom
 mapping for propagating request metadata between clients and services.
@@ -269,13 +268,13 @@ RMW_CONNEXT_INITIAL_PEERS="_shmem://, 239.255.0.1" \
 
 ### RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE
 
-ROS 2 applications using `rmw_connextdds` will not be able to interoperate with
+ROS2 applications using `rmw_connextdds` will not be able to interoperate with
 applications using the previous RMW implementation for RTI Connext DDS, `rmw_connext_cpp`,
 unless variable `RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE` is used to enable
 a "compatibility" mode with these older implementation.
 
 In particular, when this mode is enabled, `rmw_connextdds` will revert to adding
-a suffix (`_`) to the end of the names of the attributes of the ROS 2 data types
+a suffix (`_`) to the end of the names of the attributes of the ROS2 data types
 propagated via DDS discovery.
 
 ### RMW_CONNEXT_PARTICIPANT_QOS_OVERRIDE_POLICY
@@ -302,7 +301,7 @@ optimizations controlled by [RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY](#RMW_C
 
 The [DDS-RPC specification](https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/)
 defines two profiles for mapping "request/reply" interactions over DDS messages
-(e.g. ROS 2 clients and services):
+(e.g. ROS2 clients and services):
 
 - the *basic* profile conveys information about the originator of a request as
   an inline payload, serialized before the actual request/reply payloads.
@@ -311,7 +310,7 @@ defines two profiles for mapping "request/reply" interactions over DDS messages
   information out of band.
 
 By default, `rmw_connextdds` uses the *extended* profile when sending requests
-from a ROS 2 client to a service, while `rmw_connextddsmicro` uses the *basic* one.
+from a ROS2 client to a service, while `rmw_connextddsmicro` uses the *basic* one.
 
 Variable `RMW_CONNEXT_REQUEST_REPLY_MAPPING` can be used to select the actual
 profile used at runtime. Either `"basic"` or `"extended"` may be specified.

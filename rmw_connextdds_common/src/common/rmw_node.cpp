@@ -40,9 +40,12 @@ rmw_api_connextdds_create_node(
     "expected initialized context",
     return nullptr);
 
+  bool node_localhost_only =
+    context->options.localhost_only == RMW_LOCALHOST_ONLY_ENABLED;
+
   RMW_CONNEXT_LOG_DEBUG_A(
-    "creating new node: name=%s, ns=%s",
-    name, ns)
+    "creating new node: name=%s, ns=%s, localhost_only=%d",
+    name, ns, node_localhost_only)
 
   rmw_context_impl_t * ctx = context->impl;
   std::lock_guard<std::mutex> guard(ctx->initialization_mutex);
@@ -80,7 +83,7 @@ rmw_api_connextdds_create_node(
     return nullptr;
   }
 
-  ret = ctx->initialize_node(&context->options.discovery_options);
+  ret = ctx->initialize_node(ns, name, node_localhost_only);
   if (RMW_RET_OK != ret) {
     RMW_CONNEXT_LOG_ERROR("failed to initialize node in context")
     return nullptr;

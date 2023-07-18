@@ -2,40 +2,8 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.16.0 (2023-07-11)
+0.11.2 (2023-07-18)
 -------------------
-* Add support for listener callbacks (`#76 <https://github.com/ros2/rmw_connextdds/issues/76>`_)
-* Contributors: Andrea Sorbini
-
-0.15.1 (2023-05-11)
--------------------
-
-0.15.0 (2023-04-27)
--------------------
-
-0.14.0 (2023-04-12)
--------------------
-* [rmw_connextdds] New RMW discovery options (`#108 <https://github.com/ros2/rmw_connextdds/issues/108>`_)
-* Call get_type_hash_func (`#113 <https://github.com/ros2/rmw_connextdds/issues/113>`_)
-* Type hash distribution during discovery (rep2011) (`#104 <https://github.com/ros2/rmw_connextdds/issues/104>`_)
-* Implement matched event (`#101 <https://github.com/ros2/rmw_connextdds/issues/101>`_)
-* Add in implementation of inconsistent topic. (`#103 <https://github.com/ros2/rmw_connextdds/issues/103>`_)
-* Contributors: Barry Xu, Chris Lalancette, Emerson Knapp, Grey, Michael Carroll
-
-0.13.0 (2022-11-02)
--------------------
-* Add rmw_get_gid_for_client impl (`#92 <https://github.com/ros2/rmw_connextdds/issues/92>`_)
-* Contributors: Brian
-
-0.12.1 (2022-09-13)
--------------------
-* Fix assert statement to allow the seconds field of a DDS_Duration_t to be zero (`#88 <https://github.com/ros2/rmw_connextdds/issues/88>`_)
-* Contributors: Michael Jeronimo
-
-0.12.0 (2022-05-03)
--------------------
-* Handle 'best_available' QoS policies in common  (`#85 <https://github.com/ros2/rmw_connextdds/issues/85>`_)
-* Contributors: Jose Luis Rivero
 
 0.11.1 (2022-04-26)
 -------------------

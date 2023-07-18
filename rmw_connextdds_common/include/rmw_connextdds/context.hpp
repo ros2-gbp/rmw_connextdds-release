@@ -22,7 +22,6 @@
 #include <mutex>
 #include <regex>
 #include <string>
-#include <memory>
 
 #include "rmw_connextdds/dds_api.hpp"
 #include "rmw_connextdds/log.hpp"
@@ -79,11 +78,8 @@ struct rmw_context_impl_s
   DDS_DataReader * dr_publications;
   DDS_DataReader * dr_subscriptions;
 
-  /* Keep track of what discovery settings were used when initializing */
-  rmw_discovery_options_t * discovery_options;
-
-  /* Manage the memory of the domain tag */
-  char * domain_tag;
+  /* Keep track of whether the DomainParticipant is localhost only */
+  bool localhost_only;
 
   /* Global configuration for QoS profiles */
   std::string qos_ctx_name;
@@ -164,8 +160,7 @@ struct rmw_context_impl_s
     dr_participants(nullptr),
     dr_publications(nullptr),
     dr_subscriptions(nullptr),
-    discovery_options(nullptr),
-    domain_tag(nullptr)
+    localhost_only(base->options.localhost_only == RMW_LOCALHOST_ONLY_ENABLED)
   {
     /* destructor relies on these being initialized properly */
     common.thread_is_running.store(false);
@@ -185,7 +180,9 @@ struct rmw_context_impl_s
   // node_count is increased
   rmw_ret_t
   initialize_node(
-    const rmw_discovery_options_t * const discovery_options);
+    const char * const node_name,
+    const char * const node_namespace,
+    const bool localhost_only);
 
   // Destroys the participant, when node_count reaches 0.
   rmw_ret_t
@@ -193,7 +190,7 @@ struct rmw_context_impl_s
 
   // Initialize the DomainParticipant associated with the context.
   rmw_ret_t
-  initialize_participant();
+  initialize_participant(const bool localhost_only);
 
   // Enable the DomainParticipant associated with the context.
   rmw_ret_t

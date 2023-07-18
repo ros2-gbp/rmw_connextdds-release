@@ -15,7 +15,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <cmath>
 
 #include "rmw/impl/cpp/key_value.hpp"
 #include "rmw_connextdds/custom_sql_filter.hpp"
@@ -203,6 +202,23 @@ rmw_connextdds_initialize_participant_qos_impl(
     case rmw_context_impl_t::participant_qos_override_policy_t::All:
     case rmw_context_impl_t::participant_qos_override_policy_t::Basic:
       {
+        // Parse and apply QoS parameters derived from ROS 2 configuration options.
+
+        if (ctx->localhost_only) {
+          if (DDS_RETCODE_OK !=
+            DDS_PropertyQosPolicyHelper_assert_property(
+              &dp_qos->property,
+              "dds.transport.UDPv4.builtin.parent.allow_interfaces",
+              RMW_CONNEXT_LOCALHOST_ONLY_ADDRESS,
+              DDS_BOOLEAN_FALSE /* propagate */))
+          {
+            RMW_CONNEXT_LOG_ERROR_A_SET(
+              "failed to assert property on participant: %s",
+              "dds.transport.UDPv4.builtin.parent.allow_interfaces")
+            return RMW_RET_ERROR;
+          }
+        }
+
         const size_t user_data_len_in =
           DDS_OctetSeq_get_length(&dp_qos->user_data.value);
 
@@ -488,7 +504,6 @@ rmw_connextdds_get_datawriter_qos(
         // TODO(asorbini) this value is not actually used, remove it
         &qos->publish_mode,
         &qos->lifespan,
-        &qos->user_data,
         qos_policies,
         pub_options,
         nullptr /* sub_options */))
@@ -578,7 +593,6 @@ rmw_connextdds_get_datareader_qos(
         &qos->resource_limits,
         nullptr /* publish_mode */,
         nullptr /* Lifespan is a writer-only qos policy */,
-        &qos->user_data,
         qos_policies,
         nullptr /* pub_options */,
         sub_options))
@@ -810,62 +824,6 @@ rmw_connextdds_return_samples(
   return RMW_RET_OK;
 }
 
-rmw_ret_t
-rmw_connextdds_count_unread_samples(
-  RMW_Connext_Subscriber * const sub,
-  size_t & unread_count)
-{
-  DDS_Boolean is_loan = DDS_BOOLEAN_TRUE;
-  DDS_Long data_len = 0;
-  void ** data_buffer = nullptr;
-  DDS_SampleInfoSeq info_seq = DDS_SEQUENCE_INITIALIZER;
-
-  unread_count = 0;
-  DDS_ReturnCode_t rc = DDS_RETCODE_ERROR;
-  do {
-    rc = DDS_DataReader_read_or_take_instance_untypedI(
-      sub->reader(),
-      &is_loan,
-      &data_buffer,
-      &data_len,
-      &info_seq,
-      0 /* data_seq_len */,
-      0 /* data_seq_max_len */,
-      DDS_BOOLEAN_TRUE /* data_seq_has_ownership */,
-      NULL /* data_seq_contiguous_buffer_for_copy */,
-      1 /* data_size -- ignored because loaning*/,
-      DDS_LENGTH_UNLIMITED /* max_samples */,
-      &DDS_HANDLE_NIL /* a_handle */,
-  #if !RMW_CONNEXT_DDS_API_PRO_LEGACY
-      NULL /* topic_query_guid */,
-  #endif /* RMW_CONNEXT_DDS_API_PRO_LEGACY */
-      DDS_NOT_READ_SAMPLE_STATE,
-      DDS_ANY_VIEW_STATE,
-      DDS_ANY_INSTANCE_STATE,
-      DDS_BOOLEAN_FALSE /* take */);
-    if (DDS_RETCODE_NO_DATA == rc) {
-      continue;
-    }
-    if (DDS_RETCODE_OK != rc && DDS_RETCODE_NO_DATA != rc) {
-      RMW_CONNEXT_LOG_ERROR_SET("failed to read data from DDS reader")
-      return RMW_RET_ERROR;
-    }
-    if (DDS_RETCODE_OK == rc) {
-      unread_count += data_len;
-      rc = DDS_DataReader_return_loan_untypedI(
-        sub->reader(),
-        data_buffer,
-        data_len,
-        &info_seq);
-      if (DDS_RETCODE_OK != rc) {
-        RMW_CONNEXT_LOG_ERROR_SET("failed to return loan to DDS reader")
-        return RMW_RET_ERROR;
-      }
-    }
-  } while (rc == DDS_RETCODE_OK);
-
-  return RMW_RET_OK;
-}
 
 rmw_ret_t
 rmw_connextdds_filter_sample(
@@ -1261,7 +1219,6 @@ rmw_connextdds_dcps_publication_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
-        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,
@@ -1345,7 +1302,6 @@ rmw_connextdds_dcps_subscription_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
-        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,

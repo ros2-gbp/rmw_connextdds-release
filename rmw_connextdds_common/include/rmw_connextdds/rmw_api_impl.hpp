@@ -92,8 +92,8 @@ RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_event_set_callback(
   rmw_event_t * event,
-  const rmw_event_callback_t callback,
-  const void * const user_data);
+  rmw_event_callback_t callback,
+  const void * user_data);
 
 /*****************************************************************************
  * Info API
@@ -277,12 +277,6 @@ rmw_api_connextdds_get_gid_for_publisher(
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
-rmw_api_connextdds_get_gid_for_client(
-  const rmw_client_t * client,
-  rmw_gid_t * gid);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
 rmw_api_connextdds_compare_gids_equal(
   const rmw_gid_t * gid1,
   const rmw_gid_t * gid2,
@@ -443,15 +437,15 @@ RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_service_set_on_new_request_callback(
   rmw_service_t * rmw_service,
-  const rmw_event_callback_t callback,
-  const void * const user_data);
+  rmw_event_callback_t callback,
+  const void * user_data);
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_client_set_on_new_response_callback(
   rmw_client_t * rmw_client,
-  const rmw_event_callback_t callback,
-  const void * const user_data);
+  rmw_event_callback_t callback,
+  const void * user_data);
 
 /*****************************************************************************
  * Subscription API
@@ -580,9 +574,9 @@ rmw_api_connextdds_return_loaned_message_from_subscription(
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_subscription_set_on_new_message_callback(
-  rmw_subscription_t * const rmw_subscription,
-  const rmw_event_callback_t callback,
-  const void * const user_data);
+  rmw_subscription_t * rmw_subscription,
+  rmw_event_callback_t callback,
+  const void * user_data);
 
 /*****************************************************************************
  * WaitSet API
