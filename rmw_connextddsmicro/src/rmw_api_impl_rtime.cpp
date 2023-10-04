@@ -14,6 +14,16 @@
 
 #include "rmw_connextdds/rmw_api_impl.hpp"
 
+#include "rmw/event.h"
+#include "rmw/get_node_info_and_types.h"
+#include "rmw/get_service_names_and_types.h"
+#include "rmw/get_topic_endpoint_info.h"
+#include "rmw/get_topic_names_and_types.h"
+#include "rmw/init.h"
+#include "rmw/init_options.h"
+#include "rmw/names_and_types.h"
+#include "rmw/rmw.h"
+
 /*****************************************************************************
  * Context API
  *****************************************************************************/
@@ -206,6 +216,26 @@ rmw_count_subscribers(
   size_t * count)
 {
   return rmw_api_connextdds_count_subscribers(node, topic_name, count);
+}
+
+
+rmw_ret_t
+rmw_count_clients(
+  const rmw_node_t * node,
+  const char * service_name,
+  size_t * count)
+{
+  return rmw_api_connextdds_count_clients(node, service_name, count);
+}
+
+
+rmw_ret_t
+rmw_count_services(
+  const rmw_node_t * node,
+  const char * service_name,
+  size_t * count)
+{
+  return rmw_api_connextdds_count_services(node, service_name, count);
 }
 
 
