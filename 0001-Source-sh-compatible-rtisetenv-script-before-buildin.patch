@@ -1,4 +1,4 @@
-From 3aab29ce0b9428fdd2474f11b2481d7dc15928a3 Mon Sep 17 00:00:00 2001
+From cee1bb37c6b7902d13e1edc3b85829065ea2e07e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?= <steven@nuclearsandwich.com>
 Date: Thu, 11 Mar 2021 15:42:22 -0800
 Subject: [PATCH 1/2] Source sh-compatible rtisetenv script before building.
