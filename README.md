@@ -1,3 +1,30 @@
+## rmw_connextdds (jazzy) - 0.22.0-1
+
+The packages in the `rmw_connextdds` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release rmw_connextdds --rosdistro jazzy` on `Mon, 22 Apr 2024 11:20:59 -0000`
+
+These packages were released:
+- `rmw_connextdds`
+- `rmw_connextdds_common`
+- `rmw_connextddsmicro`
+- `rti_connext_dds_cmake_module`
+
+Version of package(s) in repository `rmw_connextdds`:
+
+- upstream repository: https://github.com/ros2/rmw_connextdds.git
+- release repository: https://github.com/ros2-gbp/rmw_connextdds-release.git
+- rosdistro version: `null`
+- old version: `null`
+- new version: `0.22.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.11.2`
+- catkin_pkg version: `0.5.2`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## rmw_connextdds (rolling) - 0.22.0-1
 
 The packages in the `rmw_connextdds` repository were released into the `rolling` distro by running `/home/marcogg/.local/bin/bloom-release rmw_connextdds --rosdistro rolling` on `Tue, 09 Apr 2024 06:54:04 -0000`
