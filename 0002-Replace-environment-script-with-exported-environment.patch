@@ -1,4 +1,4 @@
-From bd41912ce036382cb04f084cde3a31bd04d8b008 Mon Sep 17 00:00:00 2001
+From c4e00d2dca8a3d1d1d3e3aafd0aeae92ab2b6703 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
  <nuclearsandwich@users.noreply.github.com>
 Date: Sat, 12 Feb 2022 11:07:44 -0500
@@ -16,7 +16,7 @@ robust going forward.
  1 file changed, 8 insertions(+), 17 deletions(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index b7ad604..adf2cbd 100755
+index 0e16329..4b3dcff 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
 @@ -23,14 +23,16 @@ endif
@@ -68,7 +68,7 @@ index b7ad604..adf2cbd 100755
  	# CMAKE_PREFIX_PATH, PKG_CONFIG_PATH, and PYTHONPATH.
 -	. /tmp/rtienv.sh && \
  	if [ -f "@(InstallationPrefix)/setup.sh" ]; then . "@(InstallationPrefix)/setup.sh"; fi && \
- 	dh_shlibdeps -l$(CURDIR)/debian/@(Package)/@(InstallationPrefix)/lib/
+ 	dh_shlibdeps -l$(CURDIR)/debian/@(Package)/@(InstallationPrefix)/lib/:$(CURDIR)/debian/@(Package)/@(InstallationPrefix)/opt/@(Name)/lib/
  
 -override_dh_auto_install: /tmp/rtienv.sh
 +override_dh_auto_install:
@@ -86,5 +86,5 @@ index b7ad604..adf2cbd 100755
 -	> /tmp/rtienv.sh; \
 -	else touch /tmp/rtienv.sh; fi
 -- 
-2.43.2
+2.44.0.769.g3c40516874-goog
 
