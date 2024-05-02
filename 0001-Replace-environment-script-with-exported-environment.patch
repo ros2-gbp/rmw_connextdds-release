@@ -1,0 +1,40 @@
+From 40b471dbef66a8618c4b8580705bbc5fbbe25a4a Mon Sep 17 00:00:00 2001
+From: Chris Lalancette <clalancette@gmail.com>
+Date: Thu, 2 May 2024 11:09:53 -0400
+Subject: [PATCH] Replace environment script with exported environment
+ variable. (#12)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The rti_connext_dds_cmake_module is capable of finding Connext using the
+CONNEXTDDS_DIR environment variable which is the preferred method of
+finding Connext.
+
+This also decreases the patch surface which will hopefully make it more
+robust going forward.
+
+This was taken from 365a892ece3a8d1aa31252a2f199a5aade64586c
+
+Co-authored-by: Steven! Ragnarök <nuclearsandwich@users.noreply.github.com>
+---
+ debian/rules.em | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/debian/rules.em b/debian/rules.em
+index 2ab7b14..adf2cbd 100755
+--- a/debian/rules.em
++++ b/debian/rules.em
+@@ -23,6 +23,9 @@ endif
+ 
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ 
++# Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
++export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-6.0.1
++
+ %:
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
+ 
+-- 
+2.43.0
+
