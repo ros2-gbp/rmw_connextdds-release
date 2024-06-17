@@ -2,6 +2,16 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.24.0 (2024-06-17)
+-------------------
+* Make rmw_service_server_is_available return RMW_RET_INVALID_ARGUMENT (`#150 <https://github.com/ros2/rmw_connextdds/issues/150>`_)
+* Use rmw_namespace_validation_result_string() in rmw_create_node (`#151 <https://github.com/ros2/rmw_connextdds/issues/151>`_)
+* Make rmw_destroy_wait_set return RMW_RET_INVALID_ARGUMENT (`#152 <https://github.com/ros2/rmw_connextdds/issues/152>`_)
+* Contributors: Christophe Bedard
+
+0.23.0 (2024-04-26)
+-------------------
+
 0.22.0 (2024-04-09)
 -------------------
 * Revert "Mitigate discovery race condition between clients and services (`#132 <https://github.com/ros2/rmw_connextdds/issues/132>`_)" (`#146 <https://github.com/ros2/rmw_connextdds/issues/146>`_)
