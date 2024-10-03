@@ -1,3 +1,32 @@
+## rmw_connextdds (rolling) - 0.24.2-1
+
+The packages in the `rmw_connextdds` repository were released into the `rolling` distro by running `/usr/bin/bloom-release --track rolling --rosdistro rolling rmw_connextdds` on `Thu, 03 Oct 2024 15:55:01 -0000`
+
+These packages were released:
+- `rmw_connextdds`
+- `rmw_connextdds_common`
+- `rti_connext_dds_cmake_module`
+
+These packages were explicitly ignored:
+- `rmw_connextddsmicro`
+
+Version of package(s) in repository `rmw_connextdds`:
+
+- upstream repository: https://github.com/ros2/rmw_connextdds.git
+- release repository: https://github.com/ros2-gbp/rmw_connextdds-release.git
+- rosdistro version: `0.24.1-1`
+- old version: `0.24.1-1`
+- new version: `0.24.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.25.1`
+- rosdistro version: `0.9.1`
+- vcstools version: `0.1.42`
+
+
 ## rmw_connextdds (rolling) - 0.24.1-1
 
 The packages in the `rmw_connextdds` repository were released into the `rolling` distro by running `/usr/bin/bloom-release --rosdistro rolling --track rolling rmw_connextdds` on `Mon, 29 Jul 2024 08:11:46 -0000`
