@@ -14,16 +14,6 @@
 
 #include "rmw_connextdds/rmw_api_impl.hpp"
 
-#include "rmw/event.h"
-#include "rmw/get_node_info_and_types.h"
-#include "rmw/get_service_names_and_types.h"
-#include "rmw/get_topic_endpoint_info.h"
-#include "rmw/get_topic_names_and_types.h"
-#include "rmw/init.h"
-#include "rmw/init_options.h"
-#include "rmw/names_and_types.h"
-#include "rmw/rmw.h"
-
 /*****************************************************************************
  * Context API
  *****************************************************************************/
@@ -219,25 +209,6 @@ rmw_count_subscribers(
 
 
 rmw_ret_t
-rmw_count_clients(
-  const rmw_node_t * node,
-  const char * service_name,
-  size_t * count)
-{
-  return rmw_api_connextdds_count_clients(node, service_name, count);
-}
-
-rmw_ret_t
-rmw_count_services(
-  const rmw_node_t * node,
-  const char * service_name,
-  size_t * count)
-{
-  return rmw_api_connextdds_count_services(node, service_name, count);
-}
-
-
-rmw_ret_t
 rmw_get_subscriber_names_and_types_by_node(
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
@@ -418,13 +389,6 @@ rmw_get_gid_for_publisher(
 {
   return rmw_api_connextdds_get_gid_for_publisher(
     publisher, gid);
-}
-
-
-rmw_ret_t
-rmw_get_gid_for_client(const rmw_client_t * client, rmw_gid_t * gid)
-{
-  return rmw_api_connextdds_get_gid_for_client(client, gid);
 }
 
 
@@ -1009,55 +973,4 @@ rmw_feature_supported(rmw_feature_t feature)
         return false;
       }
   }
-}
-
-/******************************************************************************
- * Dynamic message typesupport
- ******************************************************************************/
-rmw_ret_t
-rmw_take_dynamic_message(
-  const rmw_subscription_t * subscription,
-  rosidl_dynamic_typesupport_dynamic_data_t * dynamic_message,
-  bool * taken,
-  rmw_subscription_allocation_t * allocation)
-{
-  static_cast<void>(subscription);
-  static_cast<void>(dynamic_message);
-  static_cast<void>(taken);
-  static_cast<void>(allocation);
-
-  RMW_SET_ERROR_MSG("rmw_take_dynamic_message: unimplemented");
-  return RMW_RET_UNSUPPORTED;
-}
-
-rmw_ret_t
-rmw_take_dynamic_message_with_info(
-  const rmw_subscription_t * subscription,
-  rosidl_dynamic_typesupport_dynamic_data_t * dynamic_message,
-  bool * taken,
-  rmw_message_info_t * message_info,
-  rmw_subscription_allocation_t * allocation)
-{
-  static_cast<void>(subscription);
-  static_cast<void>(dynamic_message);
-  static_cast<void>(taken);
-  static_cast<void>(message_info);
-  static_cast<void>(allocation);
-
-  RMW_SET_ERROR_MSG("rmw_take_dynamic_message_with_info: unimplemented");
-  return RMW_RET_UNSUPPORTED;
-}
-
-rmw_ret_t
-rmw_serialization_support_init(
-  const char * serialization_lib_name,
-  rcutils_allocator_t * allocator,
-  rosidl_dynamic_typesupport_serialization_support_t * serialization_support)
-{
-  static_cast<void>(serialization_lib_name);
-  static_cast<void>(allocator);
-  static_cast<void>(serialization_support);
-
-  RMW_SET_ERROR_MSG("rmw_serialization_support_init: unimplemented");
-  return RMW_RET_UNSUPPORTED;
 }

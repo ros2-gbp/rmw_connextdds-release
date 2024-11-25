@@ -35,9 +35,6 @@
  * General helpers and utilities.
  ******************************************************************************/
 
-#define dds_time_to_u64(t_) \
-  ((1000000000ULL * (uint64_t)(t_)->sec) + (uint64_t)(t_)->nanosec)
-
 rcutils_ret_t
 rcutils_uint8_array_copy(
   rcutils_uint8_array_t * const dst,
@@ -154,7 +151,7 @@ public:
   write(
     const void * const ros_message,
     const bool serialized,
-    RMW_Connext_WriteParams * const params);
+    int64_t * const sn_out = nullptr);
 
   rmw_ret_t
   enable() const
@@ -637,11 +634,6 @@ public:
 
   rmw_ret_t
   response_subscription_qos(rmw_qos_profile_t * const qos);
-
-  const rmw_gid_t gid() const
-  {
-    return *this->request_pub->gid();
-  }
 };
 
 class RMW_Connext_Service
@@ -838,7 +830,6 @@ rmw_connextdds_get_readerwriter_qos(
   DDS_ResourceLimitsQosPolicy * const resource_limits,
   DDS_PublishModeQosPolicy * const publish_mode,
   DDS_LifespanQosPolicy * const lifespan,
-  DDS_UserDataQosPolicy * const user_data,
   const rmw_qos_profile_t * const qos_policies,
   const rmw_publisher_options_t * const pub_options,
   const rmw_subscription_options_t * const sub_options);

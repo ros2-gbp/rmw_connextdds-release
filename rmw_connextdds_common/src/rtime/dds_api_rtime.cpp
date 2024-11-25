@@ -378,16 +378,6 @@ struct rmw_connextdds_api_micro
 
 rmw_connextdds_api_micro * RMW_Connext_fv_FactoryContext = nullptr;
 
-rmw_ret_t
-rmw_connextdds_get_current_time(
-  DDS_DomainParticipant * domain_participant,
-  struct DDS_Time_t * current_time)
-{
-  // Use DDS_DomainParticipant_get_current_time only with Micro since Pro's
-  // implementation is pretty slow. See #120 for details.
-  return DDS_DomainParticipant_get_current_time(domain_participant, current_time);
-}
-
 const char * const RMW_CONNEXTDDS_ID = "rmw_connextddsmicro";
 const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT = "cdr";
 
@@ -1025,7 +1015,6 @@ rmw_connextdds_get_datawriter_qos(
       &qos->resource_limits,
       &qos->publish_mode,
       nullptr /* Micro doesn't support DDS_LifespanQosPolicy */,
-      &qos->user_data,
       qos_policies,
       pub_options,
       nullptr /* sub_options */))
@@ -1075,7 +1064,6 @@ rmw_connextdds_get_datareader_qos(
       &qos->resource_limits,
       nullptr /* publish_mode */,
       nullptr /* Lifespan is a writer-only qos policy */,
-      &qos->user_data,
       qos_policies,
       nullptr /* pub_options */,
       sub_options))
@@ -1163,14 +1151,12 @@ rmw_ret_t
 rmw_connextdds_write_message(
   RMW_Connext_Publisher * const pub,
   RMW_Connext_Message * const message,
-  RMW_Connext_WriteParams * const params)
+  int64_t * const sn_out)
 {
-  DDS_Time_t timestamp = DDS_TIME_INVALID;
-  if (nullptr != params && !DDS_Time_is_invalid(&params->timestamp)) {
-    timestamp = params->timestamp;
-  }
+  UNUSED_ARG(sn_out);
+
   if (DDS_RETCODE_OK !=
-    DDS_DataWriter_write_w_timestamp(pub->writer(), message, &DDS_HANDLE_NIL, &timestamp))
+    DDS_DataWriter_write(pub->writer(), message, &DDS_HANDLE_NIL))
   {
     RMW_CONNEXT_LOG_ERROR_SET("failed to write message to DDS")
     return RMW_RET_ERROR;
@@ -1232,8 +1218,8 @@ rmw_connextdds_count_unread_samples(
       &data_seq,
       &info_seq,
       DDS_LENGTH_UNLIMITED,
-      DDS_NOT_READ_SAMPLE_STATE,
       DDS_ANY_VIEW_STATE,
+      DDS_NOT_READ_SAMPLE_STATE,
       DDS_ANY_INSTANCE_STATE);
     if (DDS_RETCODE_OK != rc && DDS_RETCODE_NO_DATA != rc) {
       RMW_CONNEXT_LOG_ERROR_SET("failed to read data from DDS reader")
@@ -1814,7 +1800,6 @@ rmw_connextdds_dcps_publication_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         qdata.data.topic_name,
         qdata.data.type_name,
-        &data->user_data,
         &qdata.data.reliability,
         &qdata.data.durability,
         &qdata.data.deadline,
@@ -1873,7 +1858,6 @@ rmw_connextdds_dcps_subscription_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         qdata.data.topic_name,
         qdata.data.type_name,
-        &data->user_data,
         &qdata.data.reliability,
         &qdata.data.durability,
         &qdata.data.deadline,

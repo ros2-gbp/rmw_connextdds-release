@@ -18,7 +18,6 @@
 #include "rmw_connextdds/context.hpp"
 
 #include "rmw/features.h"
-#include "rmw/get_network_flow_endpoints.h"
 
 /*****************************************************************************
  * Context API
@@ -152,20 +151,6 @@ rmw_api_connextdds_count_subscribers(
 
 RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
-rmw_api_connextdds_count_clients(
-  const rmw_node_t * node,
-  const char * service_name,
-  size_t * count);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_count_services(
-  const rmw_node_t * node,
-  const char * service_name,
-  size_t * count);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
 rmw_api_connextdds_get_subscriber_names_and_types_by_node(
   const rmw_node_t * node,
   rcutils_allocator_t * allocator,
@@ -288,12 +273,6 @@ RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_get_gid_for_publisher(
   const rmw_publisher_t * publisher,
-  rmw_gid_t * gid);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_get_gid_for_client(
-  const rmw_client_t * client,
   rmw_gid_t * gid);
 
 RMW_CONNEXTDDS_PUBLIC

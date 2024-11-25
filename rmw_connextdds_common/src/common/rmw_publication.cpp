@@ -15,11 +15,7 @@
 #include "rmw_connextdds/rmw_impl.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
 
-#include "rmw_dds_common/qos.hpp"
-
 #include "rmw/validate_full_topic_name.h"
-
-#include "tracetools/tracetools.h"
 
 /******************************************************************************
  * Publication functions
@@ -49,21 +45,7 @@ rmw_api_connextdds_publish(
   auto pub_impl = static_cast<RMW_Connext_Publisher *>(publisher->data);
   RMW_CHECK_ARGUMENT_FOR_NULL(pub_impl, RMW_RET_INVALID_ARGUMENT);
 
-  RMW_Connext_WriteParams write_params;
-
-  if (DDS_RETCODE_OK !=
-    rmw_connextdds_get_current_time(
-      pub_impl->dds_participant(),
-      &write_params.timestamp))
-  {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to get current time")
-    return RMW_RET_ERROR;
-  }
-
-  TRACETOOLS_TRACEPOINT(
-    rmw_publish, publisher, ros_message, dds_time_to_u64(&write_params.timestamp));
-
-  return pub_impl->write(ros_message, false /* serialized */, &write_params);
+  return pub_impl->write(ros_message, false /* serialized */);
 }
 
 
@@ -90,20 +72,7 @@ rmw_api_connextdds_publish_serialized_message(
   auto pub_impl = static_cast<RMW_Connext_Publisher *>(publisher->data);
   RMW_CHECK_ARGUMENT_FOR_NULL(pub_impl, RMW_RET_INVALID_ARGUMENT);
 
-  RMW_Connext_WriteParams write_params;
-
-  if (DDS_RETCODE_OK !=
-    rmw_connextdds_get_current_time(
-      pub_impl->dds_participant(),
-      &write_params.timestamp))
-  {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to get current time")
-    return RMW_RET_ERROR;
-  }
-
-  TRACETOOLS_TRACEPOINT(
-    rmw_publish, publisher, serialized_message, dds_time_to_u64(&write_params.timestamp));
-  return pub_impl->write(serialized_message, true /* serialized */, &write_params);
+  return pub_impl->write(serialized_message, true /* serialized */);
 }
 
 
@@ -197,14 +166,6 @@ rmw_api_connextdds_create_publisher(
     }
   }
 
-  // Adapt any 'best available' QoS options
-  rmw_qos_profile_t adapted_qos_policies = *qos_policies;
-  rmw_ret_t ret = rmw_dds_common::qos_profile_get_best_available_for_topic_publisher(
-    node, topic_name, &adapted_qos_policies, rmw_api_connextdds_get_subscriptions_info_by_topic);
-  if (RMW_RET_OK != ret) {
-    return nullptr;
-  }
-
   rmw_context_impl_t * ctx = node->context->impl;
 
   rmw_publisher_t * const rmw_pub =
@@ -215,7 +176,7 @@ rmw_api_connextdds_create_publisher(
     ctx->dds_pub,
     type_supports,
     topic_name,
-    &adapted_qos_policies,
+    qos_policies,
     publisher_options);
 
   if (nullptr == rmw_pub) {
