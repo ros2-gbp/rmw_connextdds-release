@@ -31,9 +31,14 @@
 #include "rcutils/types/uint8_array.h"
 #include "rcpputils/thread_safety_annotations.hpp"
 
+#include "tracetools/tracetools.h"
+
 /******************************************************************************
  * General helpers and utilities.
  ******************************************************************************/
+
+#define dds_time_to_u64(t_) \
+  ((1000000000ULL * (uint64_t)(t_)->sec) + (uint64_t)(t_)->nanosec)
 
 rcutils_ret_t
 rcutils_uint8_array_copy(
@@ -151,7 +156,7 @@ public:
   write(
     const void * const ros_message,
     const bool serialized,
-    int64_t * const sn_out = nullptr);
+    RMW_Connext_WriteParams * const params);
 
   rmw_ret_t
   enable() const
@@ -578,6 +583,7 @@ class RMW_Connext_Client
   RMW_Connext_Subscriber * reply_sub;
   std::atomic_uint next_request_id;
   rmw_context_impl_t * ctx;
+  const rmw_client_t * rmw_client;
 
   RMW_Connext_Client()
   : request_pub(nullptr),
@@ -594,6 +600,7 @@ public:
     DDS_Publisher * const pub,
     DDS_Subscriber * const sub,
     const rosidl_service_type_support_t * const type_supports,
+    const rmw_client_t * const rmw_client,
     const char * const svc_name,
     const rmw_qos_profile_t * const qos_policies);
 
@@ -634,6 +641,11 @@ public:
 
   rmw_ret_t
   response_subscription_qos(rmw_qos_profile_t * const qos);
+
+  const rmw_gid_t gid() const
+  {
+    return *this->request_pub->gid();
+  }
 };
 
 class RMW_Connext_Service
@@ -641,6 +653,7 @@ class RMW_Connext_Service
   RMW_Connext_Publisher * reply_pub;
   RMW_Connext_Subscriber * request_sub;
   rmw_context_impl_t * ctx;
+  const rmw_service_t * rmw_service;
 
 public:
   static RMW_Connext_Service *
@@ -650,6 +663,7 @@ public:
     DDS_Publisher * const pub,
     DDS_Subscriber * const sub,
     const rosidl_service_type_support_t * const type_supports,
+    const rmw_service_t * const rmw_service,
     const char * const svc_name,
     const rmw_qos_profile_t * const qos_policies);
 
@@ -830,6 +844,7 @@ rmw_connextdds_get_readerwriter_qos(
   DDS_ResourceLimitsQosPolicy * const resource_limits,
   DDS_PublishModeQosPolicy * const publish_mode,
   DDS_LifespanQosPolicy * const lifespan,
+  DDS_UserDataQosPolicy * const user_data,
   const rmw_qos_profile_t * const qos_policies,
   const rmw_publisher_options_t * const pub_options,
   const rmw_subscription_options_t * const sub_options);

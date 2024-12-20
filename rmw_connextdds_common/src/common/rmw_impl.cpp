@@ -19,7 +19,12 @@
 #include <vector>
 #include <stdexcept>
 
+#include "rcpputils/scope_exit.hpp"
+
+#include "tracetools/tracetools.h"
+
 #include "rmw_dds_common/time_utils.hpp"
+#include "rmw_dds_common/qos.hpp"
 
 #include "rmw_connextdds/graph_cache.hpp"
 
@@ -142,7 +147,7 @@ rmw_connextdds_parse_string_list(
     input_i += 2,
     next_i_start = input_i)
   {
-    // determine token's lenght by finding a delimiter (or end of input)
+    // determine token's length by finding a delimiter (or end of input)
     for (;
       input_i + 1 < input_len && delimiter != list[input_i + 1];
       input_i += 1)
@@ -180,7 +185,7 @@ rmw_connextdds_parse_string_list(
       DDS_String_free(*el_ref);
     }
     *el_ref = DDS_String_alloc(next_len);
-    if (nullptr == el_ref) {
+    if (nullptr == *el_ref) {
       RMW_CONNEXT_LOG_ERROR_SET("failed to allocate string")
       return RMW_RET_ERROR;
     }
@@ -286,7 +291,7 @@ dds_duration_to_rmw_time(const DDS_Duration_t & duration)
   if (DDS_Duration_is_infinite(&duration)) {
     return RMW_DURATION_INFINITE;
   }
-  assert(duration.sec > 0);
+  assert(duration.sec >= 0);
   rmw_time_t result = {static_cast<uint64_t>(duration.sec), duration.nanosec};
   return result;
 }
@@ -303,12 +308,12 @@ rmw_connextdds_get_readerwriter_qos(
   DDS_ResourceLimitsQosPolicy * const resource_limits,
   DDS_PublishModeQosPolicy * const publish_mode,
   DDS_LifespanQosPolicy * const lifespan,
+  DDS_UserDataQosPolicy * const user_data,
   const rmw_qos_profile_t * const qos_policies,
   const rmw_publisher_options_t * const pub_options,
   const rmw_subscription_options_t * const sub_options)
 {
   UNUSED_ARG(writer_qos);
-  UNUSED_ARG(type_support);
   UNUSED_ARG(publish_mode);
   UNUSED_ARG(resource_limits);
   UNUSED_ARG(pub_options);
@@ -453,6 +458,21 @@ rmw_connextdds_get_readerwriter_qos(
     lifespan->duration = rmw_time_to_dds_duration(qos_policies->lifespan);
   }
 #endif /* RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO */
+
+  std::string user_data_str;
+  if (RMW_RET_OK != rmw_dds_common::encode_type_hash_for_user_data_qos(
+      type_support->type_hash(), user_data_str))
+  {
+    RMW_CONNEXT_LOG_WARNING(
+      "Failed to encode type hash for topic, will not distribute it in USER_DATA.");
+    user_data_str.clear();
+    // We handled the error, so clear it out
+    rmw_reset_error();
+  }
+  DDS_OctetSeq_from_array(
+    &user_data->value,
+    reinterpret_cast<const uint8_t *>(user_data_str.c_str()),
+    static_cast<DDS_Long>(user_data_str.size()));
 
   return RMW_RET_OK;
 }
@@ -901,7 +921,7 @@ rmw_ret_t
 RMW_Connext_Publisher::write(
   const void * const ros_message,
   const bool serialized,
-  int64_t * const sn_out)
+  RMW_Connext_WriteParams * const params)
 {
   RMW_Connext_Message user_msg;
   if (RMW_RET_OK != RMW_Connext_Message_initialize(&user_msg, this->type_support, 0)) {
@@ -910,7 +930,7 @@ RMW_Connext_Publisher::write(
   user_msg.user_data = ros_message;
   user_msg.serialized = serialized;
 
-  return rmw_connextdds_write_message(this, &user_msg, sn_out);
+  return rmw_connextdds_write_message(this, &user_msg, params);
 }
 
 
@@ -1090,6 +1110,7 @@ rmw_connextdds_create_publisher(
     }
   }
 
+  TRACETOOLS_TRACEPOINT(rmw_publisher_init, rmw_publisher, rmw_pub_impl->gid()->data);
 
   scope_exit_rmw_writer_impl_delete.cancel();
   scope_exit_rmw_writer_delete.cancel();
@@ -1375,6 +1396,7 @@ RMW_Connext_Subscriber::create(
     RMW_CONNEXT_LOG_ERROR_SET("failed to allocate RMW subscriber")
     return nullptr;
   }
+
   scope_exit_dds_reader_delete.cancel();
   scope_exit_topic_delete.cancel();
   scope_exit_type_unregister.cancel();
@@ -1906,6 +1928,8 @@ rmw_connextdds_create_subscriber(
     }
   }
 
+  TRACETOOLS_TRACEPOINT(rmw_subscription_init, rmw_subscriber, rmw_sub_impl->gid()->data);
+
 #if RMW_CONNEXT_DEBUG && RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO
   scope_exit_enable_participant_on_error.cancel();
 #endif  // RMW_CONNEXT_DEBUG && RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO
@@ -1941,12 +1965,6 @@ rmw_connextdds_destroy_subscriber(
 
   return RMW_RET_OK;
 }
-
-static
-constexpr uint64_t C_NANOSECONDS_PER_SEC = 1000000000ULL;
-
-#define dds_time_to_u64(t_) \
-  ((C_NANOSECONDS_PER_SEC * (uint64_t)(t_)->sec) + (uint64_t)(t_)->nanosec)
 
 void
 rmw_connextdds_message_info_from_dds(
@@ -2393,6 +2411,7 @@ RMW_Connext_Client::create(
   DDS_Publisher * const pub,
   DDS_Subscriber * const sub,
   const rosidl_service_type_support_t * const type_supports,
+  const rmw_client_t * const rmw_client,
   const char * const svc_name,
   const rmw_qos_profile_t * const qos_policies)
 {
@@ -2405,6 +2424,7 @@ RMW_Connext_Client::create(
   }
 
   client_impl->ctx = ctx;
+  client_impl->rmw_client = rmw_client;
 
   auto scope_exit_client_impl_delete = rcpputils::make_scope_exit(
     [client_impl]()
@@ -2562,6 +2582,12 @@ RMW_Connext_Client::enable()
 rmw_ret_t
 RMW_Connext_Client::is_service_available(bool & available)
 {
+#if RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_MICRO
+  available = 0 < this->request_pub->subscriptions_count() &&
+    0 < this->reply_sub->publications_count();
+  return RMW_RET_OK;
+#else /* RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO */
+
   // mark service as available if we have at least one writer and one reader
   // matched from the same remote DomainParticipant.
   struct DDS_InstanceHandleSeq matched_req_subs = DDS_SEQUENCE_INITIALIZER,
@@ -2606,6 +2632,7 @@ RMW_Connext_Client::is_service_available(bool & available)
   }
 
   return RMW_RET_OK;
+#endif /* RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO */
 }
 
 rmw_ret_t
@@ -2667,6 +2694,13 @@ RMW_Connext_Client::take_response(
       rr_msg.sn)
   }
 
+  TRACETOOLS_TRACEPOINT(
+    rmw_take_response,
+    static_cast<const void *>(this->rmw_client),
+    static_cast<const void *>(ros_response),
+    request_header->request_id.sequence_number,
+    request_header->source_timestamp,
+    *taken);
   return RMW_RET_OK;
 }
 
@@ -2698,7 +2732,40 @@ RMW_Connext_Client::send_request(
     reinterpret_cast<const uint32_t *>(rr_msg.gid.data)[3],
     rr_msg.sn)
 
-  rmw_ret_t rc = this->request_pub->write(&rr_msg, false /* serialized */, sequence_id);
+  RMW_Connext_WriteParams write_params;
+
+  if (DDS_RETCODE_OK !=
+    rmw_connextdds_get_current_time(
+      this->request_pub->dds_participant(),
+      &write_params.timestamp))
+  {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to get current time")
+    return RMW_RET_ERROR;
+  }
+
+#ifndef TRACETOOLS_DISABLED
+  // In this case, we can get the sequence number before the write() call
+  if (this->ctx->request_reply_mapping == RMW_Connext_RequestReplyMapping::Basic) {
+    TRACETOOLS_TRACEPOINT(
+      rmw_send_request,
+      static_cast<const void *>(this->rmw_client),
+      static_cast<const void *>(ros_request),
+      *sequence_id);
+  }
+#endif  // TRACETOOLS_DISABLED
+
+  rmw_ret_t rc = this->request_pub->write(&rr_msg, false /* serialized */, &write_params);
+
+  if (this->ctx->request_reply_mapping != RMW_Connext_RequestReplyMapping::Basic) {
+    *sequence_id = write_params.sequence_number;
+
+    // In this other case, we can only get the sequence number after the write() call
+    TRACETOOLS_TRACEPOINT(
+      rmw_send_request,
+      static_cast<const void *>(this->rmw_client),
+      static_cast<const void *>(ros_request),
+      *sequence_id);
+  }
 
   RMW_CONNEXT_LOG_DEBUG_A(
     "[%s] SENT REQUEST: "
@@ -2769,6 +2836,7 @@ RMW_Connext_Service::create(
   DDS_Publisher * const pub,
   DDS_Subscriber * const sub,
   const rosidl_service_type_support_t * const type_supports,
+  const rmw_service_t * const rmw_service,
   const char * const svc_name,
   const rmw_qos_profile_t * const qos_policies)
 {
@@ -2781,6 +2849,7 @@ RMW_Connext_Service::create(
   }
 
   svc_impl->ctx = ctx;
+  svc_impl->rmw_service = rmw_service;
 
   auto scope_exit_svc_impl_delete = rcpputils::make_scope_exit(
     [svc_impl]()
@@ -2958,6 +3027,13 @@ RMW_Connext_Service::take_request(
       rr_msg.sn)
   }
 
+  TRACETOOLS_TRACEPOINT(
+    rmw_take_request,
+    static_cast<const void *>(this->rmw_service),
+    static_cast<const void *>(ros_request),
+    request_header->request_id.writer_guid,
+    request_header->request_id.sequence_number,
+    *taken);
   return RMW_RET_OK;
 }
 
@@ -2973,6 +3049,17 @@ RMW_Connext_Service::send_response(
   rr_msg.gid.implementation_identifier = RMW_CONNEXTDDS_ID;
   rr_msg.payload = const_cast<void *>(ros_response);
 
+  RMW_Connext_WriteParams write_params;
+
+  if (DDS_RETCODE_OK !=
+    rmw_connextdds_get_current_time(
+      this->reply_pub->dds_participant(),
+      &write_params.timestamp))
+  {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to get current time")
+    return RMW_RET_ERROR;
+  }
+
   RMW_CONNEXT_LOG_DEBUG_A(
     "[%s] send RESPONSE: "
     "gid=%08X.%08X.%08X.%08X, "
@@ -2983,8 +3070,15 @@ RMW_Connext_Service::send_response(
     reinterpret_cast<const uint32_t *>(rr_msg.gid.data)[2],
     reinterpret_cast<const uint32_t *>(rr_msg.gid.data)[3],
     rr_msg.sn)
+  TRACETOOLS_TRACEPOINT(
+    rmw_send_response,
+    static_cast<const void *>(this->rmw_service),
+    static_cast<const void *>(ros_response),
+    request_id->writer_guid,
+    request_id->sequence_number,
+    dds_time_to_u64(&write_params.timestamp));
 
-  return this->reply_pub->write(&rr_msg, false /* serialized */);
+  return this->reply_pub->write(&rr_msg, false /* serialized */, &write_params);
 }
 
 rmw_ret_t
@@ -3074,6 +3168,19 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
       {
         return DDS_SAMPLE_LOST_STATUS;
       }
+    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
+    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
+      {
+        return DDS_INCONSISTENT_TOPIC_STATUS;
+      }
+    case RMW_EVENT_PUBLICATION_MATCHED:
+      {
+        return DDS_PUBLICATION_MATCHED_STATUS;
+      }
+    case RMW_EVENT_SUBSCRIPTION_MATCHED:
+      {
+        return DDS_SUBSCRIPTION_MATCHED_STATUS;
+      }
     default:
       {
         if (nullptr != invalid) {
@@ -3116,6 +3223,10 @@ dds_event_to_str(const DDS_StatusKind event)
       {
         return "SAMPLE_LOST";
       }
+    case DDS_INCONSISTENT_TOPIC_STATUS:
+      {
+        return "INCONSISTENT_TOPIC";
+      }
     default:
       {
         return "UNSUPPORTED";
@@ -3131,6 +3242,8 @@ ros_event_for_reader(const rmw_event_type_t ros)
     case RMW_EVENT_REQUESTED_DEADLINE_MISSED:
     case RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE:
     case RMW_EVENT_MESSAGE_LOST:
+    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
+    case RMW_EVENT_SUBSCRIPTION_MATCHED:
       {
         return true;
       }
@@ -3180,6 +3293,22 @@ RMW_Connext_SubscriberStatusCondition::get_status(
         rc = this->get_message_lost_status(status);
         break;
       }
+    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
+      {
+        rmw_incompatible_type_status_t * const status =
+          reinterpret_cast<rmw_incompatible_type_status_t *>(event_info);
+
+        rc = this->get_incompatible_type_status(status);
+        break;
+      }
+    case RMW_EVENT_SUBSCRIPTION_MATCHED:
+      {
+        rmw_matched_status_t * const status =
+          reinterpret_cast<rmw_matched_status_t *>(event_info);
+
+        rc = this->get_matched_status(status);
+        break;
+      }
     default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
@@ -3221,6 +3350,22 @@ RMW_Connext_PublisherStatusCondition::get_status(
           reinterpret_cast<rmw_offered_qos_incompatible_event_status_t *>(event_info);
 
         rc = this->get_offered_qos_incompatible_status(status);
+        break;
+      }
+    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
+      {
+        rmw_incompatible_type_status_t * const status =
+          reinterpret_cast<rmw_incompatible_type_status_t *>(event_info);
+
+        rc = this->get_incompatible_type_status(status);
+        break;
+      }
+    case RMW_EVENT_PUBLICATION_MATCHED:
+      {
+        rmw_matched_status_t * status =
+          reinterpret_cast<rmw_matched_status_t *>(event_info);
+
+        rc = this->get_matched_status(status);
         break;
       }
     default:
