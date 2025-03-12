@@ -1,0 +1,12 @@
+Source: ros-jazzy-rmw-connextdds
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-jazzy-ament-cmake-ros, ros-jazzy-ament-lint-auto <!nocheck>, ros-jazzy-ament-lint-common <!nocheck>, ros-jazzy-rmw-connextdds-common, ros-jazzy-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-jazzy-rmw-connextdds
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-jazzy-ament-cmake, ros-jazzy-rmw-connextdds-common, ros-jazzy-ros-workspace
+Description: A ROS 2 RMW implementation built with RTI Connext DDS Professional.
