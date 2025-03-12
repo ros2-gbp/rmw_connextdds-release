@@ -31,8 +31,6 @@
 #include "rcutils/types/uint8_array.h"
 #include "rcpputils/thread_safety_annotations.hpp"
 
-#include "tracetools/tracetools.h"
-
 /******************************************************************************
  * General helpers and utilities.
  ******************************************************************************/
@@ -583,7 +581,6 @@ class RMW_Connext_Client
   RMW_Connext_Subscriber * reply_sub;
   std::atomic_uint next_request_id;
   rmw_context_impl_t * ctx;
-  const rmw_client_t * rmw_client;
 
   RMW_Connext_Client()
   : request_pub(nullptr),
@@ -600,7 +597,6 @@ public:
     DDS_Publisher * const pub,
     DDS_Subscriber * const sub,
     const rosidl_service_type_support_t * const type_supports,
-    const rmw_client_t * const rmw_client,
     const char * const svc_name,
     const rmw_qos_profile_t * const qos_policies);
 
@@ -653,7 +649,6 @@ class RMW_Connext_Service
   RMW_Connext_Publisher * reply_pub;
   RMW_Connext_Subscriber * request_sub;
   rmw_context_impl_t * ctx;
-  const rmw_service_t * rmw_service;
 
 public:
   static RMW_Connext_Service *
@@ -663,7 +658,6 @@ public:
     DDS_Publisher * const pub,
     DDS_Subscriber * const sub,
     const rosidl_service_type_support_t * const type_supports,
-    const rmw_service_t * const rmw_service,
     const char * const svc_name,
     const rmw_qos_profile_t * const qos_policies);
 
