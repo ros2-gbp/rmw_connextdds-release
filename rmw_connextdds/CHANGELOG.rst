@@ -2,6 +2,17 @@
 Changelog for package rmw_connextdds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2025-04-18)
+------------------
+* Switch buildtool to ament_cmake package (`#183 <https://github.com/ros2/rmw_connextdds/issues/183>`_)
+* Export a modern CMake target (`#179 <https://github.com/ros2/rmw_connextdds/issues/179>`_)
+* Contributors: Scott K Logan, Shane Loretz
+
+1.0.1 (2025-03-11)
+------------------
+* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_)
+* Contributors: Alejandro Hernández Cordero
+
 1.0.0 (2025-02-18)
 ------------------
 
