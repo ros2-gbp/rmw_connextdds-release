@@ -1,4 +1,4 @@
-From 507b79b15ec8250b0ce3bcee97ab6bcfe0cea21d Mon Sep 17 00:00:00 2001
+From 06f436ef7398d469a6786688b4cf9cb3833d5df7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
  <nuclearsandwich@users.noreply.github.com>
 Date: Sat, 12 Feb 2022 11:07:44 -0500
@@ -16,7 +16,7 @@ robust going forward.
  1 file changed, 8 insertions(+), 17 deletions(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index 0e16329..4b3dcff 100755
+index 0e163299a4ea..4b3dcff79d4c 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
 @@ -23,14 +23,16 @@ endif
@@ -86,5 +86,5 @@ index 0e16329..4b3dcff 100755
 -	> /tmp/rtienv.sh; \
 -	else touch /tmp/rtienv.sh; fi
 -- 
-2.43.0
+2.49.0
 
