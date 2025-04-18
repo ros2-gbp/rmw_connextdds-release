@@ -27,7 +27,7 @@
 #include "rmw_connextdds/discovery.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
 
-#include "rmw_dds_common/security.hpp"
+#include "rmw_security_common/security.hpp"
 
 #include "rcutils/env.h"
 #include "rcutils/filesystem.h"
@@ -405,9 +405,27 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   static const char * const uri_prefix = "";
 #endif /* !RMW_CONNEXT_DDS_API_PRO_LEGACY */
 
-  std::unordered_map<std::string, std::string> security_files;
-  if (!rmw_dds_common::get_security_files(
-      uri_prefix, this->base->options.security_options.security_root_path, security_files))
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcutils_string_map_t security_files = rcutils_get_zero_initialized_string_map();
+  rcutils_ret_t ret = rcutils_string_map_init(&security_files, 0, allocator);
+
+  if (ret != RMW_RET_OK) {
+    RMW_SET_ERROR_MSG("Failed to initialize string map for security");
+    return RMW_RET_ERROR;
+  }
+
+  auto scope_exit_ws = rcpputils::make_scope_exit(
+    [&security_files]()
+    {
+      rcutils_ret_t ret = rcutils_string_map_fini(&security_files);
+      if (ret != RMW_RET_OK) {
+        RMW_SET_ERROR_MSG("Failed to fini string map for security");
+      }
+    });
+
+  if (get_security_files(
+      uri_prefix, this->base->options.security_options.security_root_path,
+    &security_files) != RMW_RET_OK)
   {
     RMW_CONNEXT_LOG_ERROR("couldn't find all security files");
     return RMW_RET_ERROR;
@@ -418,12 +436,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_IDENTITY_CA_PROPERTY,
-      security_files["IDENTITY_CA"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "IDENTITY_CA")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_IDENTITY_CA_PROPERTY, security_files["IDENTITY_CA"].c_str())
+      DDS_SECURITY_IDENTITY_CA_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "IDENTITY_CA")).c_str())
     return RMW_RET_ERROR;
   }
 
@@ -432,12 +451,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_PERMISSIONS_CA_PROPERTY,
-      security_files["PERMISSIONS_CA"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "PERMISSIONS_CA")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_PERMISSIONS_CA_PROPERTY, security_files["PERMISSIONS_CA"].c_str())
+      DDS_SECURITY_PERMISSIONS_CA_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "PERMISSIONS_CA")).c_str())
     return RMW_RET_ERROR;
   }
 
@@ -446,12 +466,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_PRIVATE_KEY_PROPERTY,
-      security_files["PRIVATE_KEY"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "PRIVATE_KEY")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_PRIVATE_KEY_PROPERTY, security_files["PRIVATE_KEY"].c_str())
+      DDS_SECURITY_PRIVATE_KEY_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "PRIVATE_KEY")).c_str())
     return RMW_RET_ERROR;
   }
 
@@ -461,12 +482,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY,
-      security_files["CERTIFICATE"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "CERTIFICATE")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY, security_files["CERTIFICATE"].c_str())
+      DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "CERTIFICATE")).c_str())
     return RMW_RET_ERROR;
   }
   /* XML file containing domain governance configuration, signed by
@@ -475,12 +497,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_GOVERNANCE_PROPERTY,
-      security_files["GOVERNANCE"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "GOVERNANCE")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_GOVERNANCE_PROPERTY, security_files["GOVERNANCE"].c_str())
+      DDS_SECURITY_GOVERNANCE_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "GOVERNANCE")).c_str())
     return RMW_RET_ERROR;
   }
 
@@ -490,12 +513,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
       DDS_SECURITY_PERMISSIONS_PROPERTY,
-      security_files["PERMISSIONS"].c_str(),
+      std::string(rcutils_string_map_get(&security_files, "PERMISSIONS")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      DDS_SECURITY_PERMISSIONS_PROPERTY, security_files["PERMISSIONS"].c_str())
+      DDS_SECURITY_PERMISSIONS_PROPERTY,
+      std::string(rcutils_string_map_get(&security_files, "PERMISSIONS")).c_str())
     return RMW_RET_ERROR;
   }
 
@@ -937,7 +961,6 @@ rmw_api_connextdds_init_options_init(
   init_options->implementation_identifier = RMW_CONNEXTDDS_ID;
   init_options->allocator = allocator;
   init_options->impl = nullptr;
-  init_options->localhost_only = RMW_LOCALHOST_ONLY_DEFAULT;
   init_options->domain_id = RMW_DEFAULT_DOMAIN_ID;
   init_options->enclave = nullptr;
   init_options->security_options = rmw_get_zero_initialized_security_options();
@@ -970,15 +993,19 @@ rmw_api_connextdds_init_options_copy(
   rmw_init_options_t tmp = *src;
 
   const rcutils_allocator_t * allocator = &src->allocator;
-  tmp.enclave = rcutils_strdup(tmp.enclave, *allocator);
-  if (nullptr != src->enclave && nullptr == tmp.enclave) {
-    return RMW_RET_BAD_ALLOC;
+  rmw_ret_t ret;
+  if (src->enclave != NULL) {
+    ret = rmw_enclave_options_copy(src->enclave, allocator, &tmp.enclave);
+    if (RMW_RET_OK != ret) {
+      return ret;
+    }
   }
   tmp.security_options = rmw_get_zero_initialized_security_options();
-  rmw_ret_t ret =
+  ret =
     rmw_security_options_copy(&src->security_options, allocator, &tmp.security_options);
   if (RMW_RET_OK != ret) {
-    allocator->deallocate(tmp.enclave, allocator->state);
+    rmw_enclave_options_fini(tmp.enclave, allocator);
+    // Error already set
     return ret;
   }
 
@@ -1003,8 +1030,14 @@ rmw_api_connextdds_init_options_fini(rmw_init_options_t * init_options)
 
   rcutils_allocator_t * allocator = &init_options->allocator;
   RCUTILS_CHECK_ALLOCATOR(allocator, return RMW_RET_INVALID_ARGUMENT);
-  allocator->deallocate(init_options->enclave, allocator->state);
-  rmw_ret_t ret = rmw_security_options_fini(&init_options->security_options, allocator);
+  rmw_ret_t ret;
+  if (init_options->enclave != NULL) {
+    ret = rmw_enclave_options_fini(init_options->enclave, allocator);
+    if (ret != RMW_RET_OK) {
+      return ret;
+    }
+  }
+  ret = rmw_security_options_fini(&init_options->security_options, allocator);
 
   *init_options = rmw_get_zero_initialized_init_options();
   return ret;
