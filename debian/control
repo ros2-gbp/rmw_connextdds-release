@@ -1,0 +1,12 @@
+Source: ros-kilted-rmw-connextdds
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-kilted-ament-cmake, ros-kilted-ament-lint-auto <!nocheck>, ros-kilted-ament-lint-common <!nocheck>, ros-kilted-rmw-connextdds-common, ros-kilted-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kilted-rmw-connextdds
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-kilted-ament-cmake, ros-kilted-rmw-connextdds-common, ros-kilted-ros-workspace
+Description: A ROS 2 RMW implementation built with RTI Connext DDS Professional.
