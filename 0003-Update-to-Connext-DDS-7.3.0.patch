@@ -1,0 +1,25 @@
+From b297b479a0fd59d6c576719571afb05ff1cb2d40 Mon Sep 17 00:00:00 2001
+From: Scott K Logan <logans@cottsay.net>
+Date: Fri, 2 May 2025 14:09:13 -0500
+Subject: [PATCH 3/3] Update to Connext DDS 7.3.0
+
+---
+ debian/rules.em | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/debian/rules.em b/debian/rules.em
+index 4b3dcff79d4c..d155c1a83856 100755
+--- a/debian/rules.em
++++ b/debian/rules.em
+@@ -24,7 +24,7 @@ endif
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ 
+ # Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
+-export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-6.0.1
++export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-7.3.0
+ 
+ %:
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
+-- 
+2.49.0
+
