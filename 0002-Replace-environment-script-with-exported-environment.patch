@@ -1,8 +1,8 @@
-From 41ccc6e2dd8d4c5a1971951576c61c976e73834f Mon Sep 17 00:00:00 2001
+From 3816bf1a63d0207b10a69a55a407010fc5324e5a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?=
  <nuclearsandwich@users.noreply.github.com>
 Date: Sat, 12 Feb 2022 11:07:44 -0500
-Subject: [PATCH 2/2] Replace environment script with exported environment
+Subject: [PATCH 2/3] Replace environment script with exported environment
  variable.
 
 The rti_connext_dds_cmake_module is capable of finding Connext using the
