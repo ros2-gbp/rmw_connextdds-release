@@ -1,3 +1,32 @@
+## rmw_connextdds (kilted) - 1.1.0-3
+
+The packages in the `rmw_connextdds` repository were released into the `kilted` distro by running `/home/cottsay/infra_ws/install/bloom/bin/bloom-release -r kilted rmw_connextdds` on `Fri, 02 May 2025 19:17:39 -0000`
+
+These packages were released:
+- `rmw_connextdds`
+- `rmw_connextdds_common`
+- `rti_connext_dds_cmake_module`
+
+These packages were explicitly ignored:
+- `rmw_connextddsmicro`
+
+Version of package(s) in repository `rmw_connextdds`:
+
+- upstream repository: https://github.com/ros2/rmw_connextdds.git
+- release repository: https://github.com/ros2-gbp/rmw_connextdds-release.git
+- rosdistro version: `1.1.0-2`
+- old version: `1.1.0-2`
+- new version: `1.1.0-3`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.25.1`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## rmw_connextdds (rolling) - 1.2.0-1
 
 The packages in the `rmw_connextdds` repository were released into the `rolling` distro by running `/home/cottsay/infra_ws/install/bloom/bin/bloom-release rmw_connextdds -r rolling` on `Fri, 25 Apr 2025 18:08:03 -0000`
