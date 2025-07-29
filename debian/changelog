@@ -1,0 +1,312 @@
+ros-rolling-rmw-connextdds (1.2.2-1noble) noble; urgency=high
+
+  * Fix cmake deprecation (#198 <https://github.com/ros2/rmw_connextdds/issues/198>)
+  * Contributors: mosfet80
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 29 Jul 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (1.2.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 01 Jul 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (1.2.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 25 Apr 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (1.1.0-1noble) noble; urgency=high
+
+  * Switch buildtool to ament_cmake package (#183 <https://github.com/ros2/rmw_connextdds/issues/183>)
+  * Export a modern CMake target (#179 <https://github.com/ros2/rmw_connextdds/issues/179>)
+  * Contributors: Scott K Logan, Shane Loretz
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 18 Apr 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (1.0.1-1noble) noble; urgency=high
+
+  * Added rmw_event_type_is_supported (#173 <https://github.com/ros2/rmw_connextdds/issues/173>)
+  * Contributors: Alejandro Hernández Cordero
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 11 Mar 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (1.0.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 18 Feb 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.25.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 17 Feb 2025 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.25.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 20 Dec 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.24.2-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 03 Oct 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.24.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 29 Jul 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.24.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 17 Jun 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.23.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 26 Apr 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.22.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 09 Apr 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.21.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 28 Mar 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.20.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Sat, 09 Mar 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.20.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 24 Jan 2024 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.19.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 06 Nov 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.18.0-1noble) noble; urgency=high
+
+  * Add rmw count clients services impl (#93 <https://github.com/ros2/rmw_connextdds/issues/93>)
+  * Cleanup context implementation (#131 <https://github.com/ros2/rmw_connextdds/issues/131>)
+  * Contributors: Chris Lalancette, Minju, Lee
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 04 Oct 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.17.0-1noble) noble; urgency=high
+
+  * Update to C++17 (#125 <https://github.com/ros2/rmw_connextdds/issues/125>)
+  * Contributors: Chris Lalancette
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 21 Aug 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.16.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 11 Jul 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.15.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 11 May 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.15.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 27 Apr 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.14.0-1noble) noble; urgency=high
+
+  * Dynamic Subscription (BONUS: Allocators): rmw_connextdds (#115 <https://github.com/ros2/rmw_connextdds/issues/115>)
+  * Revert "Refactor serialization support to use allocators and refs"
+  * Refactor serialization support to use allocators and refs
+  * Add stubs for new rmw interfaces (#111 <https://github.com/ros2/rmw_connextdds/issues/111>)
+  * Contributors: methylDragon
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 12 Apr 2023 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.13.0-1noble) noble; urgency=high
+
+  * Add rmw_get_gid_for_client impl (#92 <https://github.com/ros2/rmw_connextdds/issues/92>)
+  * Contributors: Brian
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 02 Nov 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.12.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 13 Sep 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.12.0-1noble) noble; urgency=high
+
+  * Switch ROS2 -> ROS 2 everywhere (#83 <https://github.com/ros2/rmw_connextdds/issues/83>)
+  * Contributors: Chris Lalancette
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 03 May 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.11.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 26 Apr 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.11.0-1noble) noble; urgency=high
+
+  * Exclude missing sample info fields when building rmw_connextddsmicro (#79 <https://github.com/ros2/rmw_connextdds/issues/79>)
+  * Update launch_testing_ros output filter prefixes for Connext6 (#80 <https://github.com/ros2/rmw_connextdds/issues/80>)
+  * Contributors: Andrea Sorbini, Ivan Santiago Paunovic
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 08 Apr 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.10.0-1noble) noble; urgency=high
+
+  * Add support for user-specified content filters (#68 <https://github.com/ros2/rmw_connextdds/issues/68>)
+  * add stub for content filtered topic (#77 <https://github.com/ros2/rmw_connextdds/issues/77>)
+  * Contributors: Andrea Sorbini, Chen Lihui, Ivan Santiago Paunovic
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 28 Mar 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.9.0-1noble) noble; urgency=high
+
+  * Add rmw listener apis (#44 <https://github.com/rticommunity/rmw_connextdds/issues/44>)
+  * Contributors: iRobot ROS
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 01 Mar 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.8.3-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 10 Feb 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.8.2-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 14 Jan 2022 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.8.1-1noble) noble; urgency=high
+
+  * Add client/service QoS getters. (#67 <https://github.com/rticommunity/rmw_connextdds/issues/67>)
+  * Contributors: mauropasse
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 19 Nov 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.8.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 15 Sep 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.7.0-1noble) noble; urgency=high
+
+  * Add rmw_publisher_wait_for_all_acked support. (#20 <https://github.com/rticommunity/rmw_connextdds/issues/20>)
+  * Contributors: Barry Xu
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 04 Jun 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.6.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 26 Apr 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.6.0-1noble) noble; urgency=high
+
+  * Use rmw_qos_profile_unknown when adding entity to graph (#28 <https://github.com/rticommunity/rmw_connextdds/issues/28>)
+  * Resolve issues identified while investigating #21 <https://github.com/rticommunity/rmw_connextdds/issues/21> (#22 <https://github.com/rticommunity/rmw_connextdds/issues/22>)
+  * Use Rolling in README's Quick Start
+  * Improved implementation of client::is_service_available for Connext Pro
+  * Only add request header to typecode with Basic req/rep profile
+  * Remove commented/unused code
+  * Avoid topic name validation in get_info functions
+  * Reduce shutdown period to 10ms
+  * Pass HistoryQosPolicy to graph cache
+  * Reset error string after looking up type support
+  * Remove DDS-based WaitSet implementation
+  * Contributors: Andrea Sorbini, Ivan Santiago Paunovic
+
+ -- Andrea Sorbini <asorbini@rti.com>  Sun, 11 Apr 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.5.0-1noble) noble; urgency=high
+
+  * Merge pull request #13 <https://github.com/rticommunity/rmw_connextdds/issues/13> from Ericsson/unique_network_flows
+  * Refactor common API
+  * Update branch master to support Rolling only (#15 <https://github.com/rticommunity/rmw_connextdds/issues/15>)
+  * Contributors: Ananya Muddukrishna, Andrea Sorbini, William Woodall
+
+ -- Andrea Sorbini <asorbini@rti.com>  Tue, 06 Apr 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.4.0-1noble) noble; urgency=high
+
+  * Add ability to override of endpoint qos settings based on topic name.
+  * Optimize QoS for reliable large data.
+  * Only trigger data condition if samples were loaned from reader.
+  * Alternative WaitSet implementation based on C++ std, selectable at
+    compile-time.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 25 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.3.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Mon, 15 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.3.0-1noble) noble; urgency=high
+
+  * Add <buildtool_export_depend> for ament_cmake.
+  * Use default dds.transport.UDPv4.builtin.ignore_loopback_interface.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Fri, 12 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.2.1-1noble) noble; urgency=high
+
+  * Renamed environment variables (``RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE``,
+    ``RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE``).
+  * Support a list of initial peers via ``RMW_CONNEXT_INITIAL_PEERS``.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Thu, 11 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.2.0-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.1.1-1noble) noble; urgency=high
+
+
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 00:00:00 -0000
+
+ros-rolling-rmw-connextdds (0.1.0-1noble) noble; urgency=high
+
+  * Initial release.
+
+ -- Andrea Sorbini <asorbini@rti.com>  Wed, 10 Mar 2021 00:00:00 -0000
+
+
