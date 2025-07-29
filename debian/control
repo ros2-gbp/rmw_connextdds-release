@@ -1,0 +1,12 @@
+Source: ros-rolling-rmw-connextdds-common
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-rolling-ament-cmake, ros-rolling-ament-lint-auto <!nocheck>, ros-rolling-ament-lint-common <!nocheck>, ros-rolling-fastcdr, ros-rolling-rcpputils, ros-rolling-rcutils, ros-rolling-rmw, ros-rolling-rmw-dds-common, ros-rolling-rmw-security-common, ros-rolling-rosidl-runtime-c, ros-rolling-rosidl-runtime-cpp, ros-rolling-rosidl-typesupport-fastrtps-c, ros-rolling-rosidl-typesupport-fastrtps-cpp, ros-rolling-rosidl-typesupport-introspection-c, ros-rolling-rosidl-typesupport-introspection-cpp, ros-rolling-rti-connext-dds-cmake-module, ros-rolling-tracetools, ros-rolling-ros-workspace, ros-rolling-rosidl-typesupport-fastrtps-c, ros-rolling-rosidl-typesupport-fastrtps-cpp
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-rolling-rmw-connextdds-common
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-rolling-ament-cmake, ros-rolling-fastcdr, ros-rolling-rcpputils, ros-rolling-rcutils, ros-rolling-rmw, ros-rolling-rmw-dds-common, ros-rolling-rmw-security-common, ros-rolling-rosidl-runtime-c, ros-rolling-rosidl-runtime-cpp, ros-rolling-rosidl-typesupport-fastrtps-c, ros-rolling-rosidl-typesupport-fastrtps-cpp, ros-rolling-rosidl-typesupport-introspection-c, ros-rolling-rosidl-typesupport-introspection-cpp, ros-rolling-rti-connext-dds-cmake-module, ros-rolling-tracetools, ros-rolling-ros-workspace
+Description: Common source for RMW implementations built with RTI Connext DDS Professional and RTI Connext DDS Micro.
