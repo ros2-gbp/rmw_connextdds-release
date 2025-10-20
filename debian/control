@@ -1,0 +1,12 @@
+Source: ros-kilted-rmw-connextdds-common
+Section: misc
+Priority: optional
+Maintainer: Andrea Sorbini <asorbini@rti.com>
+Build-Depends: debhelper (>= 9.0.0), ros-kilted-ament-cmake, ros-kilted-ament-lint-auto <!nocheck>, ros-kilted-ament-lint-common <!nocheck>, ros-kilted-fastcdr, ros-kilted-rcpputils, ros-kilted-rcutils, ros-kilted-rmw, ros-kilted-rmw-dds-common, ros-kilted-rmw-security-common, ros-kilted-rosidl-runtime-c, ros-kilted-rosidl-runtime-cpp, ros-kilted-rosidl-typesupport-fastrtps-c, ros-kilted-rosidl-typesupport-fastrtps-cpp, ros-kilted-rosidl-typesupport-introspection-c, ros-kilted-rosidl-typesupport-introspection-cpp, ros-kilted-rti-connext-dds-cmake-module, ros-kilted-tracetools, ros-kilted-ros-workspace
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kilted-rmw-connextdds-common
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-kilted-ament-cmake, ros-kilted-fastcdr, ros-kilted-rcpputils, ros-kilted-rcutils, ros-kilted-rmw, ros-kilted-rmw-dds-common, ros-kilted-rmw-security-common, ros-kilted-rosidl-runtime-c, ros-kilted-rosidl-runtime-cpp, ros-kilted-rosidl-typesupport-fastrtps-c, ros-kilted-rosidl-typesupport-fastrtps-cpp, ros-kilted-rosidl-typesupport-introspection-c, ros-kilted-rosidl-typesupport-introspection-cpp, ros-kilted-rti-connext-dds-cmake-module, ros-kilted-tracetools, ros-kilted-ros-workspace
+Description: Common source for RMW implementations built with RTI Connext DDS Professional and RTI Connext DDS Micro.
