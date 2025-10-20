@@ -1,4 +1,4 @@
-From c7b7ad303b7b19e1e8da8611e4377ac1fcfbe6fe Mon Sep 17 00:00:00 2001
+From 05aeca9308a5ce9e6762f31fd5f7c31fa01cc114 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Steven!=20Ragnar=C3=B6k?= <steven@nuclearsandwich.com>
 Date: Thu, 11 Mar 2021 15:42:22 -0800
 Subject: [PATCH 1/3] Source sh-compatible rtisetenv script before building.
@@ -12,7 +12,7 @@ functionality of the script must be patched out.
  1 file changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index a856369d18c3..0e163299a4ea 100755
+index a856369..0e16329 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
 @@ -26,10 +26,11 @@ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -76,5 +76,5 @@ index a856369d18c3..0e163299a4ea 100755
 +	> /tmp/rtienv.sh; \
 +	else touch /tmp/rtienv.sh; fi
 -- 
-2.49.0
+2.43.0
 
