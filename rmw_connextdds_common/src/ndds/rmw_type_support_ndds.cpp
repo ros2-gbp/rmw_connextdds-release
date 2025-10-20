@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstring>
+#include <limits>
 #include <string>
 
 #include "rcpputils/scope_exit.hpp"
@@ -646,20 +647,31 @@ RMW_Connext_TypePlugin_get_serialized_sample_min_size(
   RTIEncapsulationId encapsulation_id,
   unsigned int current_alignment)
 {
+  PRESTypePluginDefaultEndpointData *const epd =
+    reinterpret_cast<PRESTypePluginDefaultEndpointData *>(endpoint_data);
+  RMW_Connext_MessageTypeSupport *const type_support =
+    reinterpret_cast<RMW_Connext_MessageTypeSupport *>(epd->userData);
+
   // The serialized sample min size is not currently available. As a workaround,
-  // we set it equal to the serialized sample max size.
+  // we set it equal to the serialized sample max size in case the type is
+  // bounded, or a fix value of 32 in the case the type is unbounded.
   //
-  // This effectively limits the number of samples in a batch to one when
-  // batching is constrained by max_data_bytes
+  // A proper solution would require generating code to retrieve the minimum
+  // serialized size of a sample.
+  //
+  // For bounded types, this effectively limits the number of samples in a batch
+  // to one when batching is constrained by max_data_bytes
   // (writer_qos.batching.max_data_bytes).
   //
   // To allow multiple samples per batch, the user must configure batching based
   // on the number of samples instead (writer_qos.batching.max_samples).
-  return RMW_Connext_TypePlugin_get_serialized_sample_max_size(
-    endpoint_data,
-    include_encapsulation,
-    encapsulation_id,
-    current_alignment);
+  return (type_support->unbounded()) ?
+         32 :
+         RMW_Connext_TypePlugin_get_serialized_sample_max_size(
+           endpoint_data,
+           include_encapsulation,
+           encapsulation_id,
+           current_alignment);
 }
 
 static
@@ -973,13 +985,18 @@ RMW_Connext_TypePlugin_instance_to_key_hash(
   {
     RTICdrStream_pushState(md5_stream, &cdr_state, -1);
 
-    int size = RMW_Connext_TypePlugin_get_serialized_sample_size(
-      endpoint_data,
-      RTI_FALSE /* include_encapsulation */,
-      RTI_CDR_ENCAPSULATION_ID_CDR_BE,
-      0 /* current_alignment */,
-      sample);
+    const RMW_Connext_Message *const msg =
+      reinterpret_cast<const RMW_Connext_Message *>(sample);
+    const auto size_unsigned = (nullptr != msg->user_data) ?
+      type_support->serialized_key_size_max(msg->user_data) :
+      msg->data_buffer.buffer_length;
 
+    // Make sure the size fits in an int32
+    RMW_CONNEXT_ASSERT(size_unsigned <= std::numeric_limits<int>::max());
+    const auto size = static_cast<int>(size_unsigned);
+
+    // If there's already enough size when serializing, the serialization failed
+    // for a different reason, so we return an error
     if (size <= RTICdrStream_getBufferLength(md5_stream)) {
       RTICdrStream_popState(md5_stream, &cdr_state);
       return RTI_FALSE;
