@@ -2,25 +2,14 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.3 (2025-10-20)
+1.1.1 (2025-10-20)
 ------------------
-* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_)
-* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_)
-* Contributors: Chris Lalancette, Francisco Gallego Salido
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_)
-* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_)
-* Contributors: Alejandro Hernández Cordero, Francisco Gallego Salido
-
-1.2.0 (2025-04-25)
-------------------
+* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_) (`#203 <https://github.com/ros2/rmw_connextdds/issues/203>`_)
+* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_) (`#201 <https://github.com/ros2/rmw_connextdds/issues/201>`_)
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_) (`#199 <https://github.com/ros2/rmw_connextdds/issues/199>`_)
+* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_) (`#197 <https://github.com/ros2/rmw_connextdds/issues/197>`_)
+* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_) (`#194 <https://github.com/ros2/rmw_connextdds/issues/194>`_)
+* Contributors: mergify[bot]
 
 1.1.0 (2025-04-18)
 ------------------
