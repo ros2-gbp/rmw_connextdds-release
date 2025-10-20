@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string.h>
+#include <cstddef>
+#include <cstring>
 
 #include <exception>
 #include <string>
@@ -507,6 +508,12 @@ RMW_Connext_MessageTypeSupport::deserialize(
   return RMW_RET_OK;
 }
 
+std::size_t RMW_Connext_MessageTypeSupport::serialized_key_size_max(
+  const void * const ros_msg)
+{
+  return (this->keyed()) ? _key_callbacks.get_serialized_size_key(ros_msg) : 0;
+}
+
 rmw_ret_t
 RMW_Connext_MessageTypeSupport::serialize_key(
   const void * const ros_msg,
@@ -830,7 +837,12 @@ void RMW_Connext_MessageTypeSupport::type_info(
 
   if (keyed) {
     key_callbacks = *callbacks->key_callbacks;
-    key_serialized_size_max = key_callbacks.max_serialized_size_key(unbounded_key);
+    if (key_callbacks.max_serialized_size_key(unbounded_key) < RTI_CDR_MAX_SERIALIZED_SIZE) {
+      key_serialized_size_max = static_cast<uint32_t>(
+        key_callbacks.max_serialized_size_key(unbounded_key));
+    } else {
+      throw std::runtime_error("unbounded_key is bigger than RTI_CDR_MAX_SERIALIZED_SIZE");
+    }
     /* add encapsulation size to static serialized_size_max */
     if (!unbounded_key) {
       key_serialized_size_max +=
