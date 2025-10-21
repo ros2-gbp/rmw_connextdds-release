@@ -408,9 +408,9 @@ public:
 protected:
   DDS_StatusCondition * scond;
   std::mutex new_event_mutex_;
-  rmw_event_callback_t new_event_cb_[RMW_EVENT_TYPE_MAX] = {};
-  const void * user_data_[RMW_EVENT_TYPE_MAX] = {};
-  uint64_t unread_events_count_[RMW_EVENT_TYPE_MAX] = {0};
+  rmw_event_callback_t new_event_cb_[RMW_EVENT_INVALID] = {};
+  const void * user_data_[RMW_EVENT_INVALID] = {};
+  uint64_t unread_events_count_[RMW_EVENT_INVALID] = {0};
 
   bool triggered_inconsistent_topic{false};
 
@@ -680,9 +680,7 @@ public:
     DDS_DataReader * reader);
 
   rmw_ret_t
-  install(
-    RMW_Connext_Subscriber * const sub,
-    RMW_Connext_Publisher * const related_pub = nullptr);
+  install(RMW_Connext_Subscriber * const sub);
 
   void
   on_requested_deadline_missed(
@@ -911,8 +909,7 @@ protected:
   DDS_SampleLostStatus status_sample_lost_last;
   DDS_SubscriptionMatchedStatus status_matched_last;
 
-  RMW_Connext_Subscriber * sub{nullptr};
-  RMW_Connext_Publisher * related_pub{nullptr};
+  RMW_Connext_Subscriber * sub;
 
   std::mutex new_data_event_mutex_;
   rmw_event_callback_t new_data_event_cb_{nullptr};

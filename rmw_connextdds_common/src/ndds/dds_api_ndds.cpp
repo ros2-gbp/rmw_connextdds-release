@@ -30,8 +30,6 @@
 #include "rmw_connextdds/rmw_impl.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
 
-#include "dds_c/dds_c_infrastructure_impl.h"
-
 const char * const RMW_CONNEXTDDS_ID = "rmw_connextdds";
 const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT = "cdr";
 
@@ -752,20 +750,22 @@ rmw_connextdds_write_message(
     const RMW_Connext_RequestReplyMessage * const rr_msg =
       reinterpret_cast<const RMW_Connext_RequestReplyMessage *>(message->user_data);
 
-    // Propagate the request's sample identity via the related_sample_identity field
-    int64_t sn_ros = rr_msg->sn >= 0 ? rr_msg->sn : 0;
-    rmw_connextdds_sn_ros_to_dds(
-      sn_ros,
-      write_params.related_sample_identity.sequence_number);
+    if (!rr_msg->request) {
+      /* If this is a reply, propagate the request's sample identity
+         via the related_sample_identity field */
+      rmw_ret_t rc = RMW_RET_ERROR;
 
-    rmw_ret_t rc = rmw_connextdds_gid_to_guid(
-      rr_msg->request ? rr_msg->gid : rr_msg->writer_gid,
-      write_params.related_sample_identity.writer_guid);
-    if (RMW_RET_OK != rc) {
-      return rc;
-    }
+      rmw_connextdds_sn_ros_to_dds(
+        rr_msg->sn,
+        write_params.related_sample_identity.sequence_number);
 
-    if (rr_msg->request) {
+      rc = rmw_connextdds_gid_to_guid(
+        rr_msg->gid,
+        write_params.related_sample_identity.writer_guid);
+      if (RMW_RET_OK != rc) {
+        return rc;
+      }
+    } else {
       // enable WriteParams::replace_auto to retrieve SN of published message
       write_params.replace_auto = DDS_BOOLEAN_TRUE;
     }
@@ -796,25 +796,27 @@ rmw_connextdds_take_samples(
   DDS_Long data_len = 0;
   void ** data_buffer = nullptr;
 
-  // TODO(fgallegosalido): Use DDS_DataReader_read_or_take_instance_untypedI
-  // when ROS2 support for instances is added.
   DDS_ReturnCode_t rc =
-    DDS_DataReader_read_or_take_untypedI(
-      sub->reader(),
-      &is_loan,
-      &data_buffer,
-      &data_len,
-      sub->info_seq(),
-      0 /* data_seq_len */,
-      0 /* data_seq_max_len */,
-      DDS_BOOLEAN_TRUE /* data_seq_has_ownership */,
-      NULL /* data_seq_contiguous_buffer_for_copy */,
-      1 /* data_size -- ignored because loaning*/,
-      DDS_LENGTH_UNLIMITED /* max_samples */,
-      DDS_ANY_SAMPLE_STATE,
-      DDS_ANY_VIEW_STATE,
-      DDS_ANY_INSTANCE_STATE,
-      DDS_BOOLEAN_TRUE /* take */);
+    DDS_DataReader_read_or_take_instance_untypedI(
+    sub->reader(),
+    &is_loan,
+    &data_buffer,
+    &data_len,
+    sub->info_seq(),
+    0 /* data_seq_len */,
+    0 /* data_seq_max_len */,
+    DDS_BOOLEAN_TRUE /* data_seq_has_ownership */,
+    NULL /* data_seq_contiguous_buffer_for_copy */,
+    1 /* data_size -- ignored because loaning*/,
+    DDS_LENGTH_UNLIMITED /* max_samples */,
+    &DDS_HANDLE_NIL /* a_handle */,
+#if !RMW_CONNEXT_DDS_API_PRO_LEGACY
+    NULL /* topic_query_guid */,
+#endif /* RMW_CONNEXT_DDS_API_PRO_LEGACY */
+    DDS_ANY_SAMPLE_STATE,
+    DDS_ANY_VIEW_STATE,
+    DDS_ANY_INSTANCE_STATE,
+    DDS_BOOLEAN_TRUE /* take */);
   if (DDS_RETCODE_OK != rc) {
     if (DDS_RETCODE_NO_DATA == rc) {
       return RMW_RET_OK;
@@ -822,8 +824,7 @@ rmw_connextdds_take_samples(
     RMW_CONNEXT_LOG_ERROR_SET("failed to take data from DDS reader")
     return RMW_RET_ERROR;
   }
-  RMW_CONNEXT_ASSERT(data_len > 0);
-  (void) RMW_Connext_MessagePtrSeq_loan_contiguous(
+  RMW_CONNEXT_ASSERT(data_len > 0)(void) RMW_Connext_MessagePtrSeq_loan_contiguous(
     sub->data_seq(),
     reinterpret_cast<RMW_Connext_Message **>(data_buffer),
     data_len,
@@ -881,9 +882,7 @@ rmw_connextdds_count_unread_samples(
   unread_count = 0;
   DDS_ReturnCode_t rc = DDS_RETCODE_ERROR;
   do {
-    // TODO(fgallegosalido): Use DDS_DataReader_read_or_take_instance_untypedI
-    // when ROS 2 support for instances is added.
-    rc = DDS_DataReader_read_or_take_untypedI(
+    rc = DDS_DataReader_read_or_take_instance_untypedI(
       sub->reader(),
       &is_loan,
       &data_buffer,
@@ -895,6 +894,10 @@ rmw_connextdds_count_unread_samples(
       NULL /* data_seq_contiguous_buffer_for_copy */,
       1 /* data_size -- ignored because loaning*/,
       DDS_LENGTH_UNLIMITED /* max_samples */,
+      &DDS_HANDLE_NIL /* a_handle */,
+  #if !RMW_CONNEXT_DDS_API_PRO_LEGACY
+      NULL /* topic_query_guid */,
+  #endif /* RMW_CONNEXT_DDS_API_PRO_LEGACY */
       DDS_NOT_READ_SAMPLE_STATE,
       DDS_ANY_VIEW_STATE,
       DDS_ANY_INSTANCE_STATE,
@@ -1594,14 +1597,5 @@ rmw_connextdds_get_cft_filter_expression(
     return RMW_RET_ERROR;
   }
 
-  return RMW_RET_OK;
-}
-
-rmw_ret_t
-rmw_connextdds_guid_to_instance_handle(
-  const struct DDS_GUID_t * const guid,
-  DDS_InstanceHandle_t * const instance_handle)
-{
-  DDS_GUID_to_instance_handle(guid, instance_handle);
   return RMW_RET_OK;
 }
