@@ -1,4 +1,4 @@
-From 6b73f578444a3e1457140440ef749292980c4aa8 Mon Sep 17 00:00:00 2001
+From 467e997494c9736695164b943c6b16d0ac5849e1 Mon Sep 17 00:00:00 2001
 From: Chris Lalancette <clalancette@gmail.com>
 Date: Thu, 2 May 2024 11:09:53 -0400
 Subject: [PATCH] Replace environment script with exported environment
