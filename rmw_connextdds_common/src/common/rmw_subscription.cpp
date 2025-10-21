@@ -15,11 +15,7 @@
 #include "rmw_connextdds/rmw_impl.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
 
-#include "rmw_dds_common/qos.hpp"
-
 #include "rmw/validate_full_topic_name.h"
-
-#include "tracetools/tracetools.h"
 
 /******************************************************************************
  * Subscription functions
@@ -102,14 +98,6 @@ rmw_api_connextdds_create_subscription(
     }
   }
 
-  // Adapt any 'best available' QoS options
-  rmw_qos_profile_t adapted_qos_policies = *qos_policies;
-  rmw_ret_t ret = rmw_dds_common::qos_profile_get_best_available_for_topic_subscription(
-    node, topic_name, &adapted_qos_policies, rmw_api_connextdds_get_publishers_info_by_topic);
-  if (RMW_RET_OK != ret) {
-    return nullptr;
-  }
-
   rmw_context_impl_t * ctx = node->context->impl;
 
   rmw_subscription_t * const rmw_sub =
@@ -120,7 +108,7 @@ rmw_api_connextdds_create_subscription(
     ctx->dds_sub,
     type_supports,
     topic_name,
-    &adapted_qos_policies,
+    qos_policies,
     subscription_options);
 
   if (nullptr == rmw_sub) {
@@ -284,7 +272,6 @@ rmw_api_connextdds_take(
 
   rmw_ret_t rc = sub_impl->take_message(ros_message, nullptr, taken);
 
-  TRACETOOLS_TRACEPOINT(rmw_take, subscription, ros_message, 0LL, *taken);
   return rc;
 }
 
@@ -313,13 +300,6 @@ rmw_api_connextdds_take_with_info(
     reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
 
   rmw_ret_t rc = sub_impl->take_message(ros_message, message_info, taken);
-
-  TRACETOOLS_TRACEPOINT(
-    rmw_take,
-    subscription,
-    ros_message,
-    (message_info ? message_info->source_timestamp : 0LL),
-    *taken);
 
   return rc;
 }
@@ -386,16 +366,7 @@ rmw_api_connextdds_take_serialized_message(
   RMW_Connext_Subscriber * const sub_impl =
     reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
 
-  rmw_ret_t rc = sub_impl->take_serialized(serialized_message, nullptr, taken);
-
-  TRACETOOLS_TRACEPOINT(
-    rmw_take,
-    subscription,
-    serialized_message,
-    0LL,
-    *taken);
-
-  return rc;
+  return sub_impl->take_serialized(serialized_message, nullptr, taken);
 }
 
 
@@ -422,16 +393,7 @@ rmw_api_connextdds_take_serialized_message_with_info(
   RMW_Connext_Subscriber * const sub_impl =
     reinterpret_cast<RMW_Connext_Subscriber *>(subscription->data);
 
-  rmw_ret_t rc = sub_impl->take_serialized(serialized_message, message_info, taken);
-
-  TRACETOOLS_TRACEPOINT(
-    rmw_take,
-    subscription,
-    serialized_message,
-    (message_info ? message_info->source_timestamp : 0LL),
-    *taken);
-
-  return rc;
+  return sub_impl->take_serialized(serialized_message, message_info, taken);
 }
 
 

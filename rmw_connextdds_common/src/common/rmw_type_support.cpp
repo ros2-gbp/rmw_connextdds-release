@@ -15,8 +15,6 @@
 #include <string.h>
 #include <string>
 
-#include "rcpputils/scope_exit.hpp"
-
 #include "rmw_connextdds/type_support.hpp"
 
 #include "rmw_connextdds/rmw_impl.hpp"
@@ -98,7 +96,10 @@ RMW_Connext_RequestReplyMapping_Basic_serialize(
   if (RMW_RET_OK != rc) {
     return rc;
   }
-  rmw_connextdds_sn_ros_to_dds(rr_msg->sn, sample_identity.sequence_number);
+  sample_identity.sequence_number.high =
+    static_cast<DDS_Long>((rr_msg->sn & 0xFFFFFFFF00000000) >> 8);
+  sample_identity.sequence_number.low =
+    static_cast<DDS_UnsignedLong>(rr_msg->sn & 0x00000000FFFFFFFF);
 
   try {
     // Cyclone only serializes 8 bytes of the writer guid.
@@ -297,9 +298,9 @@ rmw_ret_t RMW_Connext_MessageTypeSupport::serialize(
   eprosima::fastcdr::Cdr cdr_stream(
     cdr_buffer,
     eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-    eprosima::fastcdr::CdrVersion::XCDRv1);
-  cdr_stream.set_encoding_flag(
-    eprosima::fastcdr::EncodingAlgorithmFlag::PLAIN_CDR);
+    eprosima::fastcdr::Cdr::DDS_CDR);
+  cdr_stream.setDDSCdrPlFlag(
+    eprosima::fastcdr::Cdr::DDSCdrPlFlag::DDS_CDR_WITHOUT_PL);
 
   RMW_CONNEXT_LOG_TRACE_A(
     "[type support] %s serialize: "
@@ -364,7 +365,7 @@ rmw_ret_t RMW_Connext_MessageTypeSupport::serialize(
     return RMW_RET_ERROR;
   }
 
-  to_buffer->buffer_length = cdr_stream.get_serialized_data_length();
+  to_buffer->buffer_length = cdr_stream.getSerializedDataLength();
 
   RMW_CONNEXT_LOG_DEBUG_A(
     "[type support] %s serialized: "
@@ -392,7 +393,7 @@ RMW_Connext_MessageTypeSupport::deserialize(
   eprosima::fastcdr::Cdr cdr_stream(
     cdr_buffer,
     eprosima::fastcdr::Cdr::DEFAULT_ENDIAN,
-    eprosima::fastcdr::CdrVersion::XCDRv1);
+    eprosima::fastcdr::Cdr::DDS_CDR);
 
   RMW_CONNEXT_LOG_TRACE_A(
     "[type support] %s deserialize: "
@@ -475,7 +476,7 @@ RMW_Connext_MessageTypeSupport::deserialize(
     return RMW_RET_ERROR;
   }
 
-  size_out = cdr_stream.get_serialized_data_length();
+  size_out = cdr_stream.getSerializedDataLength();
 
   RMW_CONNEXT_LOG_DEBUG_A(
     "[type support] %s deserialized: "

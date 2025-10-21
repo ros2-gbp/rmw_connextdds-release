@@ -15,6 +15,7 @@
 #ifndef RMW_CONNEXTDDS__RMW_WAITSET_STD_HPP_
 #define RMW_CONNEXTDDS__RMW_WAITSET_STD_HPP_
 
+#include <condition_variable>
 #include "rmw_connextdds/context.hpp"
 
 /******************************************************************************
@@ -258,8 +259,7 @@ class RMW_Connext_StatusCondition : public RMW_Connext_Condition
 public:
   explicit RMW_Connext_StatusCondition(
     DDS_Entity * const entity)
-  : scond(DDS_Entity_get_statuscondition(entity)),
-    status_inconsistent_topic(DDS_InconsistentTopicStatus_INITIALIZER)
+  : scond(DDS_Entity_get_statuscondition(entity))
   {
     this->scond = DDS_Entity_get_statuscondition(entity);
     if (nullptr == this->scond) {
@@ -389,22 +389,6 @@ public:
   void
   update_status_inconsistent_topic(const struct DDS_InconsistentTopicStatus * status);
 
-  inline rmw_ret_t
-  get_incompatible_type_status(
-    rmw_incompatible_type_status_t * const status)
-  {
-    update_state(
-      [this, status]() {
-        status->total_count = this->status_inconsistent_topic.total_count;
-        status->total_count_change = this->status_inconsistent_topic.total_count_change;
-
-        this->triggered_inconsistent_topic = false;
-        this->status_inconsistent_topic.total_count_change = 0;
-      }, false /* notify */);
-
-    return RMW_RET_OK;
-  }
-
 protected:
   DDS_StatusCondition * scond;
   std::mutex new_event_mutex_;
@@ -434,12 +418,6 @@ RMW_Connext_DataWriterListener_liveliness_lost(
   void * listener_data,
   DDS_DataWriter * writer,
   const struct DDS_LivelinessLostStatus * status);
-
-void
-RMW_Connext_DataWriterListener_matched(
-  void * listener_data,
-  DDS_DataWriter * writer,
-  const struct DDS_PublicationMatchedStatus * status);
 
 class RMW_Connext_PublisherStatusCondition : public RMW_Connext_StatusCondition
 {
@@ -487,10 +465,6 @@ public:
   void
   on_liveliness_lost(
     const DDS_LivelinessLostStatus * const status);
-
-  void
-  on_matched(
-    const DDS_PublicationMatchedStatus * const status);
 
   // Helper functions to retrieve status information
   inline rmw_ret_t
@@ -548,27 +522,6 @@ public:
     return RMW_RET_OK;
   }
 
-  inline rmw_ret_t
-  get_matched_status(
-    rmw_matched_status_t * const status)
-  {
-    update_state(
-      [this, status]() {
-        this->triggered_matched = false;
-
-        status->total_count = this->status_matched.total_count;
-        status->total_count_change = this->status_matched.total_count_change;
-        status->current_count = this->status_matched.current_count;
-        status->current_count_change = this->status_matched.current_count_change;
-
-        this->status_matched.total_count_change = 0;
-        this->status_matched.current_count_change = 0;
-        this->status_matched_last = this->status_matched;
-      }, false /* notify */);
-
-    return RMW_RET_OK;
-  }
-
 protected:
   void update_status_deadline(
     const DDS_OfferedDeadlineMissedStatus * const status);
@@ -579,23 +532,17 @@ protected:
   void update_status_qos(
     const DDS_OfferedIncompatibleQosStatus * const status);
 
-  void update_status_matched(
-    const DDS_PublicationMatchedStatus * const status);
-
   bool triggered_deadline{false};
   bool triggered_liveliness{false};
   bool triggered_qos{false};
-  bool triggered_matched{false};
 
   DDS_OfferedDeadlineMissedStatus status_deadline;
   DDS_OfferedIncompatibleQosStatus status_qos;
   DDS_LivelinessLostStatus status_liveliness;
-  DDS_PublicationMatchedStatus status_matched;
 
   DDS_OfferedDeadlineMissedStatus status_deadline_last;
   DDS_OfferedIncompatibleQosStatus status_qos_last;
   DDS_LivelinessLostStatus status_liveliness_last;
-  DDS_PublicationMatchedStatus status_matched_last;
 
   RMW_Connext_Publisher * pub;
 };
@@ -695,9 +642,6 @@ public:
 
   void
   on_sample_lost(const DDS_SampleLostStatus * const status);
-
-  void
-  on_matched(const DDS_SubscriptionMatchedStatus * const status);
 
   const bool ignore_local;
   const DDS_InstanceHandle_t participant_handle;
@@ -852,26 +796,6 @@ public:
 
   void notify_new_data();
 
-  inline rmw_ret_t
-  get_matched_status(rmw_matched_status_t * const status)
-  {
-    update_state(
-      [this, status]() {
-        this->triggered_matched = false;
-
-        status->total_count = static_cast<size_t>(this->status_matched.total_count);
-        status->total_count_change = static_cast<size_t>(this->status_matched.total_count_change);
-        status->current_count = static_cast<size_t>(this->status_matched.current_count);
-        status->current_count_change = this->status_matched.current_count_change;
-
-        this->status_matched.total_count_change = 0;
-        this->status_matched.current_count_change = 0;
-        this->status_matched_last = this->status_matched;
-      }, false /* notify */);
-
-    return RMW_RET_OK;
-  }
-
 protected:
   void update_status_deadline(
     const DDS_RequestedDeadlineMissedStatus * const status);
@@ -885,29 +809,23 @@ protected:
   void update_status_sample_lost(
     const DDS_SampleLostStatus * const status);
 
-  void update_status_matched(
-    const DDS_SubscriptionMatchedStatus * const status);
-
   DDS_GuardCondition * const loan_guard_condition;
 
   bool triggered_deadline{false};
   bool triggered_liveliness{false};
   bool triggered_qos{false};
   bool triggered_sample_lost{false};
-  bool triggered_matched{false};
   bool triggered_data{false};
 
   DDS_RequestedDeadlineMissedStatus status_deadline;
   DDS_RequestedIncompatibleQosStatus status_qos;
   DDS_LivelinessChangedStatus status_liveliness;
   DDS_SampleLostStatus status_sample_lost;
-  DDS_SubscriptionMatchedStatus status_matched;
 
   DDS_RequestedDeadlineMissedStatus status_deadline_last;
   DDS_RequestedIncompatibleQosStatus status_qos_last;
   DDS_LivelinessChangedStatus status_liveliness_last;
   DDS_SampleLostStatus status_sample_lost_last;
-  DDS_SubscriptionMatchedStatus status_matched_last;
 
   RMW_Connext_Subscriber * sub;
 

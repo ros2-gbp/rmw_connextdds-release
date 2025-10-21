@@ -18,7 +18,6 @@
 #include "rmw_connextdds/context.hpp"
 
 #include "rmw/features.h"
-#include "rmw/get_network_flow_endpoints.h"
 
 /*****************************************************************************
  * Context API
@@ -96,10 +95,6 @@ rmw_api_connextdds_event_set_callback(
   const rmw_event_callback_t callback,
   const void * const user_data);
 
-RMW_CONNEXTDDS_PUBLIC
-bool
-rmw_api_connextdds_event_type_is_supported(rmw_event_type_t rmw_event_type);
-
 /*****************************************************************************
  * Info API
  *****************************************************************************/
@@ -152,20 +147,6 @@ rmw_ret_t
 rmw_api_connextdds_count_subscribers(
   const rmw_node_t * node,
   const char * topic_name,
-  size_t * count);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_count_clients(
-  const rmw_node_t * node,
-  const char * service_name,
-  size_t * count);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_count_services(
-  const rmw_node_t * node,
-  const char * service_name,
   size_t * count);
 
 RMW_CONNEXTDDS_PUBLIC
@@ -292,12 +273,6 @@ RMW_CONNEXTDDS_PUBLIC
 rmw_ret_t
 rmw_api_connextdds_get_gid_for_publisher(
   const rmw_publisher_t * publisher,
-  rmw_gid_t * gid);
-
-RMW_CONNEXTDDS_PUBLIC
-rmw_ret_t
-rmw_api_connextdds_get_gid_for_client(
-  const rmw_client_t * client,
   rmw_gid_t * gid);
 
 RMW_CONNEXTDDS_PUBLIC
