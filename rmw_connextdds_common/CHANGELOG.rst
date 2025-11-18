@@ -2,21 +2,168 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.11.5 (2025-10-21)
--------------------
-* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_) (`#205 <https://github.com/ros2/rmw_connextdds/issues/205>`_)
-* Contributors: mergify[bot]
+1.2.4 (2025-11-18)
+------------------
+* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
+* Contributors: Minju, Lee
 
-0.11.4 (2025-03-25)
--------------------
+1.2.3 (2025-10-20)
+------------------
+* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_)
+* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_)
+* Contributors: Chris Lalancette, Francisco Gallego Salido
 
-0.11.3 (2024-11-25)
+1.2.2 (2025-07-29)
+------------------
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
+* Contributors: mosfet80
+
+1.2.1 (2025-07-01)
+------------------
+* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_)
+* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_)
+* Contributors: Alejandro Hernández Cordero, Francisco Gallego Salido
+
+1.2.0 (2025-04-25)
+------------------
+
+1.1.0 (2025-04-18)
+------------------
+* Address cpplit and gcc warnings. (`#184 <https://github.com/ros2/rmw_connextdds/issues/184>`_)
+* Support topic instances (`#178 <https://github.com/ros2/rmw_connextdds/issues/178>`_)
+* Switch buildtool to ament_cmake package (`#183 <https://github.com/ros2/rmw_connextdds/issues/183>`_)
+* Discovery race condition mitigation (`#174 <https://github.com/ros2/rmw_connextdds/issues/174>`_)
+* Contributors: Francisco Gallego Salido, Scott K Logan, Tomoya Fujita
+
+1.0.1 (2025-03-11)
+------------------
+* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_)
+* use rmw_enclave_options_xxx APIs instead. (`#172 <https://github.com/ros2/rmw_connextdds/issues/172>`_)
+* fix security certificate error message format. (`#171 <https://github.com/ros2/rmw_connextdds/issues/171>`_)
+* Contributors: Alejandro Hernández Cordero, Tomoya Fujita
+
+1.0.0 (2025-02-18)
+------------------
+
+0.25.1 (2025-02-17)
 -------------------
-* Backport rmw callbacks implementation to Humble [ros2-73] (`#157 <https://github.com/ros2/rmw_connextdds/issues/157>`_)
+* Use rmw_security_common (`#167 <https://github.com/ros2/rmw_connextdds/issues/167>`_)
+* Use target_link_libraries instead of ament_target_dependencies (`#169 <https://github.com/ros2/rmw_connextdds/issues/169>`_)
+* introduce RMW_EVENT_TYPE_MAX in rmw_event_type_t. (`#162 <https://github.com/ros2/rmw_connextdds/issues/162>`_)
+* Contributors: Alejandro Hernández Cordero, Shane Loretz, Tomoya Fujita
+
+0.25.0 (2024-12-20)
+-------------------
+* Instrument client/service for end-to-end request/response tracking (`#163 <https://github.com/ros2/rmw_connextdds/issues/163>`_)
+* Contributors: Christophe Bedard
+
+0.24.2 (2024-10-03)
+-------------------
+* fix: "Failed to parse type hash" message was overly spammy (ros2-50) (`#149 <https://github.com/ros2/rmw_connextdds/issues/149>`_)
 * Contributors: Taxo Rubio RTI
 
-0.11.2 (2023-07-18)
+0.24.1 (2024-07-29)
 -------------------
+* remove rmw_localhost_only_t. (`#156 <https://github.com/ros2/rmw_connextdds/issues/156>`_)
+* Contributors: Tomoya Fujita
+
+0.24.0 (2024-06-17)
+-------------------
+* Make rmw_service_server_is_available return RMW_RET_INVALID_ARGUMENT (`#150 <https://github.com/ros2/rmw_connextdds/issues/150>`_)
+* Use rmw_namespace_validation_result_string() in rmw_create_node (`#151 <https://github.com/ros2/rmw_connextdds/issues/151>`_)
+* Make rmw_destroy_wait_set return RMW_RET_INVALID_ARGUMENT (`#152 <https://github.com/ros2/rmw_connextdds/issues/152>`_)
+* Contributors: Christophe Bedard
+
+0.23.0 (2024-04-26)
+-------------------
+
+0.22.0 (2024-04-09)
+-------------------
+* Revert "Mitigate discovery race condition between clients and services (`#132 <https://github.com/ros2/rmw_connextdds/issues/132>`_)" (`#146 <https://github.com/ros2/rmw_connextdds/issues/146>`_)
+  This reverts commit 7c95abbfc4559b293ebf5e94e20250bdd99d3ac6.
+* Mitigate discovery race condition between clients and services (`#132 <https://github.com/ros2/rmw_connextdds/issues/132>`_)
+  * Mitigate discovery race condition between clients and services.
+* Add: tracepoint for subscribe serialized_message (`#145 <https://github.com/ros2/rmw_connextdds/issues/145>`_)
+  * Add: tracepoint for take_serialized_message
+  * Fix: TRACETOOLS_TRACEPOINT args
+  * Update rmw_connextdds_common/src/common/rmw_subscription.cpp
+  Co-authored-by: Christophe Bedard <bedard.christophe@gmail.com>
+* Contributors: Andrea Sorbini, Chris Lalancette, h-suzuki-isp
+
+0.21.0 (2024-03-28)
+-------------------
+* Support Fast CDR v2 (`#141 <https://github.com/ros2/rmw_connextdds/issues/141>`_)
+* Contributors: Miguel Company
+
+0.20.1 (2024-03-09)
+-------------------
+* Fix the rmw_connextdds_common build with gcc 13.2. (`#142 <https://github.com/ros2/rmw_connextdds/issues/142>`_)
+  The most important fix here is to #include <cstdint>,
+  but also make sure we #include for all used STL functions.
+* Fix basic request reply mapping for ConnextDDS Pro (`#139 <https://github.com/ros2/rmw_connextdds/issues/139>`_)
+* Contributors: Chris Lalancette, Christopher Wecht
+
+0.20.0 (2024-01-24)
+-------------------
+* Add ros2_tracing tracepoints (`#120 <https://github.com/ros2/rmw_connextdds/issues/120>`_)
+* Contributors: Christopher Wecht
+
+0.19.0 (2023-11-06)
+-------------------
+* avoid using dds common public mutex directly (`#134 <https://github.com/ros2/rmw_connextdds/issues/134>`_)
+* Fix a couple of warnings pointed out by clang. (`#133 <https://github.com/ros2/rmw_connextdds/issues/133>`_)
+* Contributors: Chen Lihui, Chris Lalancette
+
+0.18.0 (2023-10-04)
+-------------------
+* Add rmw count clients services impl (`#93 <https://github.com/ros2/rmw_connextdds/issues/93>`_)
+* Conditional internal API access to support Connext 7+ (`#121 <https://github.com/ros2/rmw_connextdds/issues/121>`_)
+* Cleanup context implementation (`#131 <https://github.com/ros2/rmw_connextdds/issues/131>`_)
+* Contributors: Andrea Sorbini, Chris Lalancette, Minju, Lee
+
+0.17.0 (2023-08-21)
+-------------------
+* Fix RMW_Connext_Client::is_service_available for micro (`#130 <https://github.com/ros2/rmw_connextdds/issues/130>`_)
+* Update to C++17 (`#125 <https://github.com/ros2/rmw_connextdds/issues/125>`_)
+* Pass parameters in the correct order to DDS_DataReader_read in rmw_connextdds_count_unread_samples for micro (`#129 <https://github.com/ros2/rmw_connextdds/issues/129>`_)
+* Optimize QoS to improve responsiveness of reliable endpoints (`#26 <https://github.com/ros2/rmw_connextdds/issues/26>`_)
+* Clear out errors once we have handled them. (`#126 <https://github.com/ros2/rmw_connextdds/issues/126>`_)
+* Contributors: Andrea Sorbini, Chris Lalancette, Christopher Wecht
+
+0.16.0 (2023-07-11)
+-------------------
+* Add support for listener callbacks (`#76 <https://github.com/ros2/rmw_connextdds/issues/76>`_)
+* Contributors: Andrea Sorbini
+
+0.15.1 (2023-05-11)
+-------------------
+
+0.15.0 (2023-04-27)
+-------------------
+
+0.14.0 (2023-04-12)
+-------------------
+* [rmw_connextdds] New RMW discovery options (`#108 <https://github.com/ros2/rmw_connextdds/issues/108>`_)
+* Call get_type_hash_func (`#113 <https://github.com/ros2/rmw_connextdds/issues/113>`_)
+* Type hash distribution during discovery (rep2011) (`#104 <https://github.com/ros2/rmw_connextdds/issues/104>`_)
+* Implement matched event (`#101 <https://github.com/ros2/rmw_connextdds/issues/101>`_)
+* Add in implementation of inconsistent topic. (`#103 <https://github.com/ros2/rmw_connextdds/issues/103>`_)
+* Contributors: Barry Xu, Chris Lalancette, Emerson Knapp, Grey, Michael Carroll
+
+0.13.0 (2022-11-02)
+-------------------
+* Add rmw_get_gid_for_client impl (`#92 <https://github.com/ros2/rmw_connextdds/issues/92>`_)
+* Contributors: Brian
+
+0.12.1 (2022-09-13)
+-------------------
+* Fix assert statement to allow the seconds field of a DDS_Duration_t to be zero (`#88 <https://github.com/ros2/rmw_connextdds/issues/88>`_)
+* Contributors: Michael Jeronimo
+
+0.12.0 (2022-05-03)
+-------------------
+* Handle 'best_available' QoS policies in common  (`#85 <https://github.com/ros2/rmw_connextdds/issues/85>`_)
+* Contributors: Jose Luis Rivero
 
 0.11.1 (2022-04-26)
 -------------------

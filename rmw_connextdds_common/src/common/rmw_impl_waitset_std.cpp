@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rcpputils/scope_exit.hpp"
+
 #include "rmw_connextdds/rmw_impl.hpp"
 
 /******************************************************************************
@@ -112,6 +114,20 @@ RMW_Connext_DataReaderListener_sample_lost(
 }
 
 void
+RMW_Connext_DataReaderListener_matched(
+  void * listener_data,
+  DDS_DataReader * reader,
+  const struct DDS_SubscriptionMatchedStatus * status)
+{
+  RMW_Connext_SubscriberStatusCondition * const self =
+    reinterpret_cast<RMW_Connext_SubscriberStatusCondition *>(listener_data);
+
+  UNUSED_ARG(reader);
+
+  self->on_matched(status);
+}
+
+void
 RMW_Connext_DataReaderListener_on_data_available(
   void * listener_data,
   DDS_DataReader * reader)
@@ -167,6 +183,33 @@ RMW_Connext_DataWriterListener_liveliness_lost(
   self->on_liveliness_lost(status);
 }
 
+void
+RMW_Connext_TopicListener_on_inconsistent_topic(
+  void * listener_data,
+  DDS_Topic * topic,
+  const struct DDS_InconsistentTopicStatus * status)
+{
+  RMW_Connext_StatusCondition * const self =
+    reinterpret_cast<RMW_Connext_StatusCondition *>(listener_data);
+
+  UNUSED_ARG(topic);
+
+  self->on_inconsistent_topic(status);
+}
+
+void
+RMW_Connext_DataWriterListener_matched(
+  void * listener_data,
+  DDS_DataWriter * writer,
+  const struct DDS_PublicationMatchedStatus * status)
+{
+  RMW_Connext_PublisherStatusCondition * const self =
+    reinterpret_cast<RMW_Connext_PublisherStatusCondition *>(listener_data);
+
+  UNUSED_ARG(writer);
+
+  self->on_matched(status);
+}
 
 bool
 RMW_Connext_WaitSet::on_condition_active(
@@ -551,9 +594,28 @@ RMW_Connext_WaitSet::wait(
   return RMW_RET_OK;
 }
 
+void
+RMW_Connext_StatusCondition::on_inconsistent_topic(
+  const struct DDS_InconsistentTopicStatus * status)
+{
+  update_state(
+    [this, status]() {
+      this->update_status_inconsistent_topic(status);
+    }, true /* notify */);
+}
+
+void
+RMW_Connext_StatusCondition::update_status_inconsistent_topic(
+  const struct DDS_InconsistentTopicStatus * status)
+{
+  this->status_inconsistent_topic = *status;
+  this->triggered_inconsistent_topic = true;
+}
+
 rmw_ret_t
 RMW_Connext_SubscriberStatusCondition::install(
-  RMW_Connext_Subscriber * const sub)
+  RMW_Connext_Subscriber * const sub,
+  RMW_Connext_Publisher * const related_pub)
 {
   DDS_DataReaderListener listener = DDS_DataReaderListener_INITIALIZER;
   DDS_StatusMask listener_mask = DDS_STATUS_MASK_NONE;
@@ -568,6 +630,8 @@ RMW_Connext_SubscriberStatusCondition::install(
     RMW_Connext_DataReaderListener_sample_lost;
   listener.on_data_available =
     RMW_Connext_DataReaderListener_on_data_available;
+  listener.on_subscription_matched =
+    RMW_Connext_DataReaderListener_matched;
   listener.as_listener.listener_data = this;
 
   listener_mask =
@@ -575,10 +639,14 @@ RMW_Connext_SubscriberStatusCondition::install(
     DDS_REQUESTED_INCOMPATIBLE_QOS_STATUS |
     DDS_LIVELINESS_CHANGED_STATUS |
     DDS_SAMPLE_LOST_STATUS |
+    DDS_SUBSCRIPTION_MATCHED_STATUS |
     DDS_DATA_AVAILABLE_STATUS;
 
   rmw_connextdds_configure_subscriber_condition_listener(
     this, &listener, &listener_mask);
+
+  this->sub = sub;
+  this->related_pub = related_pub;
 
   if (DDS_RETCODE_OK !=
     DDS_DataReader_set_listener(sub->reader(), &listener, listener_mask))
@@ -587,7 +655,16 @@ RMW_Connext_SubscriberStatusCondition::install(
     return RMW_RET_ERROR;
   }
 
-  this->sub = sub;
+  struct DDS_TopicListener topic_listener = DDS_TopicListener_INITIALIZER;
+  topic_listener.on_inconsistent_topic = RMW_Connext_TopicListener_on_inconsistent_topic;
+  topic_listener.as_listener.listener_data = this;
+
+  if (DDS_RETCODE_OK !=
+    DDS_Topic_set_listener(sub->topic(), &topic_listener, DDS_INCONSISTENT_TOPIC_STATUS))
+  {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to set topic listener");
+    return RMW_RET_ERROR;
+  }
 
   return RMW_RET_OK;
 }
@@ -608,10 +685,12 @@ RMW_Connext_SubscriberStatusCondition::RMW_Connext_SubscriberStatusCondition(
   status_qos(DDS_RequestedIncompatibleQosStatus_INITIALIZER),
   status_liveliness(DDS_LivelinessChangedStatus_INITIALIZER),
   status_sample_lost(DDS_SampleLostStatus_INITIALIZER),
+  status_matched(DDS_SubscriptionMatchedStatus_INITIALIZER),
   status_deadline_last(DDS_RequestedDeadlineMissedStatus_INITIALIZER),
   status_qos_last(DDS_RequestedIncompatibleQosStatus_INITIALIZER),
   status_liveliness_last(DDS_LivelinessChangedStatus_INITIALIZER),
   status_sample_lost_last(DDS_SampleLostStatus_INITIALIZER),
+  status_matched_last(DDS_SubscriptionMatchedStatus_INITIALIZER),
   sub(nullptr)
 {
   if (internal && nullptr == this->loan_guard_condition) {
@@ -649,6 +728,14 @@ RMW_Connext_SubscriberStatusCondition::has_status(
     case RMW_EVENT_MESSAGE_LOST:
       {
         return this->triggered_sample_lost;
+      }
+    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
+      {
+        return this->triggered_inconsistent_topic;
+      }
+    case RMW_EVENT_SUBSCRIPTION_MATCHED:
+      {
+        return this->triggered_matched;
       }
     default:
       {
@@ -695,6 +782,16 @@ RMW_Connext_SubscriberStatusCondition::on_sample_lost(
   update_state(
     [this, status]() {
       this->update_status_sample_lost(status);
+    }, true /* notify */);
+}
+
+void
+RMW_Connext_SubscriberStatusCondition::on_matched(
+  const DDS_SubscriptionMatchedStatus * const status)
+{
+  update_state(
+    [this, status]() {
+      this->update_status_matched(status);
     }, true /* notify */);
 }
 
@@ -776,6 +873,25 @@ RMW_Connext_SubscriberStatusCondition::notify_new_data()
     });
 }
 
+void
+RMW_Connext_SubscriberStatusCondition::update_status_matched(
+  const DDS_SubscriptionMatchedStatus * const status)
+{
+  this->status_matched = *status;
+  this->triggered_matched = true;
+
+  this->status_matched.total_count_change =
+    this->status_matched.total_count - this->status_matched_last.total_count;
+  this->status_matched.current_count_change =
+    this->status_matched.current_count - this->status_matched_last.current_count;
+
+  if (nullptr != this->sub && nullptr != this->related_pub) {
+    this->related_pub->on_related_subscription_matched(this->sub, status);
+  }
+
+  this->notify_new_event(RMW_EVENT_SUBSCRIPTION_MATCHED);
+}
+
 rmw_ret_t
 RMW_Connext_PublisherStatusCondition::install(
   RMW_Connext_Publisher * const pub)
@@ -789,12 +905,17 @@ RMW_Connext_PublisherStatusCondition::install(
     RMW_Connext_DataWriterListener_offered_incompatible_qos;
   listener.on_liveliness_lost =
     RMW_Connext_DataWriterListener_liveliness_lost;
+  listener.on_publication_matched =
+    RMW_Connext_DataWriterListener_matched;
   listener.as_listener.listener_data = this;
 
   listener_mask =
     DDS_OFFERED_DEADLINE_MISSED_STATUS |
     DDS_OFFERED_INCOMPATIBLE_QOS_STATUS |
-    DDS_LIVELINESS_LOST_STATUS;
+    DDS_LIVELINESS_LOST_STATUS |
+    DDS_PUBLICATION_MATCHED_STATUS;
+
+  this->pub = pub;
 
   if (DDS_RETCODE_OK !=
     DDS_DataWriter_set_listener(
@@ -804,7 +925,22 @@ RMW_Connext_PublisherStatusCondition::install(
     return RMW_RET_ERROR;
   }
 
-  this->pub = pub;
+  DDS_Topic * topic = DDS_DataWriter_get_topic(pub->writer());
+  if (topic == nullptr) {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to get topic associated with data writer");
+    return RMW_RET_ERROR;
+  }
+
+  struct DDS_TopicListener topic_listener = DDS_TopicListener_INITIALIZER;
+  topic_listener.on_inconsistent_topic = RMW_Connext_TopicListener_on_inconsistent_topic;
+  topic_listener.as_listener.listener_data = this;
+
+  if (DDS_RETCODE_OK !=
+    DDS_Topic_set_listener(topic, &topic_listener, DDS_INCONSISTENT_TOPIC_STATUS))
+  {
+    RMW_CONNEXT_LOG_ERROR_SET("failed to set topic listener");
+    return RMW_RET_ERROR;
+  }
 
   return RMW_RET_OK;
 }
@@ -815,9 +951,11 @@ RMW_Connext_PublisherStatusCondition::RMW_Connext_PublisherStatusCondition(
   status_deadline(DDS_OfferedDeadlineMissedStatus_INITIALIZER),
   status_qos(DDS_OfferedIncompatibleQosStatus_INITIALIZER),
   status_liveliness(DDS_LivelinessLostStatus_INITIALIZER),
+  status_matched(DDS_PublicationMatchedStatus_INITIALIZER),
   status_deadline_last(DDS_OfferedDeadlineMissedStatus_INITIALIZER),
   status_qos_last(DDS_OfferedIncompatibleQosStatus_INITIALIZER),
-  status_liveliness_last(DDS_LivelinessLostStatus_INITIALIZER)
+  status_liveliness_last(DDS_LivelinessLostStatus_INITIALIZER),
+  status_matched_last(DDS_PublicationMatchedStatus_INITIALIZER)
 {}
 
 bool
@@ -836,6 +974,14 @@ RMW_Connext_PublisherStatusCondition::has_status(
     case RMW_EVENT_OFFERED_QOS_INCOMPATIBLE:
       {
         return this->triggered_qos;
+      }
+    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
+      {
+        return this->triggered_inconsistent_topic;
+      }
+    case RMW_EVENT_PUBLICATION_MATCHED:
+      {
+        return this->triggered_matched;
       }
     default:
       RMW_CONNEXT_ASSERT(0)
@@ -871,6 +1017,16 @@ RMW_Connext_PublisherStatusCondition::on_liveliness_lost(
   update_state(
     [this, status]() {
       this->update_status_liveliness(status);
+    }, true /* notify */);
+}
+
+void
+RMW_Connext_PublisherStatusCondition::on_matched(
+  const DDS_PublicationMatchedStatus * const status)
+{
+  update_state(
+    [this, status]() {
+      this->update_status_matched(status);
     }, true /* notify */);
 }
 
@@ -911,4 +1067,23 @@ RMW_Connext_PublisherStatusCondition::update_status_qos(
   this->status_qos.total_count_change -= this->status_qos_last.total_count;
 
   this->notify_new_event(RMW_EVENT_OFFERED_QOS_INCOMPATIBLE);
+}
+
+void
+RMW_Connext_PublisherStatusCondition::update_status_matched(
+  const DDS_PublicationMatchedStatus * const status)
+{
+  this->status_matched = *status;
+  this->triggered_matched = true;
+
+  this->status_matched.total_count_change =
+    this->status_matched.total_count - this->status_matched_last.total_count;
+  this->status_matched.current_count_change =
+    this->status_matched.current_count - this->status_matched_last.current_count;
+
+  if (nullptr != this->pub) {
+    this->pub->on_publication_matched(status);
+  }
+
+  this->notify_new_event(RMW_EVENT_PUBLICATION_MATCHED);
 }

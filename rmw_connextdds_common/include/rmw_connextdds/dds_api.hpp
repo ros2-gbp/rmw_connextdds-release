@@ -33,6 +33,10 @@
 #include "rmw/rmw.h"
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
 
+#ifndef DDS_GUID_INITIALIZER
+#define DDS_GUID_INITIALIZER        DDS_GUID_DEFAULT
+#endif /* DDS_GUID_INITIALIZER */
+
 class RMW_Connext_MessageTypeSupport;
 class RMW_Connext_Publisher;
 class RMW_Connext_Subscriber;
@@ -46,8 +50,19 @@ enum RMW_Connext_MessageType
   RMW_CONNEXT_MESSAGE_REPLY
 };
 
+struct RMW_Connext_WriteParams
+{
+  DDS_Time_t timestamp{DDS_TIME_INVALID};
+  int64_t sequence_number{0};
+};
+
 RMW_CONNEXTDDS_PUBLIC extern const char * const RMW_CONNEXTDDS_ID;
 extern const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT;
+
+rmw_ret_t
+rmw_connextdds_get_current_time(
+  DDS_DomainParticipant * domain_participant,
+  struct DDS_Time_t * current_time);
 
 rmw_ret_t
 rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity);
@@ -93,7 +108,8 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options);
+  const rmw_publisher_options_t * const pub_options,
+  const rosidl_type_hash_t * ser_type_hash = nullptr);
 
 rmw_ret_t
 rmw_connextdds_get_datareader_qos(
@@ -102,7 +118,8 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options);
+  const rmw_subscription_options_t * const sub_options,
+  const rosidl_type_hash_t * ser_type_hash = nullptr);
 
 DDS_DataWriter *
 rmw_connextdds_create_datawriter(
@@ -114,7 +131,8 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos);
+  DDS_DataWriterQos * const dw_qos,
+  const rosidl_type_hash_t * ser_type_hash = nullptr);
 
 DDS_DataReader *
 rmw_connextdds_create_datareader(
@@ -126,13 +144,14 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos);
+  DDS_DataReaderQos * const dr_qos,
+  const rosidl_type_hash_t * ser_type_hash = nullptr);
 
 rmw_ret_t
 rmw_connextdds_write_message(
   RMW_Connext_Publisher * const pub,
   RMW_Connext_Message * const message,
-  int64_t * const sn_out);
+  RMW_Connext_WriteParams * const params = nullptr);
 
 rmw_ret_t
 rmw_connextdds_take_samples(
@@ -280,5 +299,10 @@ rmw_connextdds_get_cft_filter_expression(
   DDS_TopicDescription * const topic_desc,
   rcutils_allocator_t * const allocator,
   rmw_subscription_content_filter_options_t * const options);
+
+rmw_ret_t
+rmw_connextdds_guid_to_instance_handle(
+  const struct DDS_GUID_t * const guid,
+  DDS_InstanceHandle_t * const instance_andle);
 
 #endif  // RMW_CONNEXTDDS__DDS_API_HPP_

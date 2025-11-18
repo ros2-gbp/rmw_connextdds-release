@@ -378,6 +378,16 @@ struct rmw_connextdds_api_micro
 
 rmw_connextdds_api_micro * RMW_Connext_fv_FactoryContext = nullptr;
 
+rmw_ret_t
+rmw_connextdds_get_current_time(
+  DDS_DomainParticipant * domain_participant,
+  struct DDS_Time_t * current_time)
+{
+  // Use DDS_DomainParticipant_get_current_time only with Micro since Pro's
+  // implementation is pretty slow. See #120 for details.
+  return DDS_DomainParticipant_get_current_time(domain_participant, current_time);
+}
+
 const char * const RMW_CONNEXTDDS_ID = "rmw_connextddsmicro";
 const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT = "cdr";
 
@@ -998,7 +1008,8 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options)
+  const rmw_publisher_options_t * const pub_options,
+  const rosidl_type_hash_t * ser_type_hash)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic);
@@ -1015,9 +1026,11 @@ rmw_connextdds_get_datawriter_qos(
       &qos->resource_limits,
       &qos->publish_mode,
       nullptr /* Micro doesn't support DDS_LifespanQosPolicy */,
+      &qos->user_data,
       qos_policies,
       pub_options,
-      nullptr /* sub_options */))
+      nullptr /* sub_options */,
+      ser_type_hash))
   {
     return RMW_RET_ERROR;
   }
@@ -1047,7 +1060,8 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options)
+  const rmw_subscription_options_t * const sub_options,
+  const rosidl_type_hash_t * ser_type_hash)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic_desc);
@@ -1064,9 +1078,11 @@ rmw_connextdds_get_datareader_qos(
       &qos->resource_limits,
       nullptr /* publish_mode */,
       nullptr /* Lifespan is a writer-only qos policy */,
+      &qos->user_data,
       qos_policies,
       nullptr /* pub_options */,
-      sub_options))
+      sub_options,
+      ser_type_hash))
   {
     return RMW_RET_ERROR;
   }
@@ -1098,7 +1114,8 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos)
+  DDS_DataWriterQos * const dw_qos,
+  const rosidl_type_hash_t * ser_type_hash)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -1106,7 +1123,7 @@ rmw_connextdds_create_datawriter(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datawriter_qos(
-      ctx, type_support, topic, dw_qos, qos_policies, publisher_options))
+      ctx, type_support, topic, dw_qos, qos_policies, publisher_options, ser_type_hash))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert writer QoS")
     return nullptr;
@@ -1129,7 +1146,8 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos)
+  DDS_DataReaderQos * const dr_qos,
+  const rosidl_type_hash_t * ser_type_hash)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -1137,7 +1155,7 @@ rmw_connextdds_create_datareader(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datareader_qos(
-      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options))
+      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options, ser_type_hash))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert reader QoS")
     return nullptr;
@@ -1151,12 +1169,14 @@ rmw_ret_t
 rmw_connextdds_write_message(
   RMW_Connext_Publisher * const pub,
   RMW_Connext_Message * const message,
-  int64_t * const sn_out)
+  RMW_Connext_WriteParams * const params)
 {
-  UNUSED_ARG(sn_out);
-
+  DDS_Time_t timestamp = DDS_TIME_INVALID;
+  if (nullptr != params && !DDS_Time_is_invalid(&params->timestamp)) {
+    timestamp = params->timestamp;
+  }
   if (DDS_RETCODE_OK !=
-    DDS_DataWriter_write(pub->writer(), message, &DDS_HANDLE_NIL))
+    DDS_DataWriter_write_w_timestamp(pub->writer(), message, &DDS_HANDLE_NIL, &timestamp))
   {
     RMW_CONNEXT_LOG_ERROR_SET("failed to write message to DDS")
     return RMW_RET_ERROR;
@@ -1218,8 +1238,8 @@ rmw_connextdds_count_unread_samples(
       &data_seq,
       &info_seq,
       DDS_LENGTH_UNLIMITED,
-      DDS_ANY_VIEW_STATE,
       DDS_NOT_READ_SAMPLE_STATE,
+      DDS_ANY_VIEW_STATE,
       DDS_ANY_INSTANCE_STATE);
     if (DDS_RETCODE_OK != rc && DDS_RETCODE_NO_DATA != rc) {
       RMW_CONNEXT_LOG_ERROR_SET("failed to read data from DDS reader")
@@ -1800,6 +1820,7 @@ rmw_connextdds_dcps_publication_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         qdata.data.topic_name,
         qdata.data.type_name,
+        &data->user_data,
         &qdata.data.reliability,
         &qdata.data.durability,
         &qdata.data.deadline,
@@ -1858,6 +1879,7 @@ rmw_connextdds_dcps_subscription_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         qdata.data.topic_name,
         qdata.data.type_name,
+        &data->user_data,
         &qdata.data.reliability,
         &qdata.data.durability,
         &qdata.data.deadline,
@@ -2023,5 +2045,15 @@ rmw_connextdds_get_cft_filter_expression(
   UNUSED_ARG(topic_desc);
   UNUSED_ARG(allocator);
   UNUSED_ARG(options);
+  return RMW_RET_UNSUPPORTED;
+}
+
+rmw_ret_t
+rmw_connextdds_guid_to_instance_handle(
+  const struct DDS_GUID_t * const guid,
+  DDS_InstanceHandle_t * const instance_handle)
+{
+  UNUSED_ARG(guid);
+  UNUSED_ARG(instance_handle);
   return RMW_RET_UNSUPPORTED;
 }

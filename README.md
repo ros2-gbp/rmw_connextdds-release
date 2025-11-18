@@ -1,15 +1,14 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
-This repository contains two novel implementations of the [ROS 2](https://docs.ros.org/en/rolling)
+This repository contains a implementation of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
 [RTI Connext DDS Professional](https://www.rti.com/products/connext-dds-professional)
-and [RTI Connext DDS Micro](https://www.rti.com/products/connext-dds-micro).
 
 The repository provides two RMW packages:
 
 - `rmw_connextdds`
 
-- `rmw_connextddsmicro`
+- `rmw_connextddsmicro` (deprecated)
 
 Package `rmw_connextdds` is meant to be a replacement for [`rmw_connext_cpp`](https://github.com/ros2/rmw_connext).
 This new implementation resolves several performance issues, and it improves out-of-the-box
@@ -20,7 +19,7 @@ active development.
 Please consider reporting any [issue](https://github.com/rticommunity/rmw_connextdds/issues)
 that you may experience, while monitoring the repository for frequent updates.*
 
-For any questions or feedback, feel free to reach out to robotics@rti.com.
+For any questions or feedback, feel free to reach out to rti-ros-team@rti.com.
 
 ## Quick Start
 
@@ -34,11 +33,11 @@ For any questions or feedback, feel free to reach out to robotics@rti.com.
 2. Configure RTI Connext DDS Professional and/or RTI Connext DDS Micro on your
    system (see [Requirements](#rti-connext-dds-requirements)). Make the installation(s)
    available via environment variables, e.g. by using the provided
-   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-6.0.1` with
+   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-7.3.0` with
    the path of your Connext installation):
 
    ```sh
-    source ~/rti_connext_dds-6.0.1/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+    source ~/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
     export CONNEXTDDS_DIR=${NDDSHOME}
     ```
 
@@ -84,18 +83,19 @@ release:
 
 |ROS 2 Release|Branch|Status|
 |-------------|------|------|
-|Rolling      |`master`|Developed|
-|Foxy         |`foxy`|LTS (May 2023)|
-|Eloquent     |`eloquent`|EOL (Nov 2020)|
-|Dashing      |`dashing`|LTS (May 2021)|
+|Rolling      |`rolling`|Developed|
+|Iron         |`iron`|Supported until November 2024 (EOL)|
+|Humble       |`humble`|Supported until May 2027|
+|Galactic     |`galactic`|Supported until November 2022 (EOL)|
+|Foxy         |`foxy`|Supported until May 2023 (EOL)|
+|Eloquent     |`eloquent`|Supported until November 2020 (EOL)|
+|Dashing      |`dashing`|Supported until May 2021 (EOL)|
 
-Branch `master` is actively developed and maintained. It is used to create
+Branch `rolling` is actively developed and maintained. It is used to create
 other branches for specific ROS 2 releases (starting from Galactic).
 
-Branches marked as `LTS` will receive updates for critical bug fixes and
-important patches only (until they reach `EOL`).
-
-Branches marked as `EOL` will not receive any future updates.
+All other non-EOL branches will receive updates for critical bug fixes and
+important patches only.
 
 ## RTI Connext DDS Requirements
 
@@ -110,8 +110,8 @@ valid installation is detected, the packages will be skipped and not be built.
 
 |RMW|RTI Product|Environment Variable(s)|Required|Default|
 |---|-----------|-----------------------|--------|-------|
-|`rmw_connextdds`|RTI Connext DDS Professional 5.3.1, or 6.x|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
-|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 6.x is available)|Guessed from contents of RTI Connext DDS Professional installation (6.x only, 5.3.1 users must specify `RTIMEHOME`).|
+|`rmw_connextdds`|RTI Connext DDS Professional 7.3.0|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
+|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 7.3.0 is available)|Guessed from contents of RTI Connext DDS Professional installation|
 
 ### Multiple versions of RTI Connext DDS Professional
 
@@ -128,7 +128,7 @@ have installed RTI Connext DDS Professional 5.3.1 via the `apt` package
 If `rmw_connext_cpp` is installed via debian package
 `ros-<version>-rmw-connext-cpp`, variable `${NDDSHOME}` will always be
 hard-coded to the install location of the `apt` package
-(`/opt/rti.com/rti_connext_dds-5.3.1`).
+(`/opt/rti.com/rti_connext_dds-<version>`).
 
 In this case, you can use `${CONNEXTDDS_DIR}` to point to a Connext 6.x
 installation, making sure to source script
@@ -142,7 +142,7 @@ consider uninstalling `rmw_connext_cpp` and `connext_cmake_module`
 
 ## Runtime Configuration
 
-In addition to standard configuration facilities provided by the ROS2 RMW
+In addition to standard configuration facilities provided by the ROS 2 RMW
 interface, `rmw_connextdds`, and `rmw_connextddsmicro` support the additional
 configuration of some aspects of their runtime behavior via custom environment
 variables.
@@ -150,6 +150,7 @@ variables.
 - [RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE](#RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE)
 - [RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS](#RMW_CONNEXT_DISABLE_LARGE_DATA_OPTIMIZATIONS)
 - [RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY](#RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY)
+- [RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS](#RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS)
 - [RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY](#RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY)
 - [RMW_CONNEXT_INITIAL_PEERS](#RMW_CONNEXT_INITIAL_PEERS)
 - [RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE](#RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE)
@@ -162,9 +163,9 @@ variables.
 
 Enable different policies to improve interoperability with `rmw_cyclonedds_cpp`.
 
-By default, ROS2 applications using `rmw_connextdds` will be able to communicate
-with those using `rmw_cyclonedds_cpp` only via ROS2 publishers and subscribers,
-while ROS2 clients and services will not interoperate across vendors.
+By default, ROS 2 applications using `rmw_connextdds` will be able to communicate
+with those using `rmw_cyclonedds_cpp` only via ROS 2 publishers and subscribers,
+while ROS 2 clients and services will not interoperate across vendors.
 
 The reason for this incompatibility lies in `rmw_cyclonedds_cpp`'s use of a custom
 mapping for propagating request metadata between clients and services.
@@ -206,6 +207,17 @@ Variable `RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY` may be used to disable
 these automatic optimizations, and to leave the DomainParticipant's QoS to
 its defaults.
 
+### RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS
+
+By default, `rmw_connextdds` will modify the QoS of each reliable DataWriter
+and DataReader to improve the responsiveness of the RTPS [reliability protocol](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Using_QosPolicies_to_Tune_the_Reliable_P.htm?tocpath=Part%203%3A%20Advanced%20Concepts%7C11.%20Reliable%20Communications%7C11.3%20Using%20QosPolicies%20to%20Tune%20the%20Reliable%20Protocol%7C_____0#reliable_1394042328_776265).
+
+For example, the ["heartbeat period"](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Controlling_Heartbeats_and_Retries.htm#reliable_1394042328_785637)
+is sped up from 3 seconds to 100 milliseconds.
+
+These optimizations may be disabled using variable
+`RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS`.
+
 ### RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY
 
 When this variable is not set or set to `always`, the QoS settings specified in
@@ -231,7 +243,7 @@ ROS mangles topic names in the following way:
 
 - Topics are prefixed with `rt`. e.g.: `/my/fully/qualified/ros/topic` is converted to `rt/my/fully/qualified/ros/topic`.
 - The service request topics are prefixed with `rq` and suffixed with `Request`. e.g.: `/my/fully/qualified/ros/service` request topic is `rq/my/fully/qualified/ros/serviceRequest`.
-- The service response topics are prefixed with `rr` and suffixed with `Response`. e.g.: `/my/fully/qualified/ros/service` response topic is `rr/my/fully/qualified/ros/serviceResponse`.
+- The service response topics are prefixed with `rr` and suffixed with `Reply`. e.g.: `/my/fully/qualified/ros/service` response topic is `rr/my/fully/qualified/ros/serviceReply`.
 
 ### RMW_CONNEXT_INITIAL_PEERS
 
@@ -245,7 +257,7 @@ The values will be parsed, trimmed, and stored in QoS field
 value it previously contained.
 
 While both `rmw_connextdds` and `rmw_connextddsmicro` will honor this variable,
-[equivalent, and more advanced, functionality is already available in RTI Connext DDS](https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/ConfigPeersListUsed_inDiscov.htm),
+[equivalent, and more advanced, functionality is already available in RTI Connext DDS](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/ConfigPeersListUsed_inDiscov.htm),
 for example using variable `NDDS_DISCOVERY_PEERS`.
 
 For this reason, only users of `rmw_connextddsmicro` should consider specifying
@@ -268,13 +280,13 @@ RMW_CONNEXT_INITIAL_PEERS="_shmem://, 239.255.0.1" \
 
 ### RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE
 
-ROS2 applications using `rmw_connextdds` will not be able to interoperate with
+ROS 2 applications using `rmw_connextdds` will not be able to interoperate with
 applications using the previous RMW implementation for RTI Connext DDS, `rmw_connext_cpp`,
 unless variable `RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE` is used to enable
 a "compatibility" mode with these older implementation.
 
 In particular, when this mode is enabled, `rmw_connextdds` will revert to adding
-a suffix (`_`) to the end of the names of the attributes of the ROS2 data types
+a suffix (`_`) to the end of the names of the attributes of the ROS 2 data types
 propagated via DDS discovery.
 
 ### RMW_CONNEXT_PARTICIPANT_QOS_OVERRIDE_POLICY
@@ -284,9 +296,9 @@ from Connext.
 
 If this variable is unspecified, or set to `all`, then `rmw_connextdds` will modify
 the default DomainParticipantQos with settings derived from ROS 2 options (e.g.
-"localhost only", or "node enclave"), and some additional optimizations meant to
-improve the out of the box experiene (e.g. speed up endpoint discovery, and increase
-the size of type information shared via discovery).
+"node enclave"), and some additional optimizations meant to improve the out of
+the box experiene (e.g. speed up endpoint discovery, and increase the size of type
+information shared via discovery).
 
 If the variable is set to `basic`, then only those settings associated with ROS 2
 options will be modified.
@@ -301,7 +313,7 @@ optimizations controlled by [RMW_CONNEXT_DISABLE_FAST_ENDPOINT_DISCOVERY](#RMW_C
 
 The [DDS-RPC specification](https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/)
 defines two profiles for mapping "request/reply" interactions over DDS messages
-(e.g. ROS2 clients and services):
+(e.g. ROS 2 clients and services):
 
 - the *basic* profile conveys information about the originator of a request as
   an inline payload, serialized before the actual request/reply payloads.
@@ -310,7 +322,7 @@ defines two profiles for mapping "request/reply" interactions over DDS messages
   information out of band.
 
 By default, `rmw_connextdds` uses the *extended* profile when sending requests
-from a ROS2 client to a service, while `rmw_connextddsmicro` uses the *basic* one.
+from a ROS 2 client to a service, while `rmw_connextddsmicro` uses the *basic* one.
 
 Variable `RMW_CONNEXT_REQUEST_REPLY_MAPPING` can be used to select the actual
 profile used at runtime. Either `"basic"` or `"extended"` may be specified.

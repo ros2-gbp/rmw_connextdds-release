@@ -2,21 +2,97 @@
 Changelog for package rti_connext_dds_cmake_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.11.5 (2025-10-21)
+1.2.4 (2025-11-18)
+------------------
+
+1.2.3 (2025-10-20)
+------------------
+
+1.2.2 (2025-07-29)
+------------------
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
+* Contributors: mosfet80
+
+1.2.1 (2025-07-01)
+------------------
+
+1.2.0 (2025-04-25)
+------------------
+
+1.1.0 (2025-04-18)
+------------------
+* Update Connext to 7.3.0 (`#181 <https://github.com/ros2/rmw_connextdds/issues/181>`_)
+* Contributors: lobolanja
+
+1.0.1 (2025-03-11)
+------------------
+
+1.0.0 (2025-02-18)
+------------------
+
+0.25.1 (2025-02-17)
 -------------------
 
-0.11.4 (2025-03-25)
--------------------
-* Quiet a warning when CONNEXTDDS_DIR or NDDSHOME is not found. (`#158 <https://github.com/ros2/rmw_connextdds/issues/158>`_) (`#166 <https://github.com/ros2/rmw_connextdds/issues/166>`_)
-* Contributors: mergify[bot]
-
-0.11.3 (2024-11-25)
+0.25.0 (2024-12-20)
 -------------------
 
-0.11.2 (2023-07-18)
+0.24.2 (2024-10-03)
 -------------------
-* Use unified approach for checking the existence of environment variables (`#105 <https://github.com/ros2/rmw_connextdds/issues/105>`_) (`#118 <https://github.com/ros2/rmw_connextdds/issues/118>`_)
-* Contributors: mergify[bot]
+* Quiet a warning when CONNEXTDDS_DIR or NDDSHOME is not found. (`#158 <https://github.com/ros2/rmw_connextdds/issues/158>`_)
+* Contributors: Chris Lalancette
+
+0.24.1 (2024-07-29)
+-------------------
+
+0.24.0 (2024-06-17)
+-------------------
+
+0.23.0 (2024-04-26)
+-------------------
+
+0.22.0 (2024-04-09)
+-------------------
+
+0.21.0 (2024-03-28)
+-------------------
+
+0.20.1 (2024-03-09)
+-------------------
+
+0.20.0 (2024-01-24)
+-------------------
+
+0.19.0 (2023-11-06)
+-------------------
+
+0.18.0 (2023-10-04)
+-------------------
+
+0.17.0 (2023-08-21)
+-------------------
+
+0.16.0 (2023-07-11)
+-------------------
+
+0.15.1 (2023-05-11)
+-------------------
+* Use unified approach for checking the existence of environment variables (`#105 <https://github.com/ros2/rmw_connextdds/issues/105>`_)
+* Contributors: Christopher Wecht
+
+0.15.0 (2023-04-27)
+-------------------
+
+0.14.0 (2023-04-12)
+-------------------
+
+0.13.0 (2022-11-02)
+-------------------
+
+0.12.1 (2022-09-13)
+-------------------
+
+0.12.0 (2022-05-03)
+-------------------
 
 0.11.1 (2022-04-26)
 -------------------
