@@ -2,56 +2,22 @@
 Changelog for package rmw_connextddsmicro
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.4 (2025-11-18)
-------------------
-* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
-* Contributors: Minju, Lee
+0.22.3 (2026-01-21)
+-------------------
+* fix: remove superflous buildtool_export_depend. (backport `#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_) (`#212 <https://github.com/ros2/rmw_connextdds/issues/212>`_)
+  * fix: remove superflous buildtool_export_depend. (`#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_)
+  (cherry picked from commit b2e22aa55c2a62bb7baac4e0548dd7a55b647a27)
+  Co-authored-by: Tomoya Fujita <Tomoya.Fujita@sony.com>
+  Co-authored-by: Alejandro Hernandez Cordero <ahcorde@gmail.com>
+* Contributors: mergify[bot]
 
-1.2.3 (2025-10-20)
-------------------
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-
-1.2.0 (2025-04-25)
-------------------
-
-1.1.0 (2025-04-18)
-------------------
-* Mark the package rmw_connextddsmicro as deprecated (`#182 <https://github.com/ros2/rmw_connextdds/issues/182>`_)
-* Switch buildtool to ament_cmake package (`#183 <https://github.com/ros2/rmw_connextdds/issues/183>`_)
-* Contributors: Francisco Gallego Salido, Scott K Logan
-
-1.0.1 (2025-03-11)
-------------------
-* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_)
-* Contributors: Alejandro Hernández Cordero
-
-1.0.0 (2025-02-18)
-------------------
-
-0.25.1 (2025-02-17)
+0.22.2 (2025-10-21)
 -------------------
 
-0.25.0 (2024-12-20)
+0.22.1 (2025-03-12)
 -------------------
-
-0.24.2 (2024-10-03)
--------------------
-
-0.24.1 (2024-07-29)
--------------------
-
-0.24.0 (2024-06-17)
--------------------
-
-0.23.0 (2024-04-26)
--------------------
+* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_) (`#175 <https://github.com/ros2/rmw_connextdds/issues/175>`_)
+* Contributors: mergify[bot]
 
 0.22.0 (2024-04-09)
 -------------------

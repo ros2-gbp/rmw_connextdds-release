@@ -41,8 +41,7 @@ rmw_connextdds_graph_add_entityEA(
   const DDS_LivelinessQosPolicy * const liveliness,
   const DDS_LifespanQosPolicy * const lifespan,
   const bool is_reader,
-  const bool local,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  const bool local);
 
 static rmw_ret_t
 rmw_connextdds_graph_remove_entityEA(
@@ -54,15 +53,13 @@ static rmw_ret_t
 rmw_connextdds_graph_add_local_publisherEA(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Publisher * const pub,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  RMW_Connext_Publisher * const pub);
 
 static rmw_ret_t
 rmw_connextdds_graph_add_local_subscriberEA(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Subscriber * const sub,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  RMW_Connext_Subscriber * const sub);
 
 rmw_ret_t
 rmw_connextdds_graph_initialize(rmw_context_impl_t * const ctx)
@@ -434,8 +431,7 @@ rmw_ret_t
 rmw_connextdds_graph_on_service_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Service * const svc,
-  const rosidl_type_hash_t * ser_type_hash)
+  RMW_Connext_Service * const svc)
 {
   std::lock_guard<std::mutex> guard(ctx->common_mutex);
   const rmw_gid_t pub_gid = *svc->publisher()->gid(),
@@ -458,14 +454,14 @@ rmw_connextdds_graph_on_service_created(
     });
 
   rmw_ret_t rc = rmw_connextdds_graph_add_local_subscriberEA(
-    ctx, node, svc->subscriber(), ser_type_hash);
+    ctx, node, svc->subscriber());
   if (RMW_RET_OK != rc) {
     return rc;
   }
   // set it so that it can be removed in the `scope_exit_entities_reset`
   added_sub = true;
 
-  rc = rmw_connextdds_graph_add_local_publisherEA(ctx, node, svc->publisher(), ser_type_hash);
+  rc = rmw_connextdds_graph_add_local_publisherEA(ctx, node, svc->publisher());
   if (RMW_RET_OK != rc) {
     return rc;
   }
@@ -513,8 +509,7 @@ rmw_ret_t
 rmw_connextdds_graph_on_client_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Client * const client,
-  const rosidl_type_hash_t * ser_type_hash)
+  RMW_Connext_Client * const client)
 {
   std::lock_guard<std::mutex> guard(ctx->common_mutex);
   const rmw_gid_t pub_gid = *client->publisher()->gid(),
@@ -537,13 +532,13 @@ rmw_connextdds_graph_on_client_created(
     });
 
   rmw_ret_t rc = rmw_connextdds_graph_add_local_subscriberEA(
-    ctx, node, client->subscriber(), ser_type_hash);
+    ctx, node, client->subscriber());
   if (RMW_RET_OK != rc) {
     return rc;
   }
   added_sub = true;
 
-  rc = rmw_connextdds_graph_add_local_publisherEA(ctx, node, client->publisher(), ser_type_hash);
+  rc = rmw_connextdds_graph_add_local_publisherEA(ctx, node, client->publisher());
   if (RMW_RET_OK != rc) {
     return rc;
   }
@@ -671,8 +666,7 @@ rmw_connextdds_graph_add_entityEA(
   const DDS_LivelinessQosPolicy * const liveliness,
   const DDS_LifespanQosPolicy * const lifespan,
   const bool is_reader,
-  const bool local,
-  const rosidl_type_hash_t * ser_type_hash)
+  const bool local)
 {
   UNUSED_ARG(local);
   rmw_gid_t gid;
@@ -729,8 +723,7 @@ rmw_connextdds_graph_add_entityEA(
       type_hash,
       dp_gid,
       qos_profile,
-      is_reader,
-      ser_type_hash))
+      is_reader))
   {
     // This is downgraded to a debug message because we might
     // enter this path when asserting entities from discovery.
@@ -762,8 +755,7 @@ rmw_ret_t
 rmw_connextdds_graph_add_local_publisherEA(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Publisher * const pub,
-  const rosidl_type_hash_t * ser_type_hash)
+  RMW_Connext_Publisher * const pub)
 {
   UNUSED_ARG(node);
   RMW_CONNEXT_LOG_DEBUG_A(
@@ -828,16 +820,14 @@ rmw_connextdds_graph_add_local_publisherEA(
     nullptr /* Micro doesn't support LifespanQosPolicy */,
 #endif /* RMW_CONNEXT_DDS_API */
     false /* is_reader */,
-    true /* local */,
-    ser_type_hash);
+    true /* local */);
 }
 
 rmw_ret_t
 rmw_connextdds_graph_add_local_subscriberEA(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Subscriber * const sub,
-  const rosidl_type_hash_t * ser_type_hash)
+  RMW_Connext_Subscriber * const sub)
 {
   UNUSED_ARG(node);
   RMW_CONNEXT_LOG_DEBUG_A(
@@ -898,8 +888,7 @@ rmw_connextdds_graph_add_local_subscriberEA(
     &dr_qos.liveliness,
     nullptr /* Lifespan is a writer-only qos policy */,
     true /* is_reader */,
-    true /* local */,
-    ser_type_hash);
+    true /* local */);
 }
 
 rmw_ret_t
@@ -935,20 +924,13 @@ rmw_connextdds_graph_add_remote_entity(
   if (RMW_RET_OK != rmw_dds_common::parse_type_hash_from_user_data(
       user_data_data, user_data_size, type_hash))
   {
-    RMW_CONNEXT_LOG_DEBUG_A(
+    RMW_CONNEXT_LOG_WARNING_A(
       "Failed to parse type hash for topic '%s' with type '%s' from USER_DATA '%*s'.",
       topic_name, type_name,
       static_cast<int>(user_data_size), reinterpret_cast<const char *>(user_data_data));
     type_hash = rosidl_get_zero_initialized_type_hash();
     // We handled the error, so clear it out
     rmw_reset_error();
-  }
-  rosidl_type_hash_t ser_type_hash;
-  rosidl_type_hash_t * ser_type_hash_ptr = nullptr;
-  if (RMW_RET_OK == rmw_dds_common::parse_sertype_hash_from_user_data(
-      reinterpret_cast<const uint8_t *>(user_data_data), user_data_size, ser_type_hash))
-  {
-    ser_type_hash_ptr = &ser_type_hash;
   }
 
   rmw_ret_t rc = rmw_connextdds_graph_add_entityEA(
@@ -965,8 +947,7 @@ rmw_connextdds_graph_add_remote_entity(
     liveliness,
     lifespan,
     is_reader,
-    false /* local */,
-    ser_type_hash_ptr);
+    false /* local */);
   if (RMW_RET_OK != rc) {
     return rc;
   }

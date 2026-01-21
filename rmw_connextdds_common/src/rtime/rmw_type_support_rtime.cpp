@@ -203,7 +203,7 @@ RMW_Connext_EncapsulationPlugin_serialize(
     }
   } else {
     if (RCUTILS_RET_OK !=
-      rcutils_uint8_array_copy(&data_buffer, user_buffer, false /* realloc_if_needed */))
+      rcutils_uint8_array_copy(&data_buffer, user_buffer))
     {
       return RTI_FALSE;
     }

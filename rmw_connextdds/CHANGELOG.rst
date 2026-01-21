@@ -2,57 +2,23 @@
 Changelog for package rmw_connextdds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.4 (2025-11-18)
-------------------
-* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
-* fix: remove superflous `buildtool_export_depend` (`#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_)
-* Contributors: Bas Zalmstra, Minju, Lee
+0.22.3 (2026-01-21)
+-------------------
+* fix: remove superflous `buildtool_export_depend` (backport `#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_) (`#208 <https://github.com/ros2/rmw_connextdds/issues/208>`_)
+  * fix: remove superflous `buildtool_export_depend` (`#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_)
+  As far as I understand this package does not expose an build time interface that requires `amend_cmake` so the `buildtool_export_depend` is not needed.
+  (cherry picked from commit 78ab48e6c43a8040599f0fa97e8e4d39a6121435)
+  Co-authored-by: Bas Zalmstra <4995967+baszalmstra@users.noreply.github.com>
+  Co-authored-by: Alejandro Hernandez Cordero <ahcorde@gmail.com>
+* Contributors: mergify[bot]
 
-1.2.3 (2025-10-20)
-------------------
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-
-1.2.0 (2025-04-25)
-------------------
-
-1.1.0 (2025-04-18)
-------------------
-* Switch buildtool to ament_cmake package (`#183 <https://github.com/ros2/rmw_connextdds/issues/183>`_)
-* Export a modern CMake target (`#179 <https://github.com/ros2/rmw_connextdds/issues/179>`_)
-* Contributors: Scott K Logan, Shane Loretz
-
-1.0.1 (2025-03-11)
-------------------
-* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_)
-* Contributors: Alejandro Hernández Cordero
-
-1.0.0 (2025-02-18)
-------------------
-
-0.25.1 (2025-02-17)
+0.22.2 (2025-10-21)
 -------------------
 
-0.25.0 (2024-12-20)
+0.22.1 (2025-03-12)
 -------------------
-
-0.24.2 (2024-10-03)
--------------------
-
-0.24.1 (2024-07-29)
--------------------
-
-0.24.0 (2024-06-17)
--------------------
-
-0.23.0 (2024-04-26)
--------------------
+* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_) (`#175 <https://github.com/ros2/rmw_connextdds/issues/175>`_)
+* Contributors: mergify[bot]
 
 0.22.0 (2024-04-09)
 -------------------

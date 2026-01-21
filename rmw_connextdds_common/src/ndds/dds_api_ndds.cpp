@@ -30,8 +30,6 @@
 #include "rmw_connextdds/rmw_impl.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
 
-#include "dds_c/dds_c_infrastructure_impl.h"
-
 const char * const RMW_CONNEXTDDS_ID = "rmw_connextdds";
 const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT = "cdr";
 
@@ -485,8 +483,7 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_publisher_options_t * const pub_options)
 {
   UNUSED_ARG(topic);
 
@@ -516,8 +513,7 @@ rmw_connextdds_get_datawriter_qos(
         &qos->user_data,
         qos_policies,
         pub_options,
-        nullptr /* sub_options */,
-        ser_type_hash))
+        nullptr /* sub_options */))
     {
       return RMW_RET_ERROR;
     }
@@ -603,8 +599,7 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_subscription_options_t * const sub_options)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic_desc);
@@ -634,8 +629,7 @@ rmw_connextdds_get_datareader_qos(
         &qos->user_data,
         qos_policies,
         nullptr /* pub_options */,
-        sub_options,
-        ser_type_hash))
+        sub_options))
     {
       return RMW_RET_ERROR;
     }
@@ -688,8 +682,7 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataWriterQos * const dw_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -697,7 +690,7 @@ rmw_connextdds_create_datawriter(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datawriter_qos(
-      ctx, type_support, topic, dw_qos, qos_policies, publisher_options, ser_type_hash))
+      ctx, type_support, topic, dw_qos, qos_policies, publisher_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert writer QoS")
     return nullptr;
@@ -721,8 +714,7 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataReaderQos * const dr_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -730,7 +722,7 @@ rmw_connextdds_create_datareader(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datareader_qos(
-      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options, ser_type_hash))
+      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert reader QoS")
     return nullptr;
@@ -758,20 +750,22 @@ rmw_connextdds_write_message(
     const RMW_Connext_RequestReplyMessage * const rr_msg =
       reinterpret_cast<const RMW_Connext_RequestReplyMessage *>(message->user_data);
 
-    // Propagate the request's sample identity via the related_sample_identity field
-    int64_t sn_ros = rr_msg->sn >= 0 ? rr_msg->sn : 0;
-    rmw_connextdds_sn_ros_to_dds(
-      sn_ros,
-      write_params.related_sample_identity.sequence_number);
+    if (!rr_msg->request) {
+      /* If this is a reply, propagate the request's sample identity
+         via the related_sample_identity field */
+      rmw_ret_t rc = RMW_RET_ERROR;
 
-    rmw_ret_t rc = rmw_connextdds_gid_to_guid(
-      rr_msg->request ? rr_msg->gid : rr_msg->writer_gid,
-      write_params.related_sample_identity.writer_guid);
-    if (RMW_RET_OK != rc) {
-      return rc;
-    }
+      rmw_connextdds_sn_ros_to_dds(
+        rr_msg->sn,
+        write_params.related_sample_identity.sequence_number);
 
-    if (rr_msg->request) {
+      rc = rmw_connextdds_gid_to_guid(
+        rr_msg->gid,
+        write_params.related_sample_identity.writer_guid);
+      if (RMW_RET_OK != rc) {
+        return rc;
+      }
+    } else {
       // enable WriteParams::replace_auto to retrieve SN of published message
       write_params.replace_auto = DDS_BOOLEAN_TRUE;
     }
@@ -802,25 +796,27 @@ rmw_connextdds_take_samples(
   DDS_Long data_len = 0;
   void ** data_buffer = nullptr;
 
-  // TODO(fgallegosalido): Use DDS_DataReader_read_or_take_instance_untypedI
-  // when ROS2 support for instances is added.
   DDS_ReturnCode_t rc =
-    DDS_DataReader_read_or_take_untypedI(
-      sub->reader(),
-      &is_loan,
-      &data_buffer,
-      &data_len,
-      sub->info_seq(),
-      0 /* data_seq_len */,
-      0 /* data_seq_max_len */,
-      DDS_BOOLEAN_TRUE /* data_seq_has_ownership */,
-      NULL /* data_seq_contiguous_buffer_for_copy */,
-      1 /* data_size -- ignored because loaning*/,
-      DDS_LENGTH_UNLIMITED /* max_samples */,
-      DDS_ANY_SAMPLE_STATE,
-      DDS_ANY_VIEW_STATE,
-      DDS_ANY_INSTANCE_STATE,
-      DDS_BOOLEAN_TRUE /* take */);
+    DDS_DataReader_read_or_take_instance_untypedI(
+    sub->reader(),
+    &is_loan,
+    &data_buffer,
+    &data_len,
+    sub->info_seq(),
+    0 /* data_seq_len */,
+    0 /* data_seq_max_len */,
+    DDS_BOOLEAN_TRUE /* data_seq_has_ownership */,
+    NULL /* data_seq_contiguous_buffer_for_copy */,
+    1 /* data_size -- ignored because loaning*/,
+    DDS_LENGTH_UNLIMITED /* max_samples */,
+    &DDS_HANDLE_NIL /* a_handle */,
+#if !RMW_CONNEXT_DDS_API_PRO_LEGACY
+    NULL /* topic_query_guid */,
+#endif /* RMW_CONNEXT_DDS_API_PRO_LEGACY */
+    DDS_ANY_SAMPLE_STATE,
+    DDS_ANY_VIEW_STATE,
+    DDS_ANY_INSTANCE_STATE,
+    DDS_BOOLEAN_TRUE /* take */);
   if (DDS_RETCODE_OK != rc) {
     if (DDS_RETCODE_NO_DATA == rc) {
       return RMW_RET_OK;
@@ -828,8 +824,7 @@ rmw_connextdds_take_samples(
     RMW_CONNEXT_LOG_ERROR_SET("failed to take data from DDS reader")
     return RMW_RET_ERROR;
   }
-  RMW_CONNEXT_ASSERT(data_len > 0);
-  (void) RMW_Connext_MessagePtrSeq_loan_contiguous(
+  RMW_CONNEXT_ASSERT(data_len > 0)(void) RMW_Connext_MessagePtrSeq_loan_contiguous(
     sub->data_seq(),
     reinterpret_cast<RMW_Connext_Message **>(data_buffer),
     data_len,
@@ -887,9 +882,7 @@ rmw_connextdds_count_unread_samples(
   unread_count = 0;
   DDS_ReturnCode_t rc = DDS_RETCODE_ERROR;
   do {
-    // TODO(fgallegosalido): Use DDS_DataReader_read_or_take_instance_untypedI
-    // when ROS 2 support for instances is added.
-    rc = DDS_DataReader_read_or_take_untypedI(
+    rc = DDS_DataReader_read_or_take_instance_untypedI(
       sub->reader(),
       &is_loan,
       &data_buffer,
@@ -901,6 +894,10 @@ rmw_connextdds_count_unread_samples(
       NULL /* data_seq_contiguous_buffer_for_copy */,
       1 /* data_size -- ignored because loaning*/,
       DDS_LENGTH_UNLIMITED /* max_samples */,
+      &DDS_HANDLE_NIL /* a_handle */,
+  #if !RMW_CONNEXT_DDS_API_PRO_LEGACY
+      NULL /* topic_query_guid */,
+  #endif /* RMW_CONNEXT_DDS_API_PRO_LEGACY */
       DDS_NOT_READ_SAMPLE_STATE,
       DDS_ANY_VIEW_STATE,
       DDS_ANY_INSTANCE_STATE,
@@ -1600,14 +1597,5 @@ rmw_connextdds_get_cft_filter_expression(
     return RMW_RET_ERROR;
   }
 
-  return RMW_RET_OK;
-}
-
-rmw_ret_t
-rmw_connextdds_guid_to_instance_handle(
-  const struct DDS_GUID_t * const guid,
-  DDS_InstanceHandle_t * const instance_handle)
-{
-  DDS_GUID_to_instance_handle(guid, instance_handle);
   return RMW_RET_OK;
 }

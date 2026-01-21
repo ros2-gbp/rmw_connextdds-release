@@ -2,80 +2,24 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.4 (2025-11-18)
-------------------
-* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
-* Contributors: Minju, Lee
-
-1.2.3 (2025-10-20)
-------------------
-* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_)
-* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_)
-* Contributors: Chris Lalancette, Francisco Gallego Salido
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_)
-* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_)
-* Contributors: Alejandro Hernández Cordero, Francisco Gallego Salido
-
-1.2.0 (2025-04-25)
-------------------
-
-1.1.0 (2025-04-18)
-------------------
-* Address cpplit and gcc warnings. (`#184 <https://github.com/ros2/rmw_connextdds/issues/184>`_)
-* Support topic instances (`#178 <https://github.com/ros2/rmw_connextdds/issues/178>`_)
-* Switch buildtool to ament_cmake package (`#183 <https://github.com/ros2/rmw_connextdds/issues/183>`_)
-* Discovery race condition mitigation (`#174 <https://github.com/ros2/rmw_connextdds/issues/174>`_)
-* Contributors: Francisco Gallego Salido, Scott K Logan, Tomoya Fujita
-
-1.0.1 (2025-03-11)
-------------------
-* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_)
-* use rmw_enclave_options_xxx APIs instead. (`#172 <https://github.com/ros2/rmw_connextdds/issues/172>`_)
-* fix security certificate error message format. (`#171 <https://github.com/ros2/rmw_connextdds/issues/171>`_)
-* Contributors: Alejandro Hernández Cordero, Tomoya Fujita
-
-1.0.0 (2025-02-18)
-------------------
-
-0.25.1 (2025-02-17)
+0.22.3 (2026-01-21)
 -------------------
-* Use rmw_security_common (`#167 <https://github.com/ros2/rmw_connextdds/issues/167>`_)
-* Use target_link_libraries instead of ament_target_dependencies (`#169 <https://github.com/ros2/rmw_connextdds/issues/169>`_)
-* introduce RMW_EVENT_TYPE_MAX in rmw_event_type_t. (`#162 <https://github.com/ros2/rmw_connextdds/issues/162>`_)
-* Contributors: Alejandro Hernández Cordero, Shane Loretz, Tomoya Fujita
+* fix: remove superflous buildtool_export_depend. (backport `#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_) (`#212 <https://github.com/ros2/rmw_connextdds/issues/212>`_)
+  * fix: remove superflous buildtool_export_depend. (`#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_)
+  (cherry picked from commit b2e22aa55c2a62bb7baac4e0548dd7a55b647a27)
+  Co-authored-by: Tomoya Fujita <Tomoya.Fujita@sony.com>
+  Co-authored-by: Alejandro Hernandez Cordero <ahcorde@gmail.com>
+* Contributors: mergify[bot]
 
-0.25.0 (2024-12-20)
+0.22.2 (2025-10-21)
 -------------------
-* Instrument client/service for end-to-end request/response tracking (`#163 <https://github.com/ros2/rmw_connextdds/issues/163>`_)
-* Contributors: Christophe Bedard
+* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_) (`#204 <https://github.com/ros2/rmw_connextdds/issues/204>`_)
+* Contributors: mergify[bot]
 
-0.24.2 (2024-10-03)
+0.22.1 (2025-03-12)
 -------------------
-* fix: "Failed to parse type hash" message was overly spammy (ros2-50) (`#149 <https://github.com/ros2/rmw_connextdds/issues/149>`_)
-* Contributors: Taxo Rubio RTI
-
-0.24.1 (2024-07-29)
--------------------
-* remove rmw_localhost_only_t. (`#156 <https://github.com/ros2/rmw_connextdds/issues/156>`_)
-* Contributors: Tomoya Fujita
-
-0.24.0 (2024-06-17)
--------------------
-* Make rmw_service_server_is_available return RMW_RET_INVALID_ARGUMENT (`#150 <https://github.com/ros2/rmw_connextdds/issues/150>`_)
-* Use rmw_namespace_validation_result_string() in rmw_create_node (`#151 <https://github.com/ros2/rmw_connextdds/issues/151>`_)
-* Make rmw_destroy_wait_set return RMW_RET_INVALID_ARGUMENT (`#152 <https://github.com/ros2/rmw_connextdds/issues/152>`_)
-* Contributors: Christophe Bedard
-
-0.23.0 (2024-04-26)
--------------------
+* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_) (`#175 <https://github.com/ros2/rmw_connextdds/issues/175>`_)
+* Contributors: mergify[bot]
 
 0.22.0 (2024-04-09)
 -------------------

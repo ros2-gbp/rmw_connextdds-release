@@ -2,13 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rmw_connextdds_common</name>
-  <version>1.2.4</version>
+  <version>0.22.3</version>
   <description>Common source for RMW implementations built with RTI Connext DDS Professional and RTI Connext DDS Micro.</description>
   <maintainer email="asorbini@rti.com">Andrea Sorbini</maintainer>
   <license>Apache License 2.0</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
   <depend>rti_connext_dds_cmake_module</depend>
   <depend>fastcdr</depend>
@@ -16,7 +15,6 @@
   <depend>rcpputils</depend>
   <depend>rmw</depend>
   <depend>rmw_dds_common</depend>
-  <depend>rmw_security_common</depend>
   <depend>rosidl_runtime_c</depend>
   <depend>rosidl_runtime_cpp</depend>
   <depend>rosidl_typesupport_fastrtps_c</depend>

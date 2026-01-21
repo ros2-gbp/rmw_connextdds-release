@@ -1,14 +1,15 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
-This repository contains a implementation of the [ROS 2](https://docs.ros.org/en/rolling)
+This repository contains two novel implementations of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
 [RTI Connext DDS Professional](https://www.rti.com/products/connext-dds-professional)
+and [RTI Connext DDS Micro](https://www.rti.com/products/connext-dds-micro).
 
 The repository provides two RMW packages:
 
 - `rmw_connextdds`
 
-- `rmw_connextddsmicro` (deprecated)
+- `rmw_connextddsmicro`
 
 Package `rmw_connextdds` is meant to be a replacement for [`rmw_connext_cpp`](https://github.com/ros2/rmw_connext).
 This new implementation resolves several performance issues, and it improves out-of-the-box
@@ -19,7 +20,7 @@ active development.
 Please consider reporting any [issue](https://github.com/rticommunity/rmw_connextdds/issues)
 that you may experience, while monitoring the repository for frequent updates.*
 
-For any questions or feedback, feel free to reach out to rti-ros-team@rti.com.
+For any questions or feedback, feel free to reach out to robotics@rti.com.
 
 ## Quick Start
 
@@ -33,11 +34,11 @@ For any questions or feedback, feel free to reach out to rti-ros-team@rti.com.
 2. Configure RTI Connext DDS Professional and/or RTI Connext DDS Micro on your
    system (see [Requirements](#rti-connext-dds-requirements)). Make the installation(s)
    available via environment variables, e.g. by using the provided
-   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-7.3.0` with
+   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-6.0.1` with
    the path of your Connext installation):
 
    ```sh
-    source ~/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
+    source ~/rti_connext_dds-6.0.1/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
     export CONNEXTDDS_DIR=${NDDSHOME}
     ```
 
@@ -84,7 +85,7 @@ release:
 |ROS 2 Release|Branch|Status|
 |-------------|------|------|
 |Rolling      |`rolling`|Developed|
-|Iron         |`iron`|Supported until November 2024 (EOL)|
+|Iron         |`iron`|Supported until November 2024|
 |Humble       |`humble`|Supported until May 2027|
 |Galactic     |`galactic`|Supported until November 2022 (EOL)|
 |Foxy         |`foxy`|Supported until May 2023 (EOL)|
@@ -110,8 +111,8 @@ valid installation is detected, the packages will be skipped and not be built.
 
 |RMW|RTI Product|Environment Variable(s)|Required|Default|
 |---|-----------|-----------------------|--------|-------|
-|`rmw_connextdds`|RTI Connext DDS Professional 7.3.0|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
-|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 7.3.0 is available)|Guessed from contents of RTI Connext DDS Professional installation|
+|`rmw_connextdds`|RTI Connext DDS Professional 5.3.1, or 6.x|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
+|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 6.x is available)|Guessed from contents of RTI Connext DDS Professional installation (6.x only, 5.3.1 users must specify `RTIMEHOME`).|
 
 ### Multiple versions of RTI Connext DDS Professional
 
@@ -128,7 +129,7 @@ have installed RTI Connext DDS Professional 5.3.1 via the `apt` package
 If `rmw_connext_cpp` is installed via debian package
 `ros-<version>-rmw-connext-cpp`, variable `${NDDSHOME}` will always be
 hard-coded to the install location of the `apt` package
-(`/opt/rti.com/rti_connext_dds-<version>`).
+(`/opt/rti.com/rti_connext_dds-5.3.1`).
 
 In this case, you can use `${CONNEXTDDS_DIR}` to point to a Connext 6.x
 installation, making sure to source script
@@ -210,9 +211,9 @@ its defaults.
 ### RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS
 
 By default, `rmw_connextdds` will modify the QoS of each reliable DataWriter
-and DataReader to improve the responsiveness of the RTPS [reliability protocol](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Using_QosPolicies_to_Tune_the_Reliable_P.htm?tocpath=Part%203%3A%20Advanced%20Concepts%7C11.%20Reliable%20Communications%7C11.3%20Using%20QosPolicies%20to%20Tune%20the%20Reliable%20Protocol%7C_____0#reliable_1394042328_776265).
+and DataReader to improve the responsiveness of the RTPS [reliability protocol](https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Using_QosPolicies_to_Tune_the_Reliable_P.htm?tocpath=Part%203%3A%20Advanced%20Concepts%7C11.%20Reliable%20Communications%7C11.3%20Using%20QosPolicies%20to%20Tune%20the%20Reliable%20Protocol%7C_____0#reliable_1394042328_776265).
 
-For example, the ["heartbeat period"](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Controlling_Heartbeats_and_Retries.htm#reliable_1394042328_785637)
+For example, the ["heartbeat period"](https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/Controlling_Heartbeats_and_Retries.htm#reliable_1394042328_785637)
 is sped up from 3 seconds to 100 milliseconds.
 
 These optimizations may be disabled using variable
@@ -257,7 +258,7 @@ The values will be parsed, trimmed, and stored in QoS field
 value it previously contained.
 
 While both `rmw_connextdds` and `rmw_connextddsmicro` will honor this variable,
-[equivalent, and more advanced, functionality is already available in RTI Connext DDS](https://community.rti.com/static/documentation/connext-dds/7.3.0/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/ConfigPeersListUsed_inDiscov.htm),
+[equivalent, and more advanced, functionality is already available in RTI Connext DDS](https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/html_files/RTI_ConnextDDS_CoreLibraries_UsersManual/Content/UsersManual/ConfigPeersListUsed_inDiscov.htm),
 for example using variable `NDDS_DISCOVERY_PEERS`.
 
 For this reason, only users of `rmw_connextddsmicro` should consider specifying
@@ -296,9 +297,9 @@ from Connext.
 
 If this variable is unspecified, or set to `all`, then `rmw_connextdds` will modify
 the default DomainParticipantQos with settings derived from ROS 2 options (e.g.
-"node enclave"), and some additional optimizations meant to improve the out of
-the box experiene (e.g. speed up endpoint discovery, and increase the size of type
-information shared via discovery).
+"localhost only", or "node enclave"), and some additional optimizations meant to
+improve the out of the box experiene (e.g. speed up endpoint discovery, and increase
+the size of type information shared via discovery).
 
 If the variable is set to `basic`, then only those settings associated with ROS 2
 options will be modified.
