@@ -2,13 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rmw_connextdds</name>
-  <version>0.22.2</version>
+  <version>0.22.3</version>
   <description>A ROS 2 RMW implementation built with RTI Connext DDS Professional.</description>
   <maintainer email="asorbini@rti.com">Andrea Sorbini</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
-  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
 
   <depend>rmw_connextdds_common</depend>
 
