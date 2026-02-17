@@ -2,79 +2,22 @@
 Changelog for package rmw_connextdds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.22.3 (2026-01-21)
+0.11.6 (2026-02-16)
 -------------------
-* fix: remove superflous `buildtool_export_depend` (backport `#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_) (`#208 <https://github.com/ros2/rmw_connextdds/issues/208>`_)
-  * fix: remove superflous `buildtool_export_depend` (`#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_)
-  As far as I understand this package does not expose an build time interface that requires `amend_cmake` so the `buildtool_export_depend` is not needed.
-  (cherry picked from commit 78ab48e6c43a8040599f0fa97e8e4d39a6121435)
-  Co-authored-by: Bas Zalmstra <4995967+baszalmstra@users.noreply.github.com>
-  Co-authored-by: Alejandro Hernandez Cordero <ahcorde@gmail.com>
+* fix: remove superflous `buildtool_export_depend` (backport `#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_) (`#209 <https://github.com/ros2/rmw_connextdds/issues/209>`_)
 * Contributors: mergify[bot]
 
-0.22.2 (2025-10-21)
+0.11.5 (2025-10-21)
 -------------------
 
-0.22.1 (2025-03-12)
--------------------
-* Added rmw_event_type_is_supported (`#173 <https://github.com/ros2/rmw_connextdds/issues/173>`_) (`#175 <https://github.com/ros2/rmw_connextdds/issues/175>`_)
-* Contributors: mergify[bot]
-
-0.22.0 (2024-04-09)
+0.11.4 (2025-03-25)
 -------------------
 
-0.21.0 (2024-03-28)
+0.11.3 (2024-11-25)
 -------------------
 
-0.20.1 (2024-03-09)
+0.11.2 (2023-07-18)
 -------------------
-
-0.20.0 (2024-01-24)
--------------------
-
-0.19.0 (2023-11-06)
--------------------
-
-0.18.0 (2023-10-04)
--------------------
-* Add rmw count clients services impl (`#93 <https://github.com/ros2/rmw_connextdds/issues/93>`_)
-* Cleanup context implementation (`#131 <https://github.com/ros2/rmw_connextdds/issues/131>`_)
-* Contributors: Chris Lalancette, Minju, Lee
-
-0.17.0 (2023-08-21)
--------------------
-* Update to C++17 (`#125 <https://github.com/ros2/rmw_connextdds/issues/125>`_)
-* Contributors: Chris Lalancette
-
-0.16.0 (2023-07-11)
--------------------
-
-0.15.1 (2023-05-11)
--------------------
-
-0.15.0 (2023-04-27)
--------------------
-
-0.14.0 (2023-04-12)
--------------------
-* Dynamic Subscription (BONUS: Allocators): rmw_connextdds (`#115 <https://github.com/ros2/rmw_connextdds/issues/115>`_)
-* Revert "Refactor serialization support to use allocators and refs"
-* Refactor serialization support to use allocators and refs
-* Add stubs for new rmw interfaces (`#111 <https://github.com/ros2/rmw_connextdds/issues/111>`_)
-* Contributors: methylDragon
-
-0.13.0 (2022-11-02)
--------------------
-* Add rmw_get_gid_for_client impl (`#92 <https://github.com/ros2/rmw_connextdds/issues/92>`_)
-* Contributors: Brian
-
-0.12.1 (2022-09-13)
--------------------
-
-0.12.0 (2022-05-03)
--------------------
-* Switch ROS2 -> ROS 2 everywhere (`#83 <https://github.com/ros2/rmw_connextdds/issues/83>`_)
-* Contributors: Chris Lalancette
 
 0.11.1 (2022-04-26)
 -------------------

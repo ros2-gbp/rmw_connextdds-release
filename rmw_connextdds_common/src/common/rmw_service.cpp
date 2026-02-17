@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcpputils/scope_exit.hpp"
-
 #include "rmw_connextdds/rmw_impl.hpp"
 #include "rmw_connextdds/graph_cache.hpp"
-
-#include "rmw_dds_common/qos.hpp"
 
 #include "rmw/validate_full_topic_name.h"
 
@@ -160,9 +156,6 @@ rmw_api_connextdds_create_client(
     "name=%s",
     service_name)
 
-  rmw_qos_profile_t adapted_qos_policies =
-    rmw_dds_common::qos_profile_update_best_available_for_services(*qos_policies);
-
   rmw_context_impl_t * ctx = node->context->impl;
   std::lock_guard<std::mutex> guard(ctx->endpoint_mutex);
 
@@ -174,7 +167,7 @@ rmw_api_connextdds_create_client(
     ctx->dds_sub,
     type_supports,
     service_name,
-    &adapted_qos_policies);
+    qos_policies);
 
   if (nullptr == client_impl) {
     RMW_CONNEXT_LOG_ERROR(
@@ -316,24 +309,6 @@ rmw_api_connextdds_client_response_subscription_get_actual_qos(
 }
 
 
-rmw_ret_t
-rmw_api_connextdds_get_gid_for_client(const rmw_client_t * client, rmw_gid_t * gid)
-{
-  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(gid, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
-    client,
-    client->implementation_identifier,
-    RMW_CONNEXTDDS_ID,
-    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-
-  RMW_Connext_Client * const client_impl = reinterpret_cast<RMW_Connext_Client *>(client->data);
-  *gid = client_impl->gid();
-
-  return RMW_RET_OK;
-}
-
-
 rmw_service_t *
 rmw_api_connextdds_create_service(
   const rmw_node_t * node,
@@ -376,9 +351,6 @@ rmw_api_connextdds_create_service(
     "name=%s",
     service_name)
 
-  rmw_qos_profile_t adapted_qos_policies =
-    rmw_dds_common::qos_profile_update_best_available_for_services(*qos_policies);
-
   rmw_context_impl_t * ctx = node->context->impl;
   std::lock_guard<std::mutex> guard(ctx->endpoint_mutex);
 
@@ -390,7 +362,7 @@ rmw_api_connextdds_create_service(
     ctx->dds_sub,
     type_supports,
     service_name,
-    &adapted_qos_policies);
+    qos_policies);
 
   if (nullptr == svc_impl) {
     RMW_CONNEXT_LOG_ERROR(

@@ -12,16 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
-#include <map>
-#include <new>
-#include <regex>
 #include <string>
+#include <map>
 #include <vector>
-
-#include "rcpputils/scope_exit.hpp"
 
 #include "rmw/impl/cpp/key_value.hpp"
 #include "rmw_connextdds/custom_sql_filter.hpp"
@@ -39,22 +32,6 @@ struct rmw_connextdds_api_pro
 };
 
 rmw_connextdds_api_pro * RMW_Connext_fv_FactoryContext = nullptr;
-
-rmw_ret_t
-rmw_connextdds_get_current_time(
-  DDS_DomainParticipant * domain_participant,
-  struct DDS_Time_t * current_time)
-{
-  // Use DDS_DomainParticipant_get_current_time only with Micro since Pro's
-  // implementation is pretty slow. See #120 for details.
-  UNUSED_ARG(domain_participant);
-  RTINtpTime now;
-  if (!RTIOsapiUtility_getTime(&now)) {
-    return DDS_RETCODE_ERROR;
-  }
-  RTINtpTime_unpackToNanosec(current_time->sec, current_time->nanosec, now);
-  return DDS_RETCODE_OK;
-}
 
 rmw_ret_t
 rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity)
@@ -225,6 +202,23 @@ rmw_connextdds_initialize_participant_qos_impl(
     case rmw_context_impl_t::participant_qos_override_policy_t::All:
     case rmw_context_impl_t::participant_qos_override_policy_t::Basic:
       {
+        // Parse and apply QoS parameters derived from ROS 2 configuration options.
+
+        if (ctx->localhost_only) {
+          if (DDS_RETCODE_OK !=
+            DDS_PropertyQosPolicyHelper_assert_property(
+              &dp_qos->property,
+              "dds.transport.UDPv4.builtin.parent.allow_interfaces",
+              RMW_CONNEXT_LOCALHOST_ONLY_ADDRESS,
+              DDS_BOOLEAN_FALSE /* propagate */))
+          {
+            RMW_CONNEXT_LOG_ERROR_A_SET(
+              "failed to assert property on participant: %s",
+              "dds.transport.UDPv4.builtin.parent.allow_interfaces")
+            return RMW_RET_ERROR;
+          }
+        }
+
         const size_t user_data_len_in =
           DDS_OctetSeq_get_length(&dp_qos->user_data.value);
 
@@ -510,7 +504,6 @@ rmw_connextdds_get_datawriter_qos(
         // TODO(asorbini) this value is not actually used, remove it
         &qos->publish_mode,
         &qos->lifespan,
-        &qos->user_data,
         qos_policies,
         pub_options,
         nullptr /* sub_options */))
@@ -522,32 +515,6 @@ rmw_connextdds_get_datawriter_qos(
   if (!ctx->use_default_publish_mode) {
     qos->publish_mode.kind = DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS;
   }
-
-#if RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS
-  // The default settings for the RTPS reliability protocol are not very
-  // responsive, and they cause some unit tests to fail. These optimizations
-  // have been derived from profile `Optimization.ReliabilityProtocol.Common`
-  // available in Connext 6+. `Generic.StrictReliable` is the equivalent
-  // profile in 5.3.1. Changes are limited to `DDS_RtpsReliableWriterProtocol_t`.
-  if (ctx->optimize_reliability) {
-    // All write() calls will block (for at most max_blocking_time) once the send_window
-    // is filled with samples that haven't yet been acknowledged by all active readers.
-    qos->protocol.rtps_reliable_writer.min_send_window_size = 40;
-    qos->protocol.rtps_reliable_writer.max_send_window_size = 40;  // fixed size window
-    qos->protocol.rtps_reliable_writer.heartbeats_per_max_samples = 10;  // 1 every 4
-    qos->protocol.rtps_reliable_writer.heartbeat_period = {0, 200000000};  // 200ms
-    qos->protocol.rtps_reliable_writer.late_joiner_heartbeat_period = {0, 20000000};  // 20ms
-    qos->protocol.rtps_reliable_writer.fast_heartbeat_period = {0, 20000000};  // 20ms
-    qos->protocol.rtps_reliable_writer.max_heartbeat_retries = 500;  // 10s @ 50hz
-    // Force the writer to reply immediately to ACKNACK's received from a writer.
-    qos->protocol.rtps_reliable_writer.max_nack_response_delay = DDS_DURATION_ZERO;
-    // When the number of unack'd samples reaches the high_watermark the fast_heartbeat_period
-    // is used. When the number dips below the low_watermark, the heartbeat_period is used.
-    // These numbers are tied to the send_window size.
-    qos->protocol.rtps_reliable_writer.high_watermark = 25;
-    qos->protocol.rtps_reliable_writer.low_watermark = 10;
-  }
-#endif /* RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS */
 
 #if RMW_CONNEXT_DEFAULT_LARGE_DATA_OPTIMIZATIONS
   // Unless disabled, optimize the DataWriter's reliability protocol to
@@ -626,7 +593,6 @@ rmw_connextdds_get_datareader_qos(
         &qos->resource_limits,
         nullptr /* publish_mode */,
         nullptr /* Lifespan is a writer-only qos policy */,
-        &qos->user_data,
         qos_policies,
         nullptr /* pub_options */,
         sub_options))
@@ -634,17 +600,6 @@ rmw_connextdds_get_datareader_qos(
       return RMW_RET_ERROR;
     }
   }
-
-#if RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS
-  // The default settings for the RTPS reliability protocol are not very
-  // responsive, and they cause some unit tests to fail. These optimizations
-  // are dual to those applied in rmw_connextdds_get_datawriter_qos().
-  // Changes are limited to `DDS_RtpsReliableReaderProtocol_t`.
-  if (ctx->optimize_reliability) {
-    qos->protocol.rtps_reliable_reader.min_heartbeat_response_delay = DDS_DURATION_ZERO;
-    qos->protocol.rtps_reliable_reader.max_heartbeat_response_delay = DDS_DURATION_ZERO;
-  }
-#endif /* RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS */
 
 #if RMW_CONNEXT_DEFAULT_LARGE_DATA_OPTIMIZATIONS
   // Unless disabled, optimize the DataReader's reliability protocol to
@@ -736,19 +691,15 @@ rmw_ret_t
 rmw_connextdds_write_message(
   RMW_Connext_Publisher * const pub,
   RMW_Connext_Message * const message,
-  RMW_Connext_WriteParams * const params)
+  int64_t * const sn_out)
 {
-  DDS_WriteParams_t write_params = DDS_WRITEPARAMS_DEFAULT;
-  if (nullptr != params && !DDS_Time_is_invalid(&params->timestamp)) {
-    write_params.source_timestamp = params->timestamp;
-  }
-
   if (pub->message_type_support()->type_requestreply() &&
     pub->message_type_support()->ctx()->request_reply_mapping ==
     RMW_Connext_RequestReplyMapping::Extended)
   {
     const RMW_Connext_RequestReplyMessage * const rr_msg =
       reinterpret_cast<const RMW_Connext_RequestReplyMessage *>(message->user_data);
+    DDS_WriteParams_t write_params = DDS_WRITEPARAMS_DEFAULT;
 
     if (!rr_msg->request) {
       /* If this is a reply, propagate the request's sample identity
@@ -769,20 +720,34 @@ rmw_connextdds_write_message(
       // enable WriteParams::replace_auto to retrieve SN of published message
       write_params.replace_auto = DDS_BOOLEAN_TRUE;
     }
+    if (DDS_RETCODE_OK !=
+      DDS_DataWriter_write_w_params_untypedI(
+        pub->writer(), message, &write_params))
+    {
+      RMW_CONNEXT_LOG_ERROR_SET(
+        "failed to write request/reply message to DDS")
+      return RMW_RET_ERROR;
+    }
+
+    if (rr_msg->request) {
+      int64_t sn = 0;
+
+      // Read assigned sn from write_params
+      rmw_connextdds_sn_dds_to_ros(
+        write_params.identity.sequence_number, sn);
+
+      *sn_out = sn;
+    }
+
+    return RMW_RET_OK;
   }
 
   if (DDS_RETCODE_OK !=
-    DDS_DataWriter_write_w_params_untypedI(
-      pub->writer(), message, &write_params))
+    DDS_DataWriter_write_untypedI(
+      pub->writer(), message, &DDS_HANDLE_NIL))
   {
     RMW_CONNEXT_LOG_ERROR_SET("failed to write message to DDS")
     return RMW_RET_ERROR;
-  }
-
-  if (nullptr != params && write_params.replace_auto) {
-    // Read assigned sn from write_params
-    rmw_connextdds_sn_dds_to_ros(
-      write_params.identity.sequence_number, params->sequence_number);
   }
 
   return RMW_RET_OK;
@@ -1329,7 +1294,6 @@ rmw_connextdds_dcps_publication_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
-        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,
@@ -1413,7 +1377,6 @@ rmw_connextdds_dcps_subscription_on_data(rmw_context_impl_t * const ctx)
         &dp_guid,
         data->topic_name,
         data->type_name,
-        &data->user_data,
         &data->reliability,
         &data->durability,
         &data->deadline,

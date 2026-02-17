@@ -46,19 +46,8 @@ enum RMW_Connext_MessageType
   RMW_CONNEXT_MESSAGE_REPLY
 };
 
-struct RMW_Connext_WriteParams
-{
-  DDS_Time_t timestamp{DDS_TIME_INVALID};
-  int64_t sequence_number{0};
-};
-
 RMW_CONNEXTDDS_PUBLIC extern const char * const RMW_CONNEXTDDS_ID;
 extern const char * const RMW_CONNEXTDDS_SERIALIZATION_FORMAT;
-
-rmw_ret_t
-rmw_connextdds_get_current_time(
-  DDS_DomainParticipant * domain_participant,
-  struct DDS_Time_t * current_time);
 
 rmw_ret_t
 rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity);
@@ -143,7 +132,7 @@ rmw_ret_t
 rmw_connextdds_write_message(
   RMW_Connext_Publisher * const pub,
   RMW_Connext_Message * const message,
-  RMW_Connext_WriteParams * const params = nullptr);
+  int64_t * const sn_out);
 
 rmw_ret_t
 rmw_connextdds_take_samples(

@@ -19,6 +19,15 @@
 /******************************************************************************
  * Event functions
  ******************************************************************************/
+
+static bool is_event_supported(const rmw_event_type_t event_type)
+{
+  bool invalid = false;
+  ros_event_to_dds(event_type, &invalid);
+  return !invalid;
+}
+
+
 rmw_ret_t
 rmw_api_connextdds_publisher_event_init(
   rmw_event_t * rmw_event,
@@ -33,7 +42,7 @@ rmw_api_connextdds_publisher_event_init(
     return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(rmw_event, RMW_RET_INVALID_ARGUMENT);
 
-  if (!rmw_api_connextdds_event_type_is_supported(event_type)) {
+  if (!is_event_supported(event_type)) {
     RMW_CONNEXT_LOG_ERROR_SET("unsupported publisher event")
     return RMW_RET_UNSUPPORTED;
   }
@@ -55,15 +64,6 @@ rmw_api_connextdds_publisher_event_init(
 }
 
 
-bool
-rmw_api_connextdds_event_type_is_supported(rmw_event_type_t rmw_event_type)
-{
-  bool invalid = false;
-  ros_event_to_dds(rmw_event_type, &invalid);
-  return !invalid;
-}
-
-
 rmw_ret_t
 rmw_api_connextdds_subscription_event_init(
   rmw_event_t * rmw_event,
@@ -78,7 +78,7 @@ rmw_api_connextdds_subscription_event_init(
     return RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_ARGUMENT_FOR_NULL(rmw_event, RMW_RET_INVALID_ARGUMENT);
 
-  if (!rmw_api_connextdds_event_type_is_supported(event_type)) {
+  if (!is_event_supported(event_type)) {
     RMW_CONNEXT_LOG_ERROR_SET("unsupported subscription event")
     return RMW_RET_UNSUPPORTED;
   }
