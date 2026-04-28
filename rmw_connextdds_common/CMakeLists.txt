@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 project(rmw_connextdds_common)
 
@@ -38,9 +38,10 @@ function(rtirmw_add_library)
       ${ARGN} # current function arguments
     )
 
-    # Default to C++14
+    # Default to C++17
     if(NOT CMAKE_CXX_STANDARD)
-        set(CMAKE_CXX_STANDARD 14)
+        set(CMAKE_CXX_STANDARD 17)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
     endif()
 
     if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -57,9 +58,6 @@ function(rtirmw_add_library)
 
     target_link_libraries(${_rti_build_NAME}
         ${_rti_build_LIBRARIES}
-        fastcdr)
-
-    ament_target_dependencies(${_rti_build_NAME}
         ${_rti_build_DEPS})
 
     set(_extra_defines)
@@ -106,11 +104,26 @@ endfunction()
 ################################################################################
 # Load external dependencies
 ################################################################################
+set(RMW_CONNEXT_TARGET_DEPS
+    rcutils::rcutils
+    rcpputils::rcpputils
+    rmw::rmw
+    rmw_dds_common::rmw_dds_common_library
+    tracetools::tracetools
+    fastcdr
+    rosidl_runtime_c::rosidl_runtime_c
+    rosidl_runtime_cpp::rosidl_runtime_cpp
+    rosidl_typesupport_fastrtps_c::rosidl_typesupport_fastrtps_c
+    rosidl_typesupport_fastrtps_cpp::rosidl_typesupport_fastrtps_cpp
+    rosidl_typesupport_introspection_c::rosidl_typesupport_introspection_c
+    rosidl_typesupport_introspection_cpp::rosidl_typesupport_introspection_cpp)
 set(RMW_CONNEXT_DEPS
     rcutils
     rcpputils
     rmw
     rmw_dds_common
+    rmw_security_common
+    tracetools
     fastcdr
     rosidl_runtime_c
     rosidl_runtime_cpp
@@ -127,6 +140,7 @@ endforeach()
 ################################################################################
 # Common Source Configuration
 ################################################################################
+
 set(RMW_CONNEXT_DIR     ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(RMW_CONNEXT_COMMON_SOURCE_CPP
@@ -171,6 +185,7 @@ set(RMW_CONNEXT_COMMON_SOURCE
     ${RMW_CONNEXT_COMMON_SOURCE_CPP}
     ${RMW_CONNEXT_COMMON_SOURCE_HPP})
 
+
 ################################################################################
 # Check if additional Connext components are needed (e.g. security)
 ################################################################################
@@ -209,7 +224,7 @@ else()
                   include/rmw_connextdds/typecode.hpp
                   include/rmw_connextdds/dds_api_ndds.hpp
                   include/rmw_connextdds/custom_sql_filter.hpp
-        DEPS      ${RMW_CONNEXT_DEPS}
+        DEPS      ${RMW_CONNEXT_TARGET_DEPS}
         LIBRARIES RTIConnextDDS::c_api
         DEFINES   ${extra_defines})
 endif()
@@ -274,7 +289,7 @@ else()
                 src/rtime/rmw_type_support_rtime.cpp
                 src/rtime/dds_api_rtime.cpp
                 include/rmw_connextdds/dds_api_rtime.hpp
-      DEPS      ${RMW_CONNEXT_DEPS}
+      DEPS      ${RMW_CONNEXT_TARGET_DEPS}
       LIBRARIES RTIConnextDDSMicro::c_api
                 RTIConnextDDSMicro::netiosdm
                 RTIConnextDDSMicro::netioshmem

@@ -188,25 +188,19 @@ rmw_api_connextdds_service_server_is_available(
   const rmw_client_t * client,
   bool * is_available)
 {
-  // TODO(asorbini): Return RMW_RET_INVALID_ARGUMENT. We return RMW_RET_ERROR
-  // because that's what's expected by test_rmw_implementation
-  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_ERROR);
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     node,
     node->implementation_identifier,
     RMW_CONNEXTDDS_ID,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  // TODO(asorbini): Return RMW_RET_INVALID_ARGUMENT. We return RMW_RET_ERROR
-  // because that's what's expected by test_rmw_implementation
-  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_ERROR);
+  RMW_CHECK_ARGUMENT_FOR_NULL(client, RMW_RET_INVALID_ARGUMENT);
   RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
     client,
     client->implementation_identifier,
     RMW_CONNEXTDDS_ID,
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
-  // TODO(asorbini): Return RMW_RET_INVALID_ARGUMENT. We return RMW_RET_ERROR
-  // because that's what's expected by test_rmw_implementation
-  RMW_CHECK_ARGUMENT_FOR_NULL(is_available, RMW_RET_ERROR);
+  RMW_CHECK_ARGUMENT_FOR_NULL(is_available, RMW_RET_INVALID_ARGUMENT);
 
   RMW_Connext_Client * const client_impl =
     reinterpret_cast<RMW_Connext_Client *>(client->data);
@@ -291,6 +285,80 @@ rmw_api_connextdds_count_subscribers(
     ROS_TOPIC_PREFIX, topic_name, "", false);
   return common_context->graph_cache.get_reader_count(
     mangled_topic_name, count);
+}
+
+
+rmw_ret_t
+rmw_api_connextdds_count_clients(
+  const rmw_node_t * node,
+  const char * service_name,
+  size_t * count)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node,
+    node->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(service_name, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(count, RMW_RET_INVALID_ARGUMENT);
+
+  int validation_result = RMW_TOPIC_VALID;
+  rmw_ret_t ret =
+    rmw_validate_full_topic_name(service_name, &validation_result, nullptr);
+  if (RMW_RET_OK != ret) {
+    return ret;
+  }
+  if (RMW_TOPIC_VALID != validation_result) {
+    const char * reason =
+      rmw_full_topic_name_validation_result_string(validation_result);
+    RMW_CONNEXT_LOG_ERROR_A_SET("invalid service name: %s", reason)
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  auto common_context = &node->context->impl->common;
+  const std::string mangled_rp_service_name =
+    rmw_connextdds_create_topic_name(
+    ROS_SERVICE_RESPONSE_PREFIX, service_name, "Reply", false);
+  return common_context->graph_cache.get_reader_count(
+    mangled_rp_service_name, count);
+}
+
+
+rmw_ret_t
+rmw_api_connextdds_count_services(
+  const rmw_node_t * node,
+  const char * service_name,
+  size_t * count)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node,
+    node->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(service_name, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(count, RMW_RET_INVALID_ARGUMENT);
+
+  int validation_result = RMW_TOPIC_VALID;
+  rmw_ret_t ret =
+    rmw_validate_full_topic_name(service_name, &validation_result, nullptr);
+  if (RMW_RET_OK != ret) {
+    return ret;
+  }
+  if (RMW_TOPIC_VALID != validation_result) {
+    const char * reason =
+      rmw_full_topic_name_validation_result_string(validation_result);
+    RMW_CONNEXT_LOG_ERROR_A_SET("invalid service name: %s", reason)
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  auto common_context = &node->context->impl->common;
+  const std::string mangled_rq_service_name =
+    rmw_connextdds_create_topic_name(
+      ROS_SERVICE_REQUESTER_PREFIX, service_name, "Request", false);
+  return common_context->graph_cache.get_reader_count(
+    mangled_rq_service_name, count);
 }
 
 
@@ -601,4 +669,210 @@ rmw_api_connextdds_get_subscriptions_info_by_topic(
     demangle_type,
     allocator,
     subscriptions_info);
+}
+
+
+rmw_ret_t
+rmw_api_connextdds_get_clients_info_by_service(
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * service_name,
+  bool no_mangle,
+  rmw_service_endpoint_info_array_t * clients_info)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node,
+    node->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(allocator, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(service_name, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(clients_info, RMW_RET_INVALID_ARGUMENT);
+  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
+    allocator, "allocator argument is invalid", return RMW_RET_INVALID_ARGUMENT);
+
+  if (RMW_RET_OK != rmw_service_endpoint_info_array_check_zero(clients_info)) {
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+  if (no_mangle) {
+    // Services in DDS require mangled topic names
+    // because they internally use separate readers and writers.
+    // Therefore, this function cannot support the 'no_mangle' option.
+    // If user need to query raw topic information without mangling,
+    // use`rmw_get_publishers_info_by_topic` or `rmw_get_subscriptions_info_by_topic` instead.
+    RMW_SET_ERROR_MSG(
+      "'no_mangle' is not supported for services"
+      " because they rely on internally mangled topic names.\n"
+      "Use 'rmw_get_publishers_info_by_topic' or 'rmw_get_subscriptions_info_by_topic'"
+      " instead to access unmangled topic information.");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+
+  auto common_context = &node->context->impl->common;
+  std::string mangled_rq_topic_name = \
+    rmw_connextdds_create_topic_name(ROS_SERVICE_REQUESTER_PREFIX, service_name, "Request", false);
+  std::string mangled_rp_topic_name = \
+    rmw_connextdds_create_topic_name(ROS_SERVICE_RESPONSE_PREFIX, service_name, "Reply", false);
+  DemangleFunction demangle_type = _demangle_service_type_only;
+
+  rmw_topic_endpoint_info_array_t subscriptions_info =
+    rmw_get_zero_initialized_topic_endpoint_info_array();
+  std::unique_ptr<
+    rmw_topic_endpoint_info_array_t,
+    std::function<void(rmw_topic_endpoint_info_array_t *)>>
+  subscriptions_info_delete(
+    &subscriptions_info,
+    [allocator](rmw_topic_endpoint_info_array_t * p) {
+      rmw_ret_t ret = rmw_topic_endpoint_info_array_fini(
+        p,
+        allocator
+      );
+      if (RMW_RET_OK != ret) {
+        RMW_SET_ERROR_MSG("Failed to destroy subscriptions_info when function ended.");
+      }
+    }
+  );
+  rmw_ret_t ret = common_context->graph_cache.get_readers_info_by_topic(
+    mangled_rp_topic_name,
+    demangle_type,
+    allocator,
+    &subscriptions_info);
+  if(RMW_RET_OK != ret) {
+    return ret;
+  }
+
+  rmw_topic_endpoint_info_array_t publishers_info =
+    rmw_get_zero_initialized_topic_endpoint_info_array();
+  std::unique_ptr<
+    rmw_topic_endpoint_info_array_t,
+    std::function<void(rmw_topic_endpoint_info_array_t *)>>
+  publishers_info_delete(
+    &publishers_info,
+    [allocator](rmw_topic_endpoint_info_array_t * p) {
+      rmw_ret_t ret = rmw_topic_endpoint_info_array_fini(
+        p,
+        allocator
+      );
+      if (RMW_RET_OK != ret) {
+        RMW_SET_ERROR_MSG("Failed to destroy publishers_info when function ended.");
+      }
+    }
+  );
+  ret = common_context->graph_cache.get_writers_info_by_topic(
+    mangled_rq_topic_name,
+    demangle_type,
+    allocator,
+    &publishers_info);
+  if(RMW_RET_OK != ret) {
+    return ret;
+  }
+  return common_context->graph_cache.get_clients_info_by_service(
+    &subscriptions_info,
+    &publishers_info,
+    allocator,
+    clients_info);
+}
+
+
+rmw_ret_t
+rmw_api_connextdds_get_servers_info_by_service(
+  const rmw_node_t * node,
+  rcutils_allocator_t * allocator,
+  const char * service_name,
+  bool no_mangle,
+  rmw_service_endpoint_info_array_t * servers_info)
+{
+  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_TYPE_IDENTIFIERS_MATCH(
+    node,
+    node->implementation_identifier,
+    RMW_CONNEXTDDS_ID,
+    return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
+  RMW_CHECK_ARGUMENT_FOR_NULL(allocator, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(service_name, RMW_RET_INVALID_ARGUMENT);
+  RMW_CHECK_ARGUMENT_FOR_NULL(servers_info, RMW_RET_INVALID_ARGUMENT);
+
+  RCUTILS_CHECK_ALLOCATOR_WITH_MSG(
+    allocator, "allocator argument is invalid", return RMW_RET_INVALID_ARGUMENT);
+
+  if (RMW_RET_OK != rmw_service_endpoint_info_array_check_zero(servers_info)) {
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+  if (no_mangle) {
+    // Services in DDS require mangled topic names
+    // because they internally use separate readers and writers.
+    // Therefore, this function cannot support the 'no_mangle' option.
+    // If user need to query raw topic information without mangling,
+    // use`rmw_get_publishers_info_by_topic` or `rmw_get_subscriptions_info_by_topic` instead.
+    RMW_SET_ERROR_MSG(
+      "'no_mangle' is not supported for services"
+      " because they rely on internally mangled topic names.\n"
+      "Use 'rmw_get_publishers_info_by_topic' or 'rmw_get_subscriptions_info_by_topic'"
+      " instead to access unmangled topic information.");
+    return RMW_RET_INVALID_ARGUMENT;
+  }
+  auto common_context = &node->context->impl->common;
+  std::string mangled_rq_topic_name = \
+    rmw_connextdds_create_topic_name(ROS_SERVICE_REQUESTER_PREFIX, service_name, "Request", false);
+  std::string mangled_rp_topic_name = \
+    rmw_connextdds_create_topic_name(ROS_SERVICE_RESPONSE_PREFIX, service_name, "Reply", false);
+  DemangleFunction demangle_type = _demangle_service_type_only;
+
+  rmw_topic_endpoint_info_array_t subscriptions_info =
+    rmw_get_zero_initialized_topic_endpoint_info_array();
+  std::unique_ptr<
+    rmw_topic_endpoint_info_array_t,
+    std::function<void(rmw_topic_endpoint_info_array_t *)>>
+  subscriptions_info_delete(
+    &subscriptions_info,
+    [allocator](rmw_topic_endpoint_info_array_t * p) {
+      rmw_ret_t ret = rmw_topic_endpoint_info_array_fini(
+        p,
+        allocator
+      );
+      if (RMW_RET_OK != ret) {
+        RMW_SET_ERROR_MSG("Failed to destroy subscriptions_info when function failed.");
+      }
+    }
+  );
+  rmw_ret_t ret = common_context->graph_cache.get_readers_info_by_topic(
+    mangled_rq_topic_name,
+    demangle_type,
+    allocator,
+    &subscriptions_info);
+  if(RMW_RET_OK != ret) {
+    return ret;
+  }
+
+  rmw_topic_endpoint_info_array_t publishers_info =
+    rmw_get_zero_initialized_topic_endpoint_info_array();
+  std::unique_ptr<
+    rmw_topic_endpoint_info_array_t,
+    std::function<void(rmw_topic_endpoint_info_array_t *)>>
+  publishers_info_delete(
+    &publishers_info,
+    [allocator](rmw_topic_endpoint_info_array_t * p) {
+      rmw_ret_t ret = rmw_topic_endpoint_info_array_fini(
+        p,
+        allocator
+      );
+      if (RMW_RET_OK != ret) {
+        RMW_SET_ERROR_MSG("Failed to destroy publishers_info when function failed.");
+      }
+    }
+  );
+  ret = common_context->graph_cache.get_writers_info_by_topic(
+    mangled_rp_topic_name,
+    demangle_type,
+    allocator,
+    &publishers_info);
+  if(RMW_RET_OK != ret) {
+    return ret;
+  }
+  return common_context->graph_cache.get_servers_info_by_service(
+    &subscriptions_info,
+    &publishers_info,
+    allocator,
+    servers_info);
 }

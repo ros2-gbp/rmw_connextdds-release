@@ -29,8 +29,8 @@ rmw_connextdds_graph_finalize(rmw_context_impl_t * const ctx);
 
 rmw_ret_t
 rmw_connextdds_graph_publish_update(
-  rmw_context_impl_t * const ctx,
-  void * const msg);
+  const rmw_publisher_t * const ctx,
+  const void * const msg);
 
 rmw_ret_t
 rmw_connextdds_graph_on_node_created(
@@ -70,7 +70,8 @@ rmw_ret_t
 rmw_connextdds_graph_on_service_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Service * const svc);
+  RMW_Connext_Service * const svc,
+  const rosidl_type_hash_t * ser_type_hash);
 
 rmw_ret_t
 rmw_connextdds_graph_on_service_deleted(
@@ -82,7 +83,8 @@ rmw_ret_t
 rmw_connextdds_graph_on_client_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Client * const client);
+  RMW_Connext_Client * const client,
+  const rosidl_type_hash_t * ser_type_hash);
 
 rmw_ret_t
 rmw_connextdds_graph_on_client_deleted(
@@ -111,6 +113,7 @@ rmw_connextdds_graph_add_remote_entity(
   const DDS_GUID_t * const dp_guid,
   const char * const topic_name,
   const char * const type_name,
+  const DDS_UserDataQosPolicy * const user_data,
   const DDS_ReliabilityQosPolicy * const reliability,
   const DDS_DurabilityQosPolicy * const durability,
   const DDS_DeadlineQosPolicy * const deadline,
