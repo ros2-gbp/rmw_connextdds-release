@@ -42,13 +42,6 @@ enum class RMW_Connext_RequestReplyMapping
   Extended
 };
 
-enum class RMW_Connext_PublishMode
-{
-  Synchronous,
-  Asynchronous,
-  Auto
-};
-
 // Definition of struct rmw_context_impl_s as declared in rmw/init.h
 struct rmw_context_impl_s
 {
@@ -70,7 +63,7 @@ public:
   DDS_DataReader * dr_subscriptions;
 
   /* Global configuration for QoS profiles */
-  RMW_Connext_PublishMode user_topics_publish_mode = RMW_Connext_PublishMode::Auto;
+  bool use_default_publish_mode;
   RMW_Connext_RequestReplyMapping request_reply_mapping;
   bool cyclone_compatible{false};
 #if RMW_CONNEXT_LEGACY_RMW_COMPATIBILITY_MODE
