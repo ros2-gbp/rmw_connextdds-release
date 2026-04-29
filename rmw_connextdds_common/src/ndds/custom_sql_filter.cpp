@@ -788,7 +788,7 @@ rti_connext_dds_custom_sql_filter::register_content_filter(
   filter.writer_finalize = RTI_CustomSqlFilter_writer_finalize;
   filter.writer_return_loan = RTI_CustomSqlFilter_writer_return_loan;
 
-  rc = DDS_DomainParticipant_register_contentfilterI(
+  rc = DDS_ContentFilter_register_filter(
     participant,
     PLUGIN_NAME,
     &filter,

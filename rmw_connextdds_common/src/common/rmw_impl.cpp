@@ -352,7 +352,8 @@ rmw_connextdds_get_readerwriter_qos(
         history->kind = DDS_KEEP_ALL_HISTORY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_HISTORY_UNKNOWN:
+    // case RMW_QOS_POLICY_HISTORY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported history kind: %d", qos_policies->history)
@@ -384,9 +385,8 @@ rmw_connextdds_get_readerwriter_qos(
         reliability->kind = DDS_BEST_EFFORT_RELIABILITY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_RELIABILITY_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_RELIABILITY_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_RELIABILITY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported reliability kind: %d", qos_policies->reliability)
@@ -409,9 +409,8 @@ rmw_connextdds_get_readerwriter_qos(
         durability->kind = DDS_TRANSIENT_LOCAL_DURABILITY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_DURABILITY_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_DURABILITY_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_DURABILITY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported durability kind: %d", qos_policies->durability)
@@ -443,9 +442,8 @@ rmw_connextdds_get_readerwriter_qos(
         liveliness->kind = DDS_MANUAL_BY_TOPIC_LIVELINESS_QOS;
         break;
       }
-    case RMW_QOS_POLICY_LIVELINESS_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_LIVELINESS_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_LIVELINESS_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported liveliness kind: %d", qos_policies->liveliness)
@@ -2041,11 +2039,6 @@ rmw_connextdds_create_subscriber(
   rmw_subscriber->options = *subscriber_options;
   rmw_subscriber->can_loan_messages = false;
   rmw_subscriber->is_cft_enabled = rmw_sub_impl->is_cft_enabled();
-#if RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO
-  rmw_subscriber->is_cft_supported = true;
-#else
-  rmw_subscriber->is_cft_supported = false;
-#endif
 
   if (!internal) {
     if (RMW_RET_OK != rmw_sub_impl->enable()) {
@@ -3417,7 +3410,6 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
         return DDS_SAMPLE_LOST_STATUS;
       }
     case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
       {
         return DDS_INCONSISTENT_TOPIC_STATUS;
@@ -3430,9 +3422,7 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
       {
         return DDS_SUBSCRIPTION_MATCHED_STATUS;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         if (nullptr != invalid) {
           *invalid = true;
@@ -3440,10 +3430,6 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
         return (DDS_StatusKind)UINT32_MAX;
       }
   }
-  if (nullptr != invalid) {
-    *invalid = true;
-  }
-  return (DDS_StatusKind)UINT32_MAX;
 }
 
 const char *
@@ -3494,37 +3480,19 @@ ros_event_for_reader(const rmw_event_type_t ros)
 {
   switch (ros) {
     case RMW_EVENT_LIVELINESS_CHANGED:
-      [[fallthrough]];
     case RMW_EVENT_REQUESTED_DEADLINE_MISSED:
-      [[fallthrough]];
     case RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
     case RMW_EVENT_MESSAGE_LOST:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_MATCHED:
       {
         return true;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLICATION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         return false;
       }
   }
-  return false;
 }
 
 rmw_ret_t
@@ -3582,19 +3550,7 @@ RMW_Connext_SubscriberStatusCondition::get_status(
         rc = this->get_matched_status(status);
         break;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLICATION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported subscriber qos: %d", event_type)
@@ -3653,21 +3609,7 @@ RMW_Connext_PublisherStatusCondition::get_status(
         rc = this->get_matched_status(status);
         break;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_CHANGED:
-      [[fallthrough]];
-    case RMW_EVENT_REQUESTED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_MESSAGE_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_SUBSCRIPTION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET("unsupported publisher qos: %d", event_type)
         RMW_CONNEXT_ASSERT(0)
