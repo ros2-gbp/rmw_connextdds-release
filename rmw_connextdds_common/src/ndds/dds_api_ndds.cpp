@@ -87,11 +87,6 @@ rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity)
         verbosity = NDDS_CONFIG_LOG_VERBOSITY_ERROR;
         break;
       }
-    default:
-      {
-        RMW_CONNEXT_LOG_ERROR_A_SET("invalid log level: %d", severity)
-        return RMW_RET_INVALID_ARGUMENT;
-      }
   }
 
   NDDS_Config_Logger_set_verbosity(logger, verbosity);
@@ -264,9 +259,15 @@ rmw_connextdds_initialize_participant_qos_impl(
           RMW_CONNEXT_LOG_ERROR_SET("failed to set user_data")
           return RMW_RET_ERROR;
         }
+
+        // Force the use of the TypeObject V1
+        dp_qos->resource_limits.type_object_max_serialized_length = 8192;
+        dp_qos->discovery_config.enabled_builtin_channels =
+          DDS_DISCOVERYCONFIG_SERVICE_REQUEST_CHANNEL;
+
         break;
       }
-    default:
+    case rmw_context_impl_t::participant_qos_override_policy_t::Never:
       {
         // No customization of DomainParticipantQos request, return immediately.
         RMW_CONNEXT_LOG_DEBUG("using default Connext's DomainParticipantQos")
@@ -325,6 +326,25 @@ rmw_connextdds_initialize_participant_qos_impl(
     dp_qos->discovery_config.subscription_writer.max_heartbeat_retries = 300;
   }
 #endif /* RMW_CONNEXT_FAST_ENDPOINT_DISCOVERY */
+
+  // Set dds.ros.demangle_topic_and_type_names to TRUE.
+  // This will announce a demangled topic name as a topic alias.
+  // This will enable interoperability with Connext applications using the
+  // demangled topic name. This should not impact compatibility with any other
+  // vendors, as the “mangled” topic name will still be announced as the real
+  // topic name. Set this property for versions 7.5+
+#if (RTI_DDS_VERSION_MAJOR > 7) || (RTI_DDS_VERSION_MAJOR == 7 && RTI_DDS_VERSION_MINOR >= 5)
+  if (DDS_RETCODE_OK != DDS_PropertyQosPolicyHelper_assert_property(
+    &dp_qos->property,
+    "dds.ros.demangle_topic_and_type_names",
+    "TRUE",
+    DDS_BOOLEAN_FALSE))
+  {
+    RMW_CONNEXT_LOG_ERROR_SET(
+      "failed to assert property on participant:  dds.ros.demangle_topic_and_type_names");
+    return RMW_RET_ERROR;
+  }
+#endif
 
   return RMW_RET_OK;
 }
@@ -523,8 +543,17 @@ rmw_connextdds_get_datawriter_qos(
     }
   }
 
-  if (!ctx->use_default_publish_mode) {
-    qos->publish_mode.kind = DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS;
+  switch (ctx->user_topics_publish_mode) {
+    case RMW_Connext_PublishMode::Synchronous:
+      qos->publish_mode.kind = DDS_SYNCHRONOUS_PUBLISH_MODE_QOS;
+      break;
+    case RMW_Connext_PublishMode::Asynchronous:
+      qos->publish_mode.kind = DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS;
+      break;
+    case RMW_Connext_PublishMode::Auto:
+      // Leave the publish mode as is, which means it will be determined by
+      // Connext based on the QoS settings and topic type.
+      break;
   }
 
 #if RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS
@@ -985,8 +1014,6 @@ rmw_connextdds_filter_sample(
             rr_msg->gid, related_sample_identity.writer_guid);
           break;
         }
-      default:
-        return RMW_RET_ERROR;
     }
 
     // Convert instance handle to guid
