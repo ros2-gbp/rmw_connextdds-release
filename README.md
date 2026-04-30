@@ -1,3 +1,32 @@
+## rmw_connextdds (lyrical) - 1.2.6-1
+
+The packages in the `rmw_connextdds` repository were released into the `lyrical` distro by running `/usr/local/google/home/sloretz/projects/lyrical/env3/bin/bloom-release rmw_connextdds -r lyrical -t lyrical` on `Thu, 30 Apr 2026 16:18:54 -0000`
+
+These packages were released:
+- `rmw_connextdds`
+- `rmw_connextdds_common`
+- `rti_connext_dds_cmake_module`
+
+These packages were explicitly ignored:
+- `rmw_connextddsmicro`
+
+Version of package(s) in repository `rmw_connextdds`:
+
+- upstream repository: https://github.com/ros2/rmw_connextdds.git
+- release repository: https://github.com/ros2-gbp/rmw_connextdds-release.git
+- rosdistro version: `1.2.5-1`
+- old version: `1.2.5-1`
+- new version: `1.2.6-1`
+
+Versions of tools used:
+
+- bloom version: `0.14.2`
+- catkin_pkg version: `1.1.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## rmw_connextdds (lyrical) - 1.2.5-1
 
 The packages in the `rmw_connextdds` repository were released into the `lyrical` distro by running `/home/cottsay/infra_ws/install/bin/bloom-release -r lyrical rmw_connextdds` on `Wed, 29 Apr 2026 21:34:37 -0000`
