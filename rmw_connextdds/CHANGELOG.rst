@@ -2,6 +2,9 @@
 Changelog for package rmw_connextdds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.7 (2026-05-12)
+------------------
+
 1.2.6 (2026-04-30)
 ------------------
 * fix: Fixed compilation on MSVC 2022 (`#225 <https://github.com/ros2/rmw_connextdds/issues/225>`_)
