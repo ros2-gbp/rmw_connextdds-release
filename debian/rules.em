@@ -24,7 +24,7 @@ endif
 DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 
 # Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
-export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-7.3.0
+export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-7.7.0
 
 %:
 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
