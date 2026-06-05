@@ -1,7 +1,7 @@
-From 052ffe71a9988231b96649a6ab1f704d952b3814 Mon Sep 17 00:00:00 2001
+From 3910f90608fe6c83880cb51e186022be49453f8a Mon Sep 17 00:00:00 2001
 From: Scott K Logan <logans@cottsay.net>
 Date: Fri, 2 May 2025 14:09:13 -0500
-Subject: [PATCH 3/3] Update to Connext DDS 7.3.0
+Subject: [PATCH 3/4] Update to Connext DDS 7.3.0
 
 ---
  debian/rules.em | 2 +-
@@ -21,5 +21,5 @@ index 4b3dcff7..d155c1a8 100755
  %:
  	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
 -- 
-2.54.0.563.g4f69b47b94-goog
+2.43.0
 
