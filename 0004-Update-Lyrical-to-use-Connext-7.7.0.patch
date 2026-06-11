@@ -1,0 +1,29 @@
+From ef4c654f9d2d35baa3db7af0e8d13e3e925196f6 Mon Sep 17 00:00:00 2001
+From: Chris Lalancette <clalancette@gmail.com>
+Date: Fri, 5 Jun 2026 13:23:38 -0400
+Subject: [PATCH 4/4] Update Lyrical to use Connext 7.7.0.
+
+Otherwise the package build will not find the path, and
+the resulting package has no librmw_connextdds.so
+
+Signed-off-by: Chris Lalancette <clalancette@gmail.com>
+---
+ debian/rules.em | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/debian/rules.em b/debian/rules.em
+index d155c1a8..6a7ca825 100755
+--- a/debian/rules.em
++++ b/debian/rules.em
+@@ -24,7 +24,7 @@ endif
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ 
+ # Set CONNEXTDDS_DIR variable so this package can find its rti-connext-dds dependency.
+-export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-7.3.0
++export CONNEXTDDS_DIR=/opt/rti.com/rti_connext_dds-7.7.0
+ 
+ %:
+ 	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
+-- 
+2.43.0
+
