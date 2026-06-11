@@ -1,4 +1,4 @@
-From ef4c654f9d2d35baa3db7af0e8d13e3e925196f6 Mon Sep 17 00:00:00 2001
+From cafcb8b1fa32dec0b35e14dea19da13a9f58d6ea Mon Sep 17 00:00:00 2001
 From: Chris Lalancette <clalancette@gmail.com>
 Date: Fri, 5 Jun 2026 13:23:38 -0400
 Subject: [PATCH 4/4] Update Lyrical to use Connext 7.7.0.
