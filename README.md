@@ -1,10 +1,8 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
 >[!IMPORTANT]
-The information in this README has been replaced by the
-[RTI Connext and ROS 2](https://community.rti.com/static/documentation/ros/index.html)
-User's Manual. See that manual for the most current Connext RMW installation and
-usage documentation.
+This README focuses on Connext RMW configuration and repository-specific development information.
+For installation instructions, tutorials, and high-level release notes, see the [RTI Connext and ROS 2](https://community.rti.com/static/documentation/ros/index.html) User's Manual in the RTI Community documentation.
 
 This repository contains an implementation of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
@@ -90,6 +88,7 @@ release:
 |ROS 2 Release|Branch|Status|
 |-------------|------|------|
 |Rolling      |`rolling`|Developed|
+|Lyrical      |`lyrical`|Supported until May 2031|
 |Kilted       |`kilted`|Supported until November 2026|
 |Iron         |`iron`|Supported until November 2024 (EOL)|
 |Humble       |`humble`|Supported until May 2027|
@@ -225,6 +224,19 @@ is sped up from 3 seconds to 100 milliseconds.
 
 These optimizations may be disabled using variable
 `RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS`.
+
+### RTI_MONITORING2_ENABLE
+
+By default, Connext enables [RTI Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html)
+on the DomainParticipantFactory. This can be changed in an XML QoS profile via
+the `<monitoring>` settings or by setting the environment variable
+`RTI_MONITORING2_ENABLE`. Setting `RTI_MONITORING2_ENABLE` to false will disable
+the Monitoring Library. For more information on enabling and using the 
+RTI Monitoring 2.0 Library, see [Enabling Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html#enabling-monitoringlibrary2-heading).
+
+Monitoring is currently disabled entirely on Windows to avoid an access
+violation during process teardown (see
+[rmw_connextdds#248](https://github.com/ros2/rmw_connextdds/issues/248)).
 
 ### RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY
 
