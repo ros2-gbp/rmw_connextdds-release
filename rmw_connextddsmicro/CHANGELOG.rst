@@ -2,7 +2,15 @@
 Changelog for package rmw_connextddsmicro
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.3.0 (2026-05-07)
+1.2.8 (2026-09-15)
+------------------
+* Switch to C++20 (`#244 <https://github.com/ros2/rmw_connextdds/issues/244>`_) (`#245 <https://github.com/ros2/rmw_connextdds/issues/245>`_)
+* Contributors: mergify[bot]
+
+1.2.7 (2026-05-12)
+------------------
+
+1.2.6 (2026-04-30)
 ------------------
 * fix: Fixed compilation on MSVC 2022 (`#225 <https://github.com/ros2/rmw_connextdds/issues/225>`_)
 * Contributors: Janosch Machowinski
