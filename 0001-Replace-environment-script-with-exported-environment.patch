@@ -1,4 +1,4 @@
-From eb473fa568f8a46fd5fc05a6ae840dc109726bbe Mon Sep 17 00:00:00 2001
+From c135fd3479f5bb86b7c266173a79d48682f599f3 Mon Sep 17 00:00:00 2001
 From: Chris Lalancette <clalancette@gmail.com>
 Date: Thu, 2 May 2024 11:09:53 -0400
 Subject: [PATCH] Replace environment script with exported environment
@@ -22,7 +22,7 @@ Co-authored-by: Steven! Ragnarök <nuclearsandwich@users.noreply.github.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index a856369..4b3dcff 100755
+index a856369d..4b3dcff7 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
 @@ -23,6 +23,9 @@ endif
@@ -36,5 +36,5 @@ index a856369..4b3dcff 100755
  	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
  
 -- 
-2.43.0
+2.53.0
 
