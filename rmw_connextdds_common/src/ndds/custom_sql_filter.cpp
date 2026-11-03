@@ -449,7 +449,6 @@ RTI_CustomSqlFilter_writer_evaluated_result(
   if (sql_matched_len > 0) {
     DDS_Cookie_t ** const sql_matched_buffer =
       DDS_CookieSeq_get_discontiguous_buffer(sql_matched);
-    RMW_CONNEXT_ASSERT(nullptr != sql_matched_buffer)
     memcpy(
       &(writer_data->matched_readers_buffer[matched_readers_start]),
       sql_matched_buffer,
@@ -789,7 +788,7 @@ rti_connext_dds_custom_sql_filter::register_content_filter(
   filter.writer_finalize = RTI_CustomSqlFilter_writer_finalize;
   filter.writer_return_loan = RTI_CustomSqlFilter_writer_return_loan;
 
-  rc = DDS_DomainParticipant_register_contentfilterI(
+  rc = DDS_ContentFilter_register_filter(
     participant,
     PLUGIN_NAME,
     &filter,

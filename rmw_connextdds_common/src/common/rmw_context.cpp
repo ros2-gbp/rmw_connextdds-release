@@ -66,11 +66,6 @@ rmw_connextdds_initialize_participant_factory_qos()
   }
 
   qos.entity_factory.autoenable_created_entities = DDS_BOOLEAN_FALSE;
-#ifdef RTI_WIN32
-  // Disable monitoring on windows due to issues with cleanup of monitoring
-  // resources
-  qos.monitoring.enable = DDS_BOOLEAN_FALSE;
-#endif
 
   if (DDS_RETCODE_OK !=
     DDS_DomainParticipantFactory_set_qos(
@@ -193,6 +188,11 @@ rmw_context_impl_s::initialize_discovery_options(DDS_DomainParticipantQos & dp_q
         return RMW_RET_ERROR;
       }
       break;
+    default:
+      RMW_CONNEXT_LOG_ERROR_A_SET(
+        "Unknown value provided for automatic discovery range: %i",
+        range);
+      return RMW_RET_ERROR;
   }
 
   if (RMW_AUTOMATIC_DISCOVERY_RANGE_OFF == range) {
@@ -353,7 +353,7 @@ rmw_context_impl_s::initialize_participant_qos(DDS_DomainParticipantQos & dp_qos
         }
       }
       break;
-    case rmw_context_impl_s::participant_qos_override_policy_t::Never:
+    default:
       break;
   }
 
@@ -435,13 +435,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_AUTH_IDENTITY_CA,
+      DDS_SECURITY_IDENTITY_CA_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "IDENTITY_CA")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_AUTH_IDENTITY_CA,
+      DDS_SECURITY_IDENTITY_CA_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "IDENTITY_CA")).c_str())
     return RMW_RET_ERROR;
   }
@@ -450,13 +450,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_ACCESS_PERMISSIONS_CA,
+      DDS_SECURITY_PERMISSIONS_CA_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PERMISSIONS_CA")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_ACCESS_PERMISSIONS_CA,
+      DDS_SECURITY_PERMISSIONS_CA_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PERMISSIONS_CA")).c_str())
     return RMW_RET_ERROR;
   }
@@ -465,13 +465,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_AUTH_PRIVATE_KEY,
+      DDS_SECURITY_PRIVATE_KEY_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PRIVATE_KEY")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_AUTH_PRIVATE_KEY,
+      DDS_SECURITY_PRIVATE_KEY_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PRIVATE_KEY")).c_str())
     return RMW_RET_ERROR;
   }
@@ -481,13 +481,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_AUTH_IDENTITY_CERTIFICATE,
+      DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "CERTIFICATE")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_AUTH_IDENTITY_CERTIFICATE,
+      DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "CERTIFICATE")).c_str())
     return RMW_RET_ERROR;
   }
@@ -496,13 +496,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_ACCESS_GOVERNANCE,
+      DDS_SECURITY_GOVERNANCE_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "GOVERNANCE")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_ACCESS_GOVERNANCE,
+      DDS_SECURITY_GOVERNANCE_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "GOVERNANCE")).c_str())
     return RMW_RET_ERROR;
   }
@@ -512,13 +512,13 @@ rmw_context_impl_s::configure_security(DDS_DomainParticipantQos * const qos)
   if (DDS_RETCODE_OK !=
     DDS_PropertyQosPolicyHelper_assert_property(
       &qos->property,
-      PROPERTY_NAME_DDS_SEC_ACCESS_PERMISSIONS,
+      DDS_SECURITY_PERMISSIONS_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PERMISSIONS")).c_str(),
       RTI_FALSE))
   {
     RMW_CONNEXT_LOG_ERROR_A_SET(
       "failed to assert DDS property: '%s' = '%s'",
-      PROPERTY_NAME_DDS_SEC_ACCESS_PERMISSIONS,
+      DDS_SECURITY_PERMISSIONS_PROPERTY,
       std::string(rcutils_string_map_get(&security_files, "PERMISSIONS")).c_str())
     return RMW_RET_ERROR;
   }
@@ -864,18 +864,32 @@ rmw_context_impl_s::assert_topic(
   const char * const topic_name,
   const char * const type_name,
   const bool internal,
-  DDS_Topic ** const topic)
+  DDS_Topic ** const topic,
+  bool & created)
 {
   DDS_TopicDescription * const topic_existing =
     DDS_DomainParticipant_lookup_topicdescription(participant, topic_name);
 
   if (nullptr != topic_existing) {
-    // Reuse the existing topic entity and rely on context-level ref counting
-    // to make topic deletion independent from endpoint destruction order.
-    *topic = DDS_Topic_narrow(topic_existing);
-    if (nullptr == *topic) {
-      RMW_CONNEXT_LOG_ERROR_SET("failed to narrow topic from description")
-      return RMW_RET_ERROR;
+    if (internal) {
+      /* topics for "internal" endpoints are created while the participant
+         is still disabled, so find_topic() cannot be called.
+         Instead, we cast the topicdescription to a topic. The deletion
+         path will have to keep track that the endpoint didn't create
+         its topic, so not to try to delete it */
+      *topic = DDS_Topic_narrow(topic_existing);
+      created = false;
+    } else {
+      *topic =
+        DDS_DomainParticipant_find_topic(
+        participant,
+        DDS_TopicDescription_get_name(topic_existing),
+        &DDS_DURATION_ZERO);
+      if (nullptr == *topic) {
+        RMW_CONNEXT_LOG_ERROR_SET("failed to find topic from description")
+        return RMW_RET_ERROR;
+      }
+      created = true;
     }
     RMW_CONNEXT_LOG_DEBUG_A(
       "found topic: name=%s, type=%s\n",
@@ -892,58 +906,20 @@ rmw_context_impl_s::assert_topic(
       RMW_CONNEXT_LOG_ERROR_SET("failed to create reader's topic")
       return RMW_RET_ERROR;
     }
+    created = true;
     RMW_CONNEXT_LOG_DEBUG_A(
       "created topic: name=%s, type=%s\n",
       topic_name, type_name);
   }
 
-  this->retain_topic(*topic);
-
   if (!internal) {
     if (DDS_RETCODE_OK != DDS_Entity_enable(DDS_Topic_as_entity(*topic))) {
       RMW_CONNEXT_LOG_ERROR_SET("failed to enable topic")
-      if (!this->release_topic(participant, *topic)) {
-        RMW_CONNEXT_LOG_ERROR("failed to release topic after enable failure")
-      }
       return RMW_RET_ERROR;
     }
   }
 
   return RMW_RET_OK;
-}
-
-void
-rmw_context_impl_s::retain_topic(DDS_Topic * const topic)
-{
-  if (!this->topic_ref_counts.contains(topic)) {
-    this->topic_ref_counts.emplace(topic, 1);
-  } else {
-    ++this->topic_ref_counts[topic];
-  }
-}
-
-bool
-rmw_context_impl_s::release_topic(
-  DDS_DomainParticipant * const participant,
-  DDS_Topic * const topic)
-{
-  if (!this->topic_ref_counts.contains(topic)) {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to release unknown topic reference")
-    return false;
-  }
-
-  // Only release the topic when no other entities reference it
-  if (--this->topic_ref_counts[topic] > 0) {
-    return true;
-  }
-
-  this->topic_ref_counts.erase(topic);
-  if (DDS_RETCODE_OK != DDS_DomainParticipant_delete_topic(participant, topic)) {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to delete DDS Topic")
-    return false;
-  }
-
-  return true;
 }
 
 /******************************************************************************
@@ -1213,9 +1189,8 @@ rmw_api_connextdds_init(
   // context->actual_domain_id in rmw_context_impl_s::initialize_node()
   ctx_impl->domain_id = actual_domain_id;
 
-  // RMW_CONNEXT_ENV_USE_DEFAULT_PUBLISH_MODE is now deprecated and will be
-  // removed in a future release. It will not have any effect on the publish
-  // mode, and a warning is logged if it is set.
+  // All publishers will use asynchronous publish mode unless
+  // RMW_CONNEXT_ENV_USE_DEFAULT_PUBLISH_MODE is set.
   const char * use_default_publish_mode_env = nullptr;
   const char * lookup_rc = rcutils_get_env(
     RMW_CONNEXT_ENV_USE_DEFAULT_PUBLISH_MODE, &use_default_publish_mode_env);
@@ -1229,45 +1204,7 @@ rmw_api_connextdds_init(
       lookup_rc)
     return RMW_RET_ERROR;
   }
-
-  if ('\0' != use_default_publish_mode_env[0]) {
-    RMW_CONNEXT_LOG_WARNING_A(
-      "environment variable '%s' is deprecated and will be ignored. Use '%s' "
-      "instead.",
-      RMW_CONNEXT_ENV_USE_DEFAULT_PUBLISH_MODE,
-      RMW_CONNEXT_ENV_USER_TOPICS_PUBLISH_MODE)
-  }
-
-  // All publishers will use synchronous publish mode (Connext default) or unless
-  // RMW_CONNEXT_ENV_USER_TOPICS_PUBLISH_MODE is set.
-  const char * user_topics_publish_mode_env = nullptr;
-  lookup_rc = rcutils_get_env(
-    RMW_CONNEXT_ENV_USER_TOPICS_PUBLISH_MODE, &user_topics_publish_mode_env);
-
-  if (nullptr != lookup_rc || nullptr == user_topics_publish_mode_env) {
-    RMW_CONNEXT_LOG_ERROR_A_SET(
-      "failed to lookup from environment: "
-      "var=%s, "
-      "rc=%s ",
-      RMW_CONNEXT_ENV_USER_TOPICS_PUBLISH_MODE,
-      lookup_rc)
-    return RMW_RET_ERROR;
-  }
-
-  if (0 == std::strcmp(user_topics_publish_mode_env, "synchronous")) {
-    ctx_impl->user_topics_publish_mode = RMW_Connext_PublishMode::Synchronous;
-  } else if (0 == std::strcmp(user_topics_publish_mode_env, "asynchronous")) {
-    ctx_impl->user_topics_publish_mode = RMW_Connext_PublishMode::Asynchronous;
-  } else if (0 == std::strcmp(user_topics_publish_mode_env, "auto")) {
-    ctx_impl->user_topics_publish_mode = RMW_Connext_PublishMode::Auto;
-  } else if (0 != std::strcmp(user_topics_publish_mode_env, "")) {
-    RMW_CONNEXT_LOG_ERROR_A_SET(
-      "unexpected value for environment variable '%s': '%s'. "
-      "Allowed values are: 'synchronous', 'asynchronous', 'auto'",
-      RMW_CONNEXT_ENV_USER_TOPICS_PUBLISH_MODE,
-      user_topics_publish_mode_env)
-    return RMW_RET_ERROR;
-  }
+  ctx_impl->use_default_publish_mode = '\0' != use_default_publish_mode_env[0];
 
   // Check if the user specified a custom override policy for participant qos.
   const char * participant_qos_policy = nullptr;

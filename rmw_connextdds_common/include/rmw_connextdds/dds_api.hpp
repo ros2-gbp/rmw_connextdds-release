@@ -108,8 +108,7 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  const rmw_publisher_options_t * const pub_options);
 
 rmw_ret_t
 rmw_connextdds_get_datareader_qos(
@@ -118,8 +117,7 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  const rmw_subscription_options_t * const sub_options);
 
 DDS_DataWriter *
 rmw_connextdds_create_datawriter(
@@ -131,8 +129,7 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  DDS_DataWriterQos * const dw_qos);
 
 DDS_DataReader *
 rmw_connextdds_create_datareader(
@@ -144,8 +141,7 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  DDS_DataReaderQos * const dr_qos);
 
 rmw_ret_t
 rmw_connextdds_write_message(
@@ -242,6 +238,36 @@ rmw_connextdds_enable_security(
 #define DDS_SECURITY_PROPERTY_PREFIX \
   "com.rti.serv.secure"
 #endif /* DDS_SECURITY_PROPERTY_PREFIX */
+
+#ifndef DDS_SECURITY_IDENTITY_CA_PROPERTY
+#define DDS_SECURITY_IDENTITY_CA_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".authentication.ca_file"
+#endif /* DDS_SECURITY_IDENTITY_CA_PROPERTY */
+
+#ifndef DDS_SECURITY_PERMISSIONS_CA_PROPERTY
+#define DDS_SECURITY_PERMISSIONS_CA_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".access_control.permissions_authority_file"
+#endif /* DDS_SECURITY_PERMISSIONS_CA_PROPERTY */
+
+#ifndef DDS_SECURITY_PRIVATE_KEY_PROPERTY
+#define DDS_SECURITY_PRIVATE_KEY_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".authentication.private_key_file"
+#endif /* DDS_SECURITY_PRIVATE_KEY_PROPERTY */
+
+#ifndef DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY
+#define DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".authentication.certificate_file"
+#endif /* DDS_SECURITY_IDENTITY_CERTIFICATE_PROPERTY */
+
+#ifndef DDS_SECURITY_GOVERNANCE_PROPERTY
+#define DDS_SECURITY_GOVERNANCE_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".access_control.governance_file"
+#endif /* DDS_SECURITY_GOVERNANCE_PROPERTY */
+
+#ifndef DDS_SECURITY_PERMISSIONS_PROPERTY
+#define DDS_SECURITY_PERMISSIONS_PROPERTY \
+  DDS_SECURITY_PROPERTY_PREFIX ".access_control.permissions_file"
+#endif /* DDS_SECURITY_PERMISSIONS_PROPERTY */
 
 #ifndef DDS_SECURITY_LOGGING_FILE_PROPERTY
 #define DDS_SECURITY_LOGGING_FILE_PROPERTY \

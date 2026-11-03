@@ -16,9 +16,9 @@ cmake_minimum_required(VERSION 3.20)
 
 project(rmw_connextdds)
 
-# Default to C++20
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
@@ -48,8 +48,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME}
     rmw_connextdds_common::rmw_connextdds_common_pro)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<PLATFORM_ID:Windows>:NOMINMAX>)
-
 configure_rmw_library(${PROJECT_NAME})
 
 register_rmw_implementation(
@@ -77,11 +75,5 @@ ament_package(
   CONFIG_EXTRAS_POST "${PROJECT_NAME}-extras.cmake.in"
 )
 
-# Lets launch_testing_ros filter the multi-line licensing notice that Connext
-# prints on stdout under a non-commercial or evaluation license out of process
-# output. Each line of the notice starts with the corresponding line of the
-# prefix, and the trailing empty line matches the blank line that ends it.
-# Licenses with an expiry date add an "Expires on" line, so register one
-# prefix per variant.
 ament_index_register_resource("rmw_output_prefixes"
-  CONTENT "[RTI LICENSE]\\nPlease contact support@rti.com\\n\n[RTI LICENSE]\\nExpires on\\nPlease contact support@rti.com\\n")
+  CONTENT "RTI Data Distribution Service\nRTI Connext DDS\nExpires on")

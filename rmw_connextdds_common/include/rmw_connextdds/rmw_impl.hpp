@@ -152,8 +152,7 @@ public:
     const RMW_Connext_MessageType msg_type = RMW_CONNEXT_MESSAGE_USERDATA,
     const void * const intro_members = nullptr,
     const bool intro_members_cpp = false,
-    std::string * const type_name = nullptr,
-    const rosidl_type_hash_t * ser_type_hash = nullptr);
+    std::string * const type_name = nullptr);
 
   rmw_ret_t
   finalize();
@@ -341,6 +340,7 @@ public:
 private:
   DDS_DataWriter * dds_writer;
   RMW_Connext_MessageTypeSupport * type_support;
+  const bool created_topic;
   rmw_gid_t ros_gid;
   RMW_Connext_PublisherStatusCondition status_condition;
   std::mutex matched_mutex;
@@ -359,7 +359,8 @@ private:
   RMW_Connext_Publisher(
     rmw_context_impl_t * const ctx,
     DDS_DataWriter * const dds_writer,
-    RMW_Connext_MessageTypeSupport * const type_support);
+    RMW_Connext_MessageTypeSupport * const type_support,
+    const bool created_topic);
 
   void
   pop_related_endpoints(const rmw_gid_t & endpoint)
@@ -416,8 +417,7 @@ public:
     std::string * const type_name = nullptr,
     const char * const cft_name = nullptr,
     const char * const cft_filter = nullptr,
-    RMW_Connext_Publisher * const related_pub = nullptr,
-    const rosidl_type_hash_t * ser_type_hash = nullptr);
+    RMW_Connext_Publisher * const related_pub = nullptr);
 
   rmw_ret_t
   finalize();
@@ -659,6 +659,7 @@ private:
   std::string cft_expression;
   RMW_Connext_MessageTypeSupport * type_support;
   rmw_gid_t ros_gid;
+  const bool created_topic;
   RMW_Connext_SubscriberStatusCondition status_condition;
   RMW_Connext_UntypedSampleSeq loan_data;
   DDS_SampleInfoSeq loan_info;
@@ -673,6 +674,7 @@ private:
     DDS_Topic * const dds_topic,
     RMW_Connext_MessageTypeSupport * const type_support,
     const bool ignore_local,
+    const bool created_topic,
     DDS_TopicDescription * const dds_topic_cft,
     const char * const cft_expression,
     const bool internal,
@@ -976,8 +978,7 @@ rmw_connextdds_get_readerwriter_qos(
   DDS_UserDataQosPolicy * const user_data,
   const rmw_qos_profile_t * const qos_policies,
   const rmw_publisher_options_t * const pub_options,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash = nullptr);
+  const rmw_subscription_options_t * const sub_options);
 
 rmw_ret_t
 rmw_connextdds_readerwriter_qos_to_ros(

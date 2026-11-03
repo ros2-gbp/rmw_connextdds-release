@@ -87,6 +87,11 @@ rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity)
         verbosity = NDDS_CONFIG_LOG_VERBOSITY_ERROR;
         break;
       }
+    default:
+      {
+        RMW_CONNEXT_LOG_ERROR_A_SET("invalid log level: %d", severity)
+        return RMW_RET_INVALID_ARGUMENT;
+      }
   }
 
   NDDS_Config_Logger_set_verbosity(logger, verbosity);
@@ -159,34 +164,6 @@ rmw_connextdds_finalize_participant_factory_context(
   for (DDS_Long i = 0; i < pending; i++) {
     DDS_DomainParticipant * const participant =
       *DDS_DomainParticipantSeq_get_reference(&participants, i);
-
-    DDS_DomainParticipantQos qos = DDS_DomainParticipantQos_INITIALIZER;
-    auto scope_exit_qos = rcpputils::make_scope_exit(
-      [&qos]() {
-        if (DDS_RETCODE_OK != DDS_DomainParticipantQos_finalize(&qos)) {
-          RMW_CONNEXT_LOG_ERROR_SET("failed to finalize participant QoS")
-        }
-      });
-    if (DDS_RETCODE_OK != DDS_DomainParticipant_get_qos(participant, &qos)) {
-      RMW_CONNEXT_LOG_ERROR_SET("failed to get participant QoS")
-      continue;
-    }
-
-    DDS_Boolean isMonitoring2Participant = DDS_BOOLEAN_FALSE;
-    if (DDS_RETCODE_OK == DDS_PropertyQosPolicyHelper_lookup_boolean_property(
-        &qos.property,
-        &isMonitoring2Participant,
-        PROPERTY_NAME_RTI_MONITORING2_PARTICIPANT,
-        DDS_BOOLEAN_FALSE))
-    {
-      if (DDS_BOOLEAN_TRUE == isMonitoring2Participant) {
-        // If this is a dedicated Participant created by Monitoring 2.0, its
-        // deletion is done when the DomainParticipantFactory is finalized.
-        //
-        // For that reason, skip the deletion of this Participant here.
-        continue;
-      }
-    }
 #if RMW_CONNEXT_DEBUG
     // If we are building in Debug mode, an issue in Connext may prevent the
     // participant from being able to delete any content-filtered topic if
@@ -287,15 +264,9 @@ rmw_connextdds_initialize_participant_qos_impl(
           RMW_CONNEXT_LOG_ERROR_SET("failed to set user_data")
           return RMW_RET_ERROR;
         }
-
-        // Force the use of the TypeObject V1
-        dp_qos->resource_limits.type_object_max_serialized_length = 8192;
-        dp_qos->discovery_config.enabled_builtin_channels =
-          DDS_DISCOVERYCONFIG_SERVICE_REQUEST_CHANNEL;
-
         break;
       }
-    case rmw_context_impl_t::participant_qos_override_policy_t::Never:
+    default:
       {
         // No customization of DomainParticipantQos request, return immediately.
         RMW_CONNEXT_LOG_DEBUG("using default Connext's DomainParticipantQos")
@@ -354,25 +325,6 @@ rmw_connextdds_initialize_participant_qos_impl(
     dp_qos->discovery_config.subscription_writer.max_heartbeat_retries = 300;
   }
 #endif /* RMW_CONNEXT_FAST_ENDPOINT_DISCOVERY */
-
-  // Set dds.ros.demangle_topic_and_type_names to TRUE.
-  // This will announce a demangled topic name as a topic alias.
-  // This will enable interoperability with Connext applications using the
-  // demangled topic name. This should not impact compatibility with any other
-  // vendors, as the “mangled” topic name will still be announced as the real
-  // topic name. Set this property for versions 7.5+
-#if (RTI_DDS_VERSION_MAJOR > 7) || (RTI_DDS_VERSION_MAJOR == 7 && RTI_DDS_VERSION_MINOR >= 5)
-  if (DDS_RETCODE_OK != DDS_PropertyQosPolicyHelper_assert_property(
-    &dp_qos->property,
-    "dds.ros.demangle_topic_and_type_names",
-    "TRUE",
-    DDS_BOOLEAN_FALSE))
-  {
-    RMW_CONNEXT_LOG_ERROR_SET(
-      "failed to assert property on participant:  dds.ros.demangle_topic_and_type_names");
-    return RMW_RET_ERROR;
-  }
-#endif
 
   return RMW_RET_OK;
 }
@@ -533,8 +485,7 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_publisher_options_t * const pub_options)
 {
   UNUSED_ARG(topic);
 
@@ -564,24 +515,14 @@ rmw_connextdds_get_datawriter_qos(
         &qos->user_data,
         qos_policies,
         pub_options,
-        nullptr /* sub_options */,
-        ser_type_hash))
+        nullptr /* sub_options */))
     {
       return RMW_RET_ERROR;
     }
   }
 
-  switch (ctx->user_topics_publish_mode) {
-    case RMW_Connext_PublishMode::Synchronous:
-      qos->publish_mode.kind = DDS_SYNCHRONOUS_PUBLISH_MODE_QOS;
-      break;
-    case RMW_Connext_PublishMode::Asynchronous:
-      qos->publish_mode.kind = DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS;
-      break;
-    case RMW_Connext_PublishMode::Auto:
-      // Leave the publish mode as is, which means it will be determined by
-      // Connext based on the QoS settings and topic type.
-      break;
+  if (!ctx->use_default_publish_mode) {
+    qos->publish_mode.kind = DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS;
   }
 
 #if RMW_CONNEXT_DEFAULT_RELIABILITY_OPTIMIZATIONS
@@ -660,8 +601,7 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_subscription_options_t * const sub_options)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic_desc);
@@ -691,8 +631,7 @@ rmw_connextdds_get_datareader_qos(
         &qos->user_data,
         qos_policies,
         nullptr /* pub_options */,
-        sub_options,
-        ser_type_hash))
+        sub_options))
     {
       return RMW_RET_ERROR;
     }
@@ -745,8 +684,7 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataWriterQos * const dw_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -754,7 +692,7 @@ rmw_connextdds_create_datawriter(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datawriter_qos(
-      ctx, type_support, topic, dw_qos, qos_policies, publisher_options, ser_type_hash))
+      ctx, type_support, topic, dw_qos, qos_policies, publisher_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert writer QoS")
     return nullptr;
@@ -778,8 +716,7 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataReaderQos * const dr_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -787,7 +724,7 @@ rmw_connextdds_create_datareader(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datareader_qos(
-      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options, ser_type_hash))
+      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert reader QoS")
     return nullptr;
@@ -1042,6 +979,8 @@ rmw_connextdds_filter_sample(
             rr_msg->gid, related_sample_identity.writer_guid);
           break;
         }
+      default:
+        return RMW_RET_ERROR;
     }
 
     // Convert instance handle to guid

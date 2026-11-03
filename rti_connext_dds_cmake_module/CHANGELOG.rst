@@ -2,41 +2,13 @@
 Changelog for package rti_connext_dds_cmake_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.9 (2026-11-03)
+1.1.2 (2026-11-03)
 ------------------
 
-1.2.8 (2026-09-15)
+1.1.1 (2025-10-20)
 ------------------
-
-1.2.7 (2026-05-12)
-------------------
-
-1.2.6 (2026-04-30)
-------------------
-
-1.2.5 (2026-04-14)
-------------------
-
-* Update Connext from 7.3.0 to 7.7.0, disable monitoring library by default, and use synchronous publishing mode (`#219 <https://github.com/ros2/rmw_connextdds/issues/219>`_)
-
-* Contributors: Francisco Gallego Salido
-
-1.2.4 (2025-11-18)
-------------------
-
-1.2.3 (2025-10-20)
-------------------
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-
-1.2.0 (2025-04-25)
-------------------
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_) (`#199 <https://github.com/ros2/rmw_connextdds/issues/199>`_)
+* Contributors: mergify[bot]
 
 1.1.0 (2025-04-18)
 ------------------

@@ -1,10 +1,6 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
->[!IMPORTANT]
-This README focuses on Connext RMW configuration and repository-specific development information.
-For installation instructions, tutorials, and high-level release notes, see the [RTI Connext and ROS 2](https://community.rti.com/static/documentation/ros/index.html) User's Manual in the RTI Community documentation.
-
-This repository contains an implementation of the [ROS 2](https://docs.ros.org/en/rolling)
+This repository contains a implementation of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
 [RTI Connext DDS Professional](https://www.rti.com/products/connext-dds-professional)
 
@@ -37,11 +33,11 @@ For any questions or feedback, feel free to reach out to rti-ros-team@rti.com.
 2. Configure RTI Connext DDS Professional and/or RTI Connext DDS Micro on your
    system (see [Requirements](#rti-connext-dds-requirements)). Make the installation(s)
    available via environment variables, e.g. by using the provided
-   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-7.7.0` with
+   `rtisetenv_<architecture>.bash` script (replace `~/rti_connext_dds-7.3.0` with
    the path of your Connext installation):
 
    ```sh
-    source ~/rti_connext_dds-7.7.0/resource/scripts/rtisetenv_x64Linux4gcc8.5.0.bash
+    source ~/rti_connext_dds-7.3.0/resource/scripts/rtisetenv_x64Linux4gcc7.3.0.bash
     export CONNEXTDDS_DIR=${NDDSHOME}
     ```
 
@@ -116,8 +112,8 @@ valid installation is detected, the packages will be skipped and not be built.
 
 |RMW|RTI Product|Environment Variable(s)|Required|Default|
 |---|-----------|-----------------------|--------|-------|
-|`rmw_connextdds`|RTI Connext DDS Professional 7.7.0|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
-|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 7.7.0 is available)|Guessed from contents of RTI Connext DDS Professional installation|
+|`rmw_connextdds`|RTI Connext DDS Professional 7.3.0|`CONNEXTDDS_DIR`, or `NDDSHOME`|Yes|None|
+|`rmw_connextddsmicro`|RTI Connext DDS Micro 3.x |`RTIMEHOME`|No (if RTI Connext DDS Professional 7.3.0 is available)|Guessed from contents of RTI Connext DDS Professional installation|
 
 ### Multiple versions of RTI Connext DDS Professional
 
@@ -163,8 +159,7 @@ variables.
 - [RMW_CONNEXT_PARTICIPANT_QOS_OVERRIDE_POLICY](#RMW_CONNEXT_PARTICIPANT_QOS_OVERRIDE_POLICY)
 - [RMW_CONNEXT_REQUEST_REPLY_MAPPING](#RMW_CONNEXT_REQUEST_REPLY_MAPPING)
 - [RMW_CONNEXT_UDP_INTERFACE](#RMW_CONNEXT_UDP_INTERFACE)
-- [RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE](#RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE) (Deprecated)
-- [RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE](#RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE)
+- [RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE](#RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE)
 
 ### RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE
 
@@ -224,19 +219,6 @@ is sped up from 3 seconds to 100 milliseconds.
 
 These optimizations may be disabled using variable
 `RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS`.
-
-### RTI_MONITORING2_ENABLE
-
-By default, Connext enables [RTI Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html)
-on the DomainParticipantFactory. This can be changed in an XML QoS profile via
-the `<monitoring>` settings or by setting the environment variable
-`RTI_MONITORING2_ENABLE`. Setting `RTI_MONITORING2_ENABLE` to false will disable
-the Monitoring Library. For more information on enabling and using the 
-RTI Monitoring 2.0 Library, see [Enabling Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html#enabling-monitoringlibrary2-heading).
-
-Monitoring is currently disabled entirely on Windows to avoid an access
-violation during process teardown (see
-[rmw_connextdds#248](https://github.com/ros2/rmw_connextdds/issues/248)).
 
 ### RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY
 
@@ -409,27 +391,12 @@ This variable is not used by `rmw_connextdds`.
 
 ### RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE
 
-**DEPRECATION NOTICE**
+`rmw_connextdds` will always set `DDS_DataWriterQos::publish_mode::kind` of
+any DataWriter it creates to `DDS_ASYNCHRONOUS_PUBLISH_MODE_QOS`, in order to
+enable out of the box support for "large data".
 
-This environment variable is deprecated and will be ignored. It will be removed
-in a future release.
-
-Use [RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE](#RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE)
-instead.
-
-### RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE
-
-`rmw_connextdds` will always set `DDS_DataWriterQos::publish_mode::kind` of any
-user Data Writer it creates to the default value of Connext (Synchronous publish
-mode) or to the value of a provided XML file.
-
-To override this behavior, you can set this variable to any of these values:
-
-- *synchronous*: Set publish mode of every user Data Writer to Synchronous.
-- *asynchronous*: Set publish mode of every user Data Writer to Asynchronous.
-- *auto*: Connext will choose the publish mode according to the QoS XML
-  configuration. If no XML file is used, Connext will use the default publish
-  mode (Synchronous).
+This behavior might not be always desirable, and it can be disabled by setting
+`RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE` to a non-empty value.
 
 This variable is not used by `rmw_connextddsmicro`, since it doesn't
 automatically override `DDS_DataWriterQos::publish_mode::kind`.

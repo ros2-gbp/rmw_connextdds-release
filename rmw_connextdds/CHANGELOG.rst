@@ -2,50 +2,15 @@
 Changelog for package rmw_connextdds
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.9 (2026-11-03)
+1.1.2 (2026-11-03)
 ------------------
-* Register multi-line rmw_output_prefixes for the RTI license notice (`#255 <https://github.com/ros2/rmw_connextdds/issues/255>`_) (`#264 <https://github.com/ros2/rmw_connextdds/issues/264>`_)
+* fix: remove superflous `buildtool_export_depend` (`#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_) (`#207 <https://github.com/ros2/rmw_connextdds/issues/207>`_)
 * Contributors: mergify[bot]
 
-1.2.8 (2026-09-15)
+1.1.1 (2025-10-20)
 ------------------
-* Switch to C++20 (`#244 <https://github.com/ros2/rmw_connextdds/issues/244>`_) (`#245 <https://github.com/ros2/rmw_connextdds/issues/245>`_)
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_) (`#199 <https://github.com/ros2/rmw_connextdds/issues/199>`_)
 * Contributors: mergify[bot]
-
-1.2.7 (2026-05-12)
-------------------
-
-1.2.6 (2026-04-30)
-------------------
-* fix: Fixed compilation on MSVC 2022 (`#225 <https://github.com/ros2/rmw_connextdds/issues/225>`_)
-* Contributors: Janosch Machowinski
-
-1.2.5 (2026-04-14)
-------------------
-
-* Remove default from switch with enum to enable compiler warnings (`#216 <https://github.com/ros2/rmw_connextdds/issues/216>`_)
-
-* Contributors: Tomoya Fujita
-
-1.2.4 (2025-11-18)
-------------------
-* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
-* fix: remove superflous `buildtool_export_depend` (`#206 <https://github.com/ros2/rmw_connextdds/issues/206>`_)
-* Contributors: Bas Zalmstra, Minju, Lee
-
-1.2.3 (2025-10-20)
-------------------
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-
-1.2.0 (2025-04-25)
-------------------
 
 1.1.0 (2025-04-18)
 ------------------

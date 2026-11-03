@@ -316,8 +316,7 @@ rmw_connextdds_get_readerwriter_qos(
   DDS_UserDataQosPolicy * const user_data,
   const rmw_qos_profile_t * const qos_policies,
   const rmw_publisher_options_t * const pub_options,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_subscription_options_t * const sub_options)
 {
   UNUSED_ARG(writer_qos);
   UNUSED_ARG(publish_mode);
@@ -352,7 +351,8 @@ rmw_connextdds_get_readerwriter_qos(
         history->kind = DDS_KEEP_ALL_HISTORY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_HISTORY_UNKNOWN:
+    // case RMW_QOS_POLICY_HISTORY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported history kind: %d", qos_policies->history)
@@ -384,9 +384,8 @@ rmw_connextdds_get_readerwriter_qos(
         reliability->kind = DDS_BEST_EFFORT_RELIABILITY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_RELIABILITY_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_RELIABILITY_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_RELIABILITY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported reliability kind: %d", qos_policies->reliability)
@@ -409,9 +408,8 @@ rmw_connextdds_get_readerwriter_qos(
         durability->kind = DDS_TRANSIENT_LOCAL_DURABILITY_QOS;
         break;
       }
-    case RMW_QOS_POLICY_DURABILITY_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_DURABILITY_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_DURABILITY_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported durability kind: %d", qos_policies->durability)
@@ -443,9 +441,8 @@ rmw_connextdds_get_readerwriter_qos(
         liveliness->kind = DDS_MANUAL_BY_TOPIC_LIVELINESS_QOS;
         break;
       }
-    case RMW_QOS_POLICY_LIVELINESS_UNKNOWN:
-      [[fallthrough]];
-    case RMW_QOS_POLICY_LIVELINESS_BEST_AVAILABLE:
+    // case RMW_QOS_POLICY_LIVELINESS_UNKNOWN:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported liveliness kind: %d", qos_policies->liveliness)
@@ -476,14 +473,6 @@ rmw_connextdds_get_readerwriter_qos(
     user_data_str.clear();
     // We handled the error, so clear it out
     rmw_reset_error();
-  }
-  if (ser_type_hash) {
-    std::string typehash_str;
-    if (RMW_RET_OK == rmw_dds_common::encode_sertype_hash_for_user_data_qos(
-        *ser_type_hash, typehash_str))
-    {
-      user_data_str += typehash_str;
-    }
   }
   DDS_OctetSeq_from_array(
     &user_data->value,
@@ -668,10 +657,12 @@ RMW_Connext_Node::finalize()
 RMW_Connext_Publisher::RMW_Connext_Publisher(
   rmw_context_impl_t * const ctx,
   DDS_DataWriter * const dds_writer,
-  RMW_Connext_MessageTypeSupport * const type_support)
+  RMW_Connext_MessageTypeSupport * const type_support,
+  const bool created_topic)
 : ctx(ctx),
   dds_writer(dds_writer),
   type_support(type_support),
+  created_topic(created_topic),
   status_condition(dds_writer),
   matched_subscriptions(DDS_SEQUENCE_INITIALIZER)
 {
@@ -702,8 +693,7 @@ RMW_Connext_Publisher::create(
   const RMW_Connext_MessageType msg_type,
   const void * const intro_members,
   const bool intro_members_cpp,
-  std::string * const type_name,
-  const rosidl_type_hash_t * ser_type_hash)
+  std::string * const type_name)
 {
   UNUSED_ARG(internal);
 
@@ -749,6 +739,7 @@ RMW_Connext_Publisher::create(
   }
 
   DDS_Topic * topic = nullptr;
+  bool topic_created = false;
 
   if (RMW_RET_OK !=
     ctx->assert_topic(
@@ -756,7 +747,8 @@ RMW_Connext_Publisher::create(
       fqtopic_name.c_str(),
       type_support->type_name(),
       internal,
-      &topic))
+      &topic,
+      topic_created))
   {
     RMW_CONNEXT_LOG_ERROR_A(
       "failed to assert topic: "
@@ -768,11 +760,15 @@ RMW_Connext_Publisher::create(
   }
 
   auto scope_exit_topic_delete = rcpputils::make_scope_exit(
-    [ctx, dp, topic]()
+    [topic_created, dp, topic]()
     {
-      if (!ctx->release_topic(dp, topic)) {
-        RMW_CONNEXT_LOG_ERROR_SET(
-          "failed to delete writer's topic")
+      if (topic_created) {
+        if (DDS_RETCODE_OK !=
+        DDS_DomainParticipant_delete_topic(dp, topic))
+        {
+          RMW_CONNEXT_LOG_ERROR_SET(
+            "failed to delete writer's topic")
+        }
       }
     });
 
@@ -816,8 +812,7 @@ RMW_Connext_Publisher::create(
     internal,
     type_support,
     topic,
-    &dw_qos,
-    ser_type_hash);
+    &dw_qos);
 
   if (nullptr == dds_writer) {
     RMW_CONNEXT_LOG_ERROR("failed to create DDS writer")
@@ -838,7 +833,7 @@ RMW_Connext_Publisher::create(
 
   RMW_Connext_Publisher * rmw_pub_impl =
     new (std::nothrow) RMW_Connext_Publisher(
-    ctx, dds_writer, type_support);
+    ctx, dds_writer, type_support, topic_created);
 
   if (nullptr == rmw_pub_impl) {
     RMW_CONNEXT_LOG_ERROR_SET("failed to allocate RMW publisher")
@@ -871,16 +866,22 @@ RMW_Connext_Publisher::finalize()
   }
 
   DDS_DomainParticipant * const participant = this->dds_participant();
-  DDS_Topic * const topic = this->dds_topic();
 
-  RMW_CONNEXT_LOG_DEBUG_A(
-    "deleting topic: name=%s",
-    DDS_TopicDescription_get_name(
-      DDS_Topic_as_topicdescription(topic)))
+  if (this->created_topic) {
+    DDS_Topic * const topic = this->dds_topic();
 
-  if (!this->ctx->release_topic(participant, topic)) {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to delete DDS Topic")
-    return RMW_RET_ERROR;
+    RMW_CONNEXT_LOG_DEBUG_A(
+      "deleting topic: name=%s",
+      DDS_TopicDescription_get_name(
+        DDS_Topic_as_topicdescription(topic)))
+
+    DDS_ReturnCode_t rc =
+      DDS_DomainParticipant_delete_topic(participant, topic);
+
+    if (DDS_RETCODE_OK != rc) {
+      RMW_CONNEXT_LOG_ERROR_SET("failed to delete DDS Topic")
+      return RMW_RET_ERROR;
+    }
   }
 
   rmw_ret_t rc = RMW_Connext_MessageTypeSupport::unregister_type_support(
@@ -1265,6 +1266,7 @@ RMW_Connext_Subscriber::RMW_Connext_Subscriber(
   DDS_Topic * const dds_topic,
   RMW_Connext_MessageTypeSupport * const type_support,
   const bool ignore_local,
+  const bool created_topic,
   DDS_TopicDescription * const dds_topic_cft,
   const char * const cft_expression,
   const bool internal,
@@ -1277,6 +1279,7 @@ RMW_Connext_Subscriber::RMW_Connext_Subscriber(
   dds_topic_cft(dds_topic_cft),
   cft_expression(cft_expression),
   type_support(type_support),
+  created_topic(created_topic),
   status_condition(dds_reader, ignore_local, internal),
   related_pub(related_pub)
 {
@@ -1311,8 +1314,7 @@ RMW_Connext_Subscriber::create(
   std::string * const type_name,
   const char * const cft_name,
   const char * const cft_filter,
-  RMW_Connext_Publisher * const related_pub,
-  const rosidl_type_hash_t * ser_type_hash)
+  RMW_Connext_Publisher * const related_pub)
 {
   RMW_Connext_MessageTypeSupport * const type_support =
     RMW_Connext_MessageTypeSupport::register_type_support(
@@ -1357,6 +1359,7 @@ RMW_Connext_Subscriber::create(
 
   DDS_Topic * topic = nullptr;
   DDS_TopicDescription * cft_topic = nullptr;
+  bool topic_created = false;
 
   if (RMW_RET_OK !=
     ctx->assert_topic(
@@ -1364,7 +1367,8 @@ RMW_Connext_Subscriber::create(
       fqtopic_name.c_str(),
       type_support->type_name(),
       internal,
-      &topic))
+      &topic,
+      topic_created))
   {
     RMW_CONNEXT_LOG_ERROR_A(
       "failed to assert topic: "
@@ -1376,7 +1380,7 @@ RMW_Connext_Subscriber::create(
   }
 
   auto scope_exit_topic_delete = rcpputils::make_scope_exit(
-    [ctx, dp, &topic, &cft_topic]()
+    [ctx, &topic_created, dp, &topic, &cft_topic]()
     {
       if (nullptr != cft_topic) {
         if (RMW_RET_OK !=
@@ -1385,9 +1389,13 @@ RMW_Connext_Subscriber::create(
           RMW_CONNEXT_LOG_ERROR("failed to delete content-filtered topic")
         }
       }
-      if (!ctx->release_topic(dp, topic)) {
-        RMW_CONNEXT_LOG_ERROR_SET(
-          "failed to delete reader's topic")
+      if (topic_created) {
+        if (DDS_RETCODE_OK !=
+        DDS_DomainParticipant_delete_topic(dp, topic))
+        {
+          RMW_CONNEXT_LOG_ERROR_SET(
+            "failed to delete reader's topic")
+        }
       }
     });
 
@@ -1466,8 +1474,7 @@ RMW_Connext_Subscriber::create(
     internal,
     type_support,
     sub_topic,
-    &dr_qos,
-    ser_type_hash);
+    &dr_qos);
 
   if (nullptr == dds_reader) {
     RMW_CONNEXT_LOG_ERROR_SET("failed to create DDS reader")
@@ -1493,6 +1500,7 @@ RMW_Connext_Subscriber::create(
     topic,
     type_support,
     subscriber_options->ignore_local_publications,
+    topic_created,
     cft_topic,
     sub_cft_expr,
     internal,
@@ -1546,16 +1554,21 @@ RMW_Connext_Subscriber::finalize()
     }
   }
 
-  DDS_Topic * const topic = this->dds_topic;
+  if (this->created_topic) {
+    DDS_Topic * const topic = this->dds_topic;
 
-  RMW_CONNEXT_LOG_DEBUG_A(
-    "deleting topic: name=%s",
-    DDS_TopicDescription_get_name(
-      DDS_Topic_as_topicdescription(topic)))
+    RMW_CONNEXT_LOG_DEBUG_A(
+      "deleting topic: name=%s",
+      DDS_TopicDescription_get_name(
+        DDS_Topic_as_topicdescription(topic)))
 
-  if (!this->ctx->release_topic(participant, topic)) {
-    RMW_CONNEXT_LOG_ERROR_SET("failed to delete DDS Topic")
-    return RMW_RET_ERROR;
+    DDS_ReturnCode_t rc =
+      DDS_DomainParticipant_delete_topic(participant, topic);
+
+    if (DDS_RETCODE_OK != rc) {
+      RMW_CONNEXT_LOG_ERROR_SET("failed to delete DDS Topic")
+      return RMW_RET_ERROR;
+    }
   }
 
   rmw_ret_t rc = RMW_Connext_MessageTypeSupport::unregister_type_support(
@@ -2013,11 +2026,6 @@ rmw_connextdds_create_subscriber(
   rmw_subscriber->options = *subscriber_options;
   rmw_subscriber->can_loan_messages = false;
   rmw_subscriber->is_cft_enabled = rmw_sub_impl->is_cft_enabled();
-#if RMW_CONNEXT_DDS_API == RMW_CONNEXT_DDS_API_PRO
-  rmw_subscriber->is_cft_supported = true;
-#else
-  rmw_subscriber->is_cft_supported = false;
-#endif
 
   if (!internal) {
     if (RMW_RET_OK != rmw_sub_impl->enable()) {
@@ -2584,7 +2592,7 @@ RMW_Connext_Client::create(
 
   rmw_publisher_options_t pub_options = rmw_get_default_publisher_options();
   rmw_subscription_options_t sub_options = rmw_get_default_subscription_options();
-  const rosidl_type_hash_t * ser_type_hash = type_supports->get_type_hash_func(type_supports);
+
 
   RMW_CONNEXT_LOG_DEBUG_A(
     "creating request publisher: "
@@ -2606,8 +2614,7 @@ RMW_Connext_Client::create(
     RMW_CONNEXT_MESSAGE_REQUEST,
     svc_members_req,
     svc_members_req_cpp,
-    &request_type,
-    ser_type_hash);
+    &request_type);
 
   if (nullptr == client_impl->request_pub) {
     RMW_CONNEXT_LOG_ERROR("failed to create client requester")
@@ -2659,9 +2666,7 @@ RMW_Connext_Client::create(
     svc_members_res_cpp,
     &reply_type,
     cft_name,
-    cft_filter,
-    nullptr,
-    ser_type_hash);
+    cft_filter);
 
   if (nullptr == client_impl->reply_sub) {
     RMW_CONNEXT_LOG_ERROR("failed to create client replier")
@@ -3020,7 +3025,6 @@ RMW_Connext_Service::create(
 
   rmw_publisher_options_t pub_options = rmw_get_default_publisher_options();
   rmw_subscription_options_t sub_options = rmw_get_default_subscription_options();
-  const rosidl_type_hash_t * ser_type_hash = type_supports->get_type_hash_func(type_supports);
 
   RMW_CONNEXT_LOG_DEBUG_A(
     "creating reply publisher: "
@@ -3042,8 +3046,7 @@ RMW_Connext_Service::create(
     RMW_CONNEXT_MESSAGE_REPLY,
     svc_members_res,
     svc_members_res_cpp,
-    &reply_type,
-    ser_type_hash);
+    &reply_type);
 
   if (nullptr == svc_impl->reply_pub) {
     RMW_CONNEXT_LOG_ERROR("failed to create service replier")
@@ -3076,8 +3079,7 @@ RMW_Connext_Service::create(
     /* If we are using the extended RPC mapping, then we cache the reply writer
        so that we can notify it of "subscription_match" events. */
     (ctx->request_reply_mapping == RMW_Connext_RequestReplyMapping::Extended ?
-    svc_impl->reply_pub : nullptr),
-    ser_type_hash);
+    svc_impl->reply_pub : nullptr));
 
   if (nullptr == svc_impl->request_sub) {
     RMW_CONNEXT_LOG_ERROR("failed to create service requester")
@@ -3389,7 +3391,6 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
         return DDS_SAMPLE_LOST_STATUS;
       }
     case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
       {
         return DDS_INCONSISTENT_TOPIC_STATUS;
@@ -3402,9 +3403,7 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
       {
         return DDS_SUBSCRIPTION_MATCHED_STATUS;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         if (nullptr != invalid) {
           *invalid = true;
@@ -3412,10 +3411,6 @@ ros_event_to_dds(const rmw_event_type_t ros, bool * const invalid)
         return (DDS_StatusKind)UINT32_MAX;
       }
   }
-  if (nullptr != invalid) {
-    *invalid = true;
-  }
-  return (DDS_StatusKind)UINT32_MAX;
 }
 
 const char *
@@ -3466,37 +3461,19 @@ ros_event_for_reader(const rmw_event_type_t ros)
 {
   switch (ros) {
     case RMW_EVENT_LIVELINESS_CHANGED:
-      [[fallthrough]];
     case RMW_EVENT_REQUESTED_DEADLINE_MISSED:
-      [[fallthrough]];
     case RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
     case RMW_EVENT_MESSAGE_LOST:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
     case RMW_EVENT_SUBSCRIPTION_MATCHED:
       {
         return true;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLICATION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         return false;
       }
   }
-  return false;
 }
 
 rmw_ret_t
@@ -3554,19 +3531,7 @@ RMW_Connext_SubscriberStatusCondition::get_status(
         rc = this->get_matched_status(status);
         break;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_OFFERED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLISHER_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_PUBLICATION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET(
           "unsupported subscriber qos: %d", event_type)
@@ -3625,21 +3590,7 @@ RMW_Connext_PublisherStatusCondition::get_status(
         rc = this->get_matched_status(status);
         break;
       }
-    case RMW_EVENT_INVALID:
-      [[fallthrough]];
-    case RMW_EVENT_LIVELINESS_CHANGED:
-      [[fallthrough]];
-    case RMW_EVENT_REQUESTED_DEADLINE_MISSED:
-      [[fallthrough]];
-    case RMW_EVENT_REQUESTED_QOS_INCOMPATIBLE:
-      [[fallthrough]];
-    case RMW_EVENT_MESSAGE_LOST:
-      [[fallthrough]];
-    case RMW_EVENT_SUBSCRIPTION_INCOMPATIBLE_TYPE:
-      [[fallthrough]];
-    case RMW_EVENT_SUBSCRIPTION_MATCHED:
-      [[fallthrough]];
-    case RMW_EVENT_TYPE_MAX:
+    default:
       {
         RMW_CONNEXT_LOG_ERROR_A_SET("unsupported publisher qos: %d", event_type)
         RMW_CONNEXT_ASSERT(0)

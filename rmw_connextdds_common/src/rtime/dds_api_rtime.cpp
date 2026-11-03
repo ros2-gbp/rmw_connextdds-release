@@ -414,6 +414,11 @@ rmw_connextdds_set_log_verbosity(rmw_log_severity_t severity)
         verbosity = OSAPI_LOG_VERBOSITY_ERROR;
         break;
       }
+    default:
+      {
+        RMW_CONNEXT_LOG_ERROR_A_SET("invalid log level: %d", severity)
+        return RMW_RET_INVALID_ARGUMENT;
+      }
   }
 
   OSAPI_Log_set_verbosity(verbosity);
@@ -1003,8 +1008,7 @@ rmw_connextdds_get_datawriter_qos(
   DDS_Topic * const topic,
   DDS_DataWriterQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_publisher_options_t * const pub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_publisher_options_t * const pub_options)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic);
@@ -1024,8 +1028,7 @@ rmw_connextdds_get_datawriter_qos(
       &qos->user_data,
       qos_policies,
       pub_options,
-      nullptr /* sub_options */,
-      ser_type_hash))
+      nullptr /* sub_options */))
   {
     return RMW_RET_ERROR;
   }
@@ -1055,8 +1058,7 @@ rmw_connextdds_get_datareader_qos(
   DDS_TopicDescription * const topic_desc,
   DDS_DataReaderQos * const qos,
   const rmw_qos_profile_t * const qos_policies,
-  const rmw_subscription_options_t * const sub_options,
-  const rosidl_type_hash_t * ser_type_hash)
+  const rmw_subscription_options_t * const sub_options)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(topic_desc);
@@ -1076,8 +1078,7 @@ rmw_connextdds_get_datareader_qos(
       &qos->user_data,
       qos_policies,
       nullptr /* pub_options */,
-      sub_options,
-      ser_type_hash))
+      sub_options))
   {
     return RMW_RET_ERROR;
   }
@@ -1109,8 +1110,7 @@ rmw_connextdds_create_datawriter(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_Topic * const topic,
-  DDS_DataWriterQos * const dw_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataWriterQos * const dw_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -1118,7 +1118,7 @@ rmw_connextdds_create_datawriter(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datawriter_qos(
-      ctx, type_support, topic, dw_qos, qos_policies, publisher_options, ser_type_hash))
+      ctx, type_support, topic, dw_qos, qos_policies, publisher_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert writer QoS")
     return nullptr;
@@ -1141,8 +1141,7 @@ rmw_connextdds_create_datareader(
   const bool internal,
   RMW_Connext_MessageTypeSupport * const type_support,
   DDS_TopicDescription * const topic_desc,
-  DDS_DataReaderQos * const dr_qos,
-  const rosidl_type_hash_t * ser_type_hash)
+  DDS_DataReaderQos * const dr_qos)
 {
   UNUSED_ARG(ctx);
   UNUSED_ARG(participant);
@@ -1150,7 +1149,7 @@ rmw_connextdds_create_datareader(
 
   if (RMW_RET_OK !=
     rmw_connextdds_get_datareader_qos(
-      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options, ser_type_hash))
+      ctx, type_support, topic_desc, dr_qos, qos_policies, subscriber_options))
   {
     RMW_CONNEXT_LOG_ERROR("failed to convert reader QoS")
     return nullptr;

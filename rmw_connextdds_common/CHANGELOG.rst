@@ -2,65 +2,19 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.9 (2026-11-03)
+1.1.2 (2026-11-03)
 ------------------
-
-1.2.8 (2026-09-15)
-------------------
-* Disable monitoring on Windows, update README to include monitoring env var (`#250 <https://github.com/ros2/rmw_connextdds/issues/250>`_) (`#252 <https://github.com/ros2/rmw_connextdds/issues/252>`_)
-* Enable Monitoring Library by default (`#243 <https://github.com/ros2/rmw_connextdds/issues/243>`_) (`#251 <https://github.com/ros2/rmw_connextdds/issues/251>`_)
-* Switch to C++20 (`#244 <https://github.com/ros2/rmw_connextdds/issues/244>`_) (`#245 <https://github.com/ros2/rmw_connextdds/issues/245>`_)
-* Use reference counting for Topics deletion (`#239 <https://github.com/ros2/rmw_connextdds/issues/239>`_) (`#241 <https://github.com/ros2/rmw_connextdds/issues/241>`_)
-* Contributors: Tomoya Fujita, mergify[bot]
-
-1.2.7 (2026-05-12)
-------------------
-* Fix content filtering on Windows with modern Connext DDS (`#226 <https://github.com/ros2/rmw_connextdds/issues/226>`_) (`#230 <https://github.com/ros2/rmw_connextdds/issues/230>`_)
+* fix: remove superflous buildtool_export_depend. (`#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_) (`#211 <https://github.com/ros2/rmw_connextdds/issues/211>`_)
 * Contributors: mergify[bot]
 
-1.2.6 (2026-04-30)
+1.1.1 (2025-10-20)
 ------------------
-* fix: Fixed compilation on MSVC 2022 (`#225 <https://github.com/ros2/rmw_connextdds/issues/225>`_)
-* Contributors: Janosch Machowinski
-
-1.2.5 (2026-04-14)
-------------------
-
-* Add variable ``RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE`` and deprecate ``RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE`` (`#224 <https://github.com/ros2/rmw_connextdds/issues/224>`_)
-* Update Connext from 7.3.0 to 7.7.0, disable monitoring library by default, and use synchronous publishing mode (`#219 <https://github.com/ros2/rmw_connextdds/issues/219>`_)
-* Enable property ``dds.ros.demangle_topic_and_type_names`` to announce demangled topic name as topic alias (`#221 <https://github.com/ros2/rmw_connextdds/issues/221>`_)
-* Enable content filtering flag (`#223 <https://github.com/ros2/rmw_connextdds/issues/223>`_)
-* Remove deprecated security properties and use new ones (`#217 <https://github.com/ros2/rmw_connextdds/issues/217>`_)
-* Remove default from switch with enum to enable compiler warnings (`#216 <https://github.com/ros2/rmw_connextdds/issues/216>`_)
-* Replace ``DDS_ContentFilter_register_filter`` with ``DDS_DomainParticipant_register_contentfilterI`` (`#215 <https://github.com/ros2/rmw_connextdds/issues/215>`_)
-* Remove superfluous ``buildtool_export_depend`` (`#210 <https://github.com/ros2/rmw_connextdds/issues/210>`_)
-
-* Contributors: Barry Xu, Francisco Gallego Salido, Tomoya Fujita
-
-1.2.4 (2025-11-18)
-------------------
-* add : get clients,servers info (`#154 <https://github.com/ros2/rmw_connextdds/issues/154>`_)
-* Contributors: Minju, Lee
-
-1.2.3 (2025-10-20)
-------------------
-* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_)
-* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_)
-* Contributors: Chris Lalancette, Francisco Gallego Salido
-
-1.2.2 (2025-07-29)
-------------------
-* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_)
-* Contributors: mosfet80
-
-1.2.1 (2025-07-01)
-------------------
-* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_)
-* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_)
-* Contributors: Alejandro Hernández Cordero, Francisco Gallego Salido
-
-1.2.0 (2025-04-25)
-------------------
+* [rmw_connextdds_common]: Remove <member_of_group>rosidl_interface_packages (`#202 <https://github.com/ros2/rmw_connextdds/issues/202>`_) (`#203 <https://github.com/ros2/rmw_connextdds/issues/203>`_)
+* Correctly calculate the size of a serialized key (`#200 <https://github.com/ros2/rmw_connextdds/issues/200>`_) (`#201 <https://github.com/ros2/rmw_connextdds/issues/201>`_)
+* Fix cmake deprecation (`#198 <https://github.com/ros2/rmw_connextdds/issues/198>`_) (`#199 <https://github.com/ros2/rmw_connextdds/issues/199>`_)
+* Fixed serialized minimum sample size callback (`#196 <https://github.com/ros2/rmw_connextdds/issues/196>`_) (`#197 <https://github.com/ros2/rmw_connextdds/issues/197>`_)
+* Removed warning (`#187 <https://github.com/ros2/rmw_connextdds/issues/187>`_) (`#194 <https://github.com/ros2/rmw_connextdds/issues/194>`_)
+* Contributors: mergify[bot]
 
 1.1.0 (2025-04-18)
 ------------------

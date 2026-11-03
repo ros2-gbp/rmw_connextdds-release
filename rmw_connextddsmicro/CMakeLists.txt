@@ -16,9 +16,9 @@ cmake_minimum_required(VERSION 3.20)
 
 project(rmw_connextddsmicro)
 
-# Default to C++20
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
@@ -54,8 +54,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     rmw_connextdds_common::rmw_connextdds_common_micro)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<PLATFORM_ID:Windows>:NOMINMAX>)
 
 configure_rmw_library(${PROJECT_NAME})
 

@@ -70,8 +70,7 @@ rmw_ret_t
 rmw_connextdds_graph_on_service_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Service * const svc,
-  const rosidl_type_hash_t * ser_type_hash);
+  RMW_Connext_Service * const svc);
 
 rmw_ret_t
 rmw_connextdds_graph_on_service_deleted(
@@ -83,8 +82,7 @@ rmw_ret_t
 rmw_connextdds_graph_on_client_created(
   rmw_context_impl_t * const ctx,
   const rmw_node_t * const node,
-  RMW_Connext_Client * const client,
-  const rosidl_type_hash_t * ser_type_hash);
+  RMW_Connext_Client * const client);
 
 rmw_ret_t
 rmw_connextdds_graph_on_client_deleted(
