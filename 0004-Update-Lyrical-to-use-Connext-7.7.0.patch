@@ -1,4 +1,4 @@
-From 45b5b596c3d9ba8842b7a0a6b3fd0dbd51555929 Mon Sep 17 00:00:00 2001
+From 313b083ae66e65a09cfb578653d0fe843bd198b7 Mon Sep 17 00:00:00 2001
 From: Chris Lalancette <clalancette@gmail.com>
 Date: Fri, 5 Jun 2026 13:23:38 -0400
 Subject: [PATCH 4/4] Update Lyrical to use Connext 7.7.0.
@@ -25,5 +25,5 @@ index d155c1a8..6a7ca825 100755
  %:
  	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
 -- 
-2.55.0.1032.g73a4cd73de-goog
+2.53.0
 
