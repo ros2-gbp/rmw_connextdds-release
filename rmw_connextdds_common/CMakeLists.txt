@@ -38,9 +38,9 @@ function(rtirmw_add_library)
       ${ARGN} # current function arguments
     )
 
-    # Default to C++17
+    # Default to C++20
     if(NOT CMAKE_CXX_STANDARD)
-        set(CMAKE_CXX_STANDARD 17)
+        set(CMAKE_CXX_STANDARD 20)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
     endif()
 
@@ -210,7 +210,7 @@ else()
     if("${CONNEXTDDS_VERSION}" VERSION_LESS "6.0.0")
       list(APPEND extra_defines "RMW_CONNEXT_DDS_API_PRO_LEGACY=1")
     endif()
-    if(CONNEXTDDS_ARCH MATCHES ".*Win.*")
+    if(CONNEXTDDS_ARCH MATCHES ".*Win.*" AND "${CONNEXTDDS_VERSION}" VERSION_LESS "6.0.0")
       list(APPEND extra_defines "RMW_CONNEXT_BUILTIN_CFT_COMPATIBILITY_MODE=1")
     endif()
     rtirmw_add_library(
