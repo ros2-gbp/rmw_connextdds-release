@@ -1,4 +1,4 @@
-From 712cf7b60f5e9cacc865d3a530f8412ef5165daf Mon Sep 17 00:00:00 2001
+From 15e6bc34a31224120180adac7c4afff2313f1823 Mon Sep 17 00:00:00 2001
 From: Scott K Logan <logans@cottsay.net>
 Date: Fri, 2 May 2025 14:09:13 -0500
 Subject: [PATCH 3/3] Update to Connext DDS 7.3.0
@@ -8,7 +8,7 @@ Subject: [PATCH 3/3] Update to Connext DDS 7.3.0
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/debian/rules.em b/debian/rules.em
-index 4b3dcff..d155c1a 100755
+index 4b3dcff7..d155c1a8 100755
 --- a/debian/rules.em
 +++ b/debian/rules.em
 @@ -24,7 +24,7 @@ endif
@@ -21,5 +21,5 @@ index 4b3dcff..d155c1a 100755
  %:
  	dh $@@ -v --buildsystem=cmake --builddirectory=.obj-$(DEB_HOST_GNU_TYPE)
 -- 
-2.43.0
+2.53.0
 
