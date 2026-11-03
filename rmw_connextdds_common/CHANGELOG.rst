@@ -2,20 +2,20 @@
 Changelog for package rmw_connextdds_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.2.8 (2026-09-15)
+1.3.1 (2026-11-03)
 ------------------
-* Disable monitoring on Windows, update README to include monitoring env var (`#250 <https://github.com/ros2/rmw_connextdds/issues/250>`_) (`#252 <https://github.com/ros2/rmw_connextdds/issues/252>`_)
-* Enable Monitoring Library by default (`#243 <https://github.com/ros2/rmw_connextdds/issues/243>`_) (`#251 <https://github.com/ros2/rmw_connextdds/issues/251>`_)
-* Switch to C++20 (`#244 <https://github.com/ros2/rmw_connextdds/issues/244>`_) (`#245 <https://github.com/ros2/rmw_connextdds/issues/245>`_)
-* Use reference counting for Topics deletion (`#239 <https://github.com/ros2/rmw_connextdds/issues/239>`_) (`#241 <https://github.com/ros2/rmw_connextdds/issues/241>`_)
-* Contributors: Tomoya Fujita, mergify[bot]
+* Silence MSVC C5033 from the RTI skiplist macro (`#262 <https://github.com/ros2/rmw_connextdds/issues/262>`_)
+* Use the SPDX identifier Apache-2.0 in package.xml license tags (`#258 <https://github.com/ros2/rmw_connextdds/issues/258>`_)
+* Add TypeObject V2 tests to Connext RMW, fix initialization of Connext type plugins (`#253 <https://github.com/ros2/rmw_connextdds/issues/253>`_)
+* Disable monitoring on Windows, update README to include monitoring env var (`#250 <https://github.com/ros2/rmw_connextdds/issues/250>`_)
+* Enable Monitoring Library by default (`#243 <https://github.com/ros2/rmw_connextdds/issues/243>`_)
+* Switch to C++20 (`#244 <https://github.com/ros2/rmw_connextdds/issues/244>`_)
+* Added new variable RMW_CONNEXT_DISCOVERY_TOPICS_PUBLISH_MODE (`#240 <https://github.com/ros2/rmw_connextdds/issues/240>`_)
+* Use reference counting for Topics deletion (`#239 <https://github.com/ros2/rmw_connextdds/issues/239>`_)
+* Fix content filtering on Windows with modern Connext DDS (`#226 <https://github.com/ros2/rmw_connextdds/issues/226>`_)
+* Contributors: Francisco Gallego Salido, Michael Carroll, oliviadorenczrti
 
-1.2.7 (2026-05-12)
-------------------
-* Fix content filtering on Windows with modern Connext DDS (`#226 <https://github.com/ros2/rmw_connextdds/issues/226>`_) (`#230 <https://github.com/ros2/rmw_connextdds/issues/230>`_)
-* Contributors: mergify[bot]
-
-1.2.6 (2026-04-30)
+1.3.0 (2026-05-07)
 ------------------
 * fix: Fixed compilation on MSVC 2022 (`#225 <https://github.com/ros2/rmw_connextdds/issues/225>`_)
 * Contributors: Janosch Machowinski
