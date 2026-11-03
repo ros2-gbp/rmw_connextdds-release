@@ -81,8 +81,7 @@ struct RMW_Connext_NddsTypePluginI
     REDAFastBufferPool * const pool_samples,
     DDS_TypeCode * const tc = nullptr,
     RMW_Connext_TypeCodePtrSeq * const tc_cache = nullptr)
-  : base{},
-    wrapper(wrapper),
+  : wrapper(wrapper),
     type_code(this, tc, tc_cache),
     pool_samples(pool_samples),
     attached_count(0)
@@ -1168,7 +1167,6 @@ RMW_Connext_TypePlugin_initialize(
 #if !RMW_CONNEXT_DDS_API_PRO_LEGACY
   /* This functions are not part of the pre-6.x type plugin */
   plugin->isMetpType = RTI_FALSE;
-  plugin->isRecursiveType = RTI_FALSE;
   plugin->getWriterLoanedSampleFnc = nullptr;
   plugin->returnWriterLoanedSampleFnc = nullptr;
   plugin->returnWriterLoanedSampleFromCookieFnc = nullptr;
