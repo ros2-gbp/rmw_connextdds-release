@@ -15,8 +15,6 @@
 #ifndef RMW_CONNEXTDDS__TYPE_SUPPORT_HPP_
 #define RMW_CONNEXTDDS__TYPE_SUPPORT_HPP_
 
-#include <cstddef>
-#include <cstdint>
 #include <string>
 #include <stdexcept>
 
@@ -43,31 +41,20 @@
 #include "rosidl_typesupport_introspection_c/service_introspection.h"
 #include "rosidl_typesupport_introspection_c/visibility_control.h"
 
-// This type is internal to the implementation and it is not sent over the wire
 struct RMW_Connext_RequestReplyMessage
 {
   bool request;
-  // In basic mapping, this is the GID of the client's DataWriter
-  // In extended mapping, this is the GID of the client's DataReader
   rmw_gid_t gid;
-  // This is the GID of the writer that sent the request
-  rmw_gid_t writer_gid;
   int64_t sn;
-  void *payload;
+  void * payload;
 };
 
 class RMW_Connext_MessageTypeSupport
 {
-  const rosidl_message_type_support_t * _message_type_support;
   const rosidl_message_type_support_t * _type_support_fastrtps;
-  message_type_support_key_callbacks_t _key_callbacks;
   bool _unbounded;
   bool _empty;
-  bool _keyed;
-  bool _unbounded_key;
-  bool _is_cpp;
   uint32_t _serialized_size_max;
-  uint32_t _key_serialized_size_max;
   std::string _type_name;
   RMW_Connext_MessageType _message_type;
   rmw_context_impl_t * const _ctx;
@@ -85,11 +72,6 @@ public:
   {
     return static_cast<const message_type_support_callbacks_t *>(
       this->_type_support_fastrtps->data);
-  }
-
-  const rosidl_message_type_support_t * message_type_support() const
-  {
-    return this->_message_type_support;
   }
 
   rmw_context_impl_t * ctx() const
@@ -112,14 +94,6 @@ public:
     return this->_serialized_size_max;
   }
 
-  uint32_t type_key_serialized_size_max() const
-  {
-    if (!this->_keyed) {
-      return 0;
-    }
-    return this->_key_serialized_size_max;
-  }
-
   bool unbounded() const
   {
     return this->_unbounded;
@@ -128,21 +102,6 @@ public:
   bool empty() const
   {
     return this->_empty;
-  }
-
-  bool keyed() const
-  {
-    return this->_keyed;
-  }
-
-  bool unbounded_key() const
-  {
-    return this->_unbounded_key;
-  }
-
-  bool is_cpp() const
-  {
-    return this->_is_cpp;
   }
 
   RMW_Connext_MessageType message_type() const
@@ -175,33 +134,13 @@ public:
 
   rmw_ret_t serialize(
     const void * const ros_msg,
-    rcutils_uint8_array_t * const to_buffer,
-    const bool include_encapsulation = true);
+    rcutils_uint8_array_t * const to_buffer);
 
   rmw_ret_t deserialize(
     void * const ros_msg,
     const rcutils_uint8_array_t * const from_buffer,
+    size_t & size_out,
     const bool header_only = false);
-
-  std::size_t serialized_key_size_max(const void * const ros_msg);
-
-  rmw_ret_t serialize_key(
-    const void * const ros_msg,
-    rcutils_uint8_array_t * const to_buffer,
-    RTIEncapsulationId encapsulation_id,
-    const bool include_encapsulation = true);
-
-  // Not available in message_type_support_key_callbacks_t yet
-  //
-  // Because deserialize_key is not supported yet there will be errors receiving dispose samples
-  // that have the serialized key as payload and the sample will be reported as lost.
-  //
-  // By default, dispose samples do not contain the serialized key, so this should only be a
-  // problem if the DataWriterQos.protocol.serialize_key_with_dispose is set to true.
-  //
-  // rmw_ret_t deserialize_key(
-  //   void * const ros_msg,
-  //   const rcutils_uint8_array_t * const from_buffer);
 
   static
   RMW_Connext_MessageTypeSupport *
@@ -230,11 +169,7 @@ public:
     const rosidl_message_type_support_t * const type_support,
     uint32_t & serialized_size_max,
     bool & unbounded,
-    bool & empty,
-    bool & keyed,
-    bool & unbounded_key,
-    message_type_support_key_callbacks_t & key_callbacks,
-    uint32_t & key_serialized_size_max);
+    bool & empty);
 };
 
 struct RMW_Connext_Message
