@@ -1,10 +1,8 @@
 # ROS 2 Middleware Layer for RTI Connext DDS
 
 >[!IMPORTANT]
-The information in this README has been replaced by the
-[RTI Connext and ROS 2](https://community.rti.com/static/documentation/ros/index.html)
-User's Manual. See that manual for the most current Connext RMW installation and
-usage documentation.
+This README focuses on Connext RMW configuration and repository-specific development information.
+For installation instructions, tutorials, and high-level release notes, see the [RTI Connext and ROS 2](https://community.rti.com/static/documentation/ros/index.html) User's Manual in the RTI Community documentation.
 
 This repository contains an implementation of the [ROS 2](https://docs.ros.org/en/rolling)
 RMW layer which allow developers to deploy their ROS applications on top of
@@ -90,6 +88,7 @@ release:
 |ROS 2 Release|Branch|Status|
 |-------------|------|------|
 |Rolling      |`rolling`|Developed|
+|Lyrical      |`lyrical`|Supported until May 2031|
 |Kilted       |`kilted`|Supported until November 2026|
 |Iron         |`iron`|Supported until November 2024 (EOL)|
 |Humble       |`humble`|Supported until May 2027|
@@ -166,6 +165,7 @@ variables.
 - [RMW_CONNEXT_UDP_INTERFACE](#RMW_CONNEXT_UDP_INTERFACE)
 - [RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE](#RMW_CONNEXT_USE_DEFAULT_PUBLISH_MODE) (Deprecated)
 - [RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE](#RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE)
+- [RMW_CONNEXT_DISCOVERY_TOPICS_PUBLISH_MODE](#RMW_CONNEXT_DISCOVERY_TOPICS_PUBLISH_MODE)
 
 ### RMW_CONNEXT_CYCLONE_COMPATIBILITY_MODE
 
@@ -225,6 +225,19 @@ is sped up from 3 seconds to 100 milliseconds.
 
 These optimizations may be disabled using variable
 `RMW_CONNEXT_DISABLE_RELIABILITY_OPTIMIZATIONS`.
+
+### RTI_MONITORING2_ENABLE
+
+By default, Connext enables [RTI Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html)
+on the DomainParticipantFactory. This can be changed in an XML QoS profile via
+the `<monitoring>` settings or by setting the environment variable
+`RTI_MONITORING2_ENABLE`. Setting `RTI_MONITORING2_ENABLE` to false will disable
+the Monitoring Library. For more information on enabling and using the 
+RTI Monitoring 2.0 Library, see [Enabling Monitoring Library 2.0](https://community.rti.com/static/documentation/connext-dds/current/doc/manuals/connext_dds_professional/observability/library.html#enabling-monitoringlibrary2-heading).
+
+Monitoring is currently disabled entirely on Windows to avoid an access
+violation during process teardown (see
+[rmw_connextdds#248](https://github.com/ros2/rmw_connextdds/issues/248)).
 
 ### RMW_CONNEXT_ENDPOINT_QOS_OVERRIDE_POLICY
 
@@ -408,16 +421,41 @@ instead.
 ### RMW_CONNEXT_USER_TOPICS_PUBLISH_MODE
 
 `rmw_connextdds` will always set `DDS_DataWriterQos::publish_mode::kind` of any
-user Data Writer it creates to the default value of Connext (Synchronous publish
+user DataWriter it creates to the default value of Connext (Synchronous publish
 mode) or to the value of a provided XML file.
 
 To override this behavior, you can set this variable to any of these values:
 
-- *synchronous*: Set publish mode of every user Data Writer to Synchronous.
-- *asynchronous*: Set publish mode of every user Data Writer to Asynchronous.
+- *synchronous*: Set publish mode of every user DataWriter to Synchronous.
+- *asynchronous*: Set publish mode of every user DataWriter to Asynchronous.
 - *auto*: Connext will choose the publish mode according to the QoS XML
   configuration. If no XML file is used, Connext will use the default publish
   mode (Synchronous).
 
 This variable is not used by `rmw_connextddsmicro`, since it doesn't
 automatically override `DDS_DataWriterQos::publish_mode::kind`.
+
+### RMW_CONNEXT_DISCOVERY_TOPICS_PUBLISH_MODE
+
+`rmw_connextdds` will always set
+`DDS_DiscoveryConfigQosPolicy::publication_writer_publish_mode::kind`,
+`DDS_DiscoveryConfigQosPolicy::subscription_writer_publish_mode::kind` and
+`DDS_DiscoveryConfigQosPolicy::participant_configuration_writer_publish_mode::kind`
+of any built-in publication, subscription and participant configuration (SPDP2)
+DataWriter to the default value of Connext (Synchronous publish mode) or to the
+value of a provided XML file.
+
+To override this behavior, you can set this variable to any of these values:
+
+- *synchronous*: Set publish mode of every built-in publication, subscription
+  and participant configuration DataWriter to Synchronous.
+- *asynchronous*: Set publish mode of every built-in publication, subscription
+  and participant configuration DataWriter to Asynchronous.
+- *auto*: Connext chooses the publish mode according to the QoS XML
+  configuration. If no XML file is used, Connext will use the default publish
+  mode (Synchronous).
+
+This variable is not used by `rmw_connextddsmicro` because it doesn't
+expose `DDS_DiscoveryConfigQosPolicy::publication_writer_publish_mode::kind`,
+`DDS_DiscoveryConfigQosPolicy::subscription_writer_publish_mode::kind` and
+`DDS_DiscoveryConfigQosPolicy::participant_configuration_writer_publish_mode::kind`.
